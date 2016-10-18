@@ -5,7 +5,7 @@ const path = require('path');
 
 const app = express();
 
-const SONG_FOLDER = path.join(__dirname, 'songs');
+const SONG_FOLDER = path.join(__dirname, '../../songs');
 
 app.set('port', (process.env.PORT || 4000));
 

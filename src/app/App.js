@@ -1,18 +1,14 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import Client from './client.js'
-import logo from './logo.svg';
-import './App.css';
+import Client from './client.js';
+// import './App.css';
 
 class App extends Component {
   render() {
 
     return (
-      <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to Disco Match</h2>
-        </div>
+      <div className="">
+        <h2>Disco Match</h2>
         <AudioPlayer />
       </div>
     );
@@ -29,8 +25,10 @@ class AudioPlayer extends Component {
     render() {
       console.info('[AudioPlayer] render...');
 
+
       return (
-          <audio ref="audio_tag" src="http://localhost:4000/api/song"  autoPlay="true"/>
+        /*autoPlay="false"*/
+        <audio ref="audio_tag" src="http://localhost:4000/api/song" controls />
       );
     }
   }
