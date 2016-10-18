@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import Client from './client.js'
 import logo from './logo.svg';
-import song from './song.mp3';
 import './App.css';
 
 class App extends Component {
@@ -13,25 +13,26 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
           <h2>Welcome to Disco Match</h2>
         </div>
-        <audio src={process.env.PUBLIC_URL + '/song.mp3'} controls />
+        <AudioPlayer />
       </div>
     );
   }
 }
 
-// class AudioPlayer extends Component {
-//     componentDidMount() {
-//       console.info('[AudioPlayer] componentDidMount...');
-//       let elmt = ReactDOM.findDOMNode(this.refs.audio_tag);
-//       console.info('audio prop set', elmt);
-//     }
+class AudioPlayer extends Component {
+    // componentDidMount() {
+    //   console.info('[AudioPlayer] componentDidMount...');
+    //   let elmt = ReactDOM.findDOMNode(this.refs.audio_tag);
+    //   console.info('audio prop set', elmt);
+    // }
 
-//     render() {
-//       console.info('[AudioPlayer] render...');
-//       return (
-//           <audio ref="audio_tag" src="/static/song.mp3" controls autoPlay="true"/>
-//       );
-//     }
-//   }
+    render() {
+      console.info('[AudioPlayer] render...');
+
+      return (
+          <audio ref="audio_tag" src="http://localhost:4000/api/song"  autoPlay="true"/>
+      );
+    }
+  }
 
 export default App;

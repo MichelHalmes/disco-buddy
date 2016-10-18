@@ -1,5 +1,6 @@
 
 songs
+npm-debug.log.*
 
 # dependencies
 node_modules
