@@ -4,19 +4,70 @@ import Client from './client.js';
 import Helper from './helper.js';
 import './App.css';
 
-class App extends Component {
-  render() {
+import { Modal, Button, Icon } from 'semantic-ui-react'
 
+
+const App = React.createClass({
+  getInitialState: function () {
+    let user = JSON.parse(localStorage.getItem('user'));
+      // localStorage.setItem('user', JSON.stringify(this.state));
+    return {code: undefined, user: user};
+  },
+
+  render() {
     return (
       <div className="ui centered" >
         <Header />
         <CodeArea code="1234"/>
         <AudioPlayer />
         <NextButton />
+        <ModalSetUser user=""/>
       </div>
     );
   }
-}
+});
+
+
+const ModalSetUser = React.createClass({
+
+  // close  () { 
+  //   this.setState({ open: false })
+  // }
+
+  handleSubmit: function () {
+    let user = this.refs.user.value;
+    let email = this.refs.email.value;
+    console.log(user, email, 'ekeje');
+  },
+
+  render: function() {
+
+    return (
+      <Modal
+        open={!this.props.user}
+        closeOnEscape={false}
+        closeOnRootNodeClick={false}
+        onClose={this.close}>
+        <div className="ui segment">
+          <h1>Enter a username </h1>
+          <form className="ui form">
+            <div className="field">
+              <label>Username*</label>
+              <input type="text" ref="user" placeholder="Username" required/>
+            </div>
+            <div className="field">
+              <label>Email address</label>
+              <input type="email" ref="email" placeholder="Email"/>
+            </div>
+            <button className="ui button green" onClick={this.handleSubmit}>Submit</button>
+          </form>
+        </div>
+      </Modal>
+    );
+  },
+});
+
+
 
 
 function Header(props) {
@@ -67,11 +118,11 @@ function NextButton() {
 }
 
 
-class AudioPlayer extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {timeRemaining: 120};
-  }
+
+const AudioPlayer = React.createClass({
+  getInitialState: function () {
+    return {timeRemaining: 120};
+  },
 
   render() {
     let self = this;
@@ -89,7 +140,7 @@ class AudioPlayer extends Component {
         <audio ref="audio_tag" src="http://localhost:4000/api/song"  onTimeUpdate={updateTrackTime}/>
       </div>   
     );
-  }
-}
+  },
+});
 
 export default App;
