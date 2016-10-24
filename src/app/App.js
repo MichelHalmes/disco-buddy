@@ -14,6 +14,25 @@ const App = React.createClass({
     return {code: undefined, user: user};
   },
 
+  handleUserSubmit: function (name, email) {
+    let self = this;
+    return Client.login(name, email)
+      .then(function() {
+        console.log('settting ', name);
+        self.setState({code: undefined, user: name});
+        return true;
+      })
+      .catch(function(error){
+        console.log('App.handleUserSubmit', error.status);
+        console.log('%O', error);
+        if (error.response.status == 403) { // User already exists!
+          return false;
+        } else {
+           throw error;
+        }
+      });
+  },
+
   render() {
     return (
       <div className="ui centered" >
@@ -21,23 +40,36 @@ const App = React.createClass({
         <CodeArea code="1234"/>
         <AudioPlayer />
         <NextButton />
-        <ModalSetUser user=""/>
+        <ModalSetUser user={this.state.user} onUserSubmit={this.handleUserSubmit}/>
       </div>
     );
   }
 });
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 const ModalSetUser = React.createClass({
+  getInitialState: function () {
+    return {error: false};
+  },
+
 
   // close  () { 
   //   this.setState({ open: false })
   // }
 
-  handleSubmit: function () {
-    let user = this.refs.user.value;
+  handleFormSubmit: function () {
+    let self = this;
+    let name = this.refs.user.value;
     let email = this.refs.email.value;
-    console.log(user, email, 'ekeje');
+
+    this.props.onUserSubmit(name, email)
+      .then(function (isOk){
+        if (!isOk) {
+          self.setState({error: true});
+        }
+      });
+    console.log(name, email, 'ekeje');
   },
 
   render: function() {
@@ -48,9 +80,9 @@ const ModalSetUser = React.createClass({
         closeOnEscape={false}
         closeOnRootNodeClick={false}
         onClose={this.close}>
-        <div className="ui segment">
+        <div className="ui segment"> {this.props.user}
           <h1>Enter a username </h1>
-          <form className="ui form">
+          <div className={"ui form " + (this.state.error ? 'error': '')} >
             <div className="field">
               <label>Username*</label>
               <input type="text" ref="user" placeholder="Username" required/>
@@ -58,9 +90,14 @@ const ModalSetUser = React.createClass({
             <div className="field">
               <label>Email address</label>
               <input type="email" ref="email" placeholder="Email"/>
+              <p>Promise, we won't spam you or give your email to anyone else. This is only for us to </p>
             </div>
-            <button className="ui button green" onClick={this.handleSubmit}>Submit</button>
-          </form>
+            <div className="ui error message">
+              <div className="header">Invalid username</div>
+              <p>The username you have chose is already used. Please choose another one!</p>
+            </div>
+            <button className="ui basic button green" onClick={this.handleFormSubmit}>Submit</button>
+          </div>
         </div>
       </Modal>
     );
@@ -68,6 +105,7 @@ const ModalSetUser = React.createClass({
 });
 
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 function Header(props) {
@@ -118,6 +156,7 @@ function NextButton() {
 }
 
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 const AudioPlayer = React.createClass({
   getInitialState: function () {

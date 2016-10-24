@@ -9,10 +9,10 @@ function getSong() {
   }).then(checkStatus)
 }
 
-function createTimer(data) {
-  return fetch('/api/timers', {
+function login(name, email) {
+  return fetch('/api/login', {
     method: 'post',
-    body: JSON.stringify(data),
+    body: JSON.stringify({name, email}),
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -37,5 +37,6 @@ function parseJSON(response) {
 }
 
 module.exports = {
-  getSong
+  getSong,
+  login
 };
