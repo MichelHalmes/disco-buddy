@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import isEmail from 'validator/lib/isEmail';
 import ReactDOM from 'react-dom';
 import Client from './client.js';
 import Helper from './helper.js';
@@ -10,7 +11,6 @@ import { Modal, Button, Icon } from 'semantic-ui-react'
 const App = React.createClass({
   getInitialState: function () {
     let user = JSON.parse(localStorage.getItem('user'));
-      // localStorage.setItem('user', JSON.stringify(this.state));
     return {code: undefined, user: user};
   },
 
@@ -20,6 +20,7 @@ const App = React.createClass({
       .then(function() {
         console.log('settting ', name);
         self.setState({code: undefined, user: name});
+        localStorage.setItem('user', JSON.stringify(name));
         return true;
       })
       .catch(function(error){
@@ -50,26 +51,52 @@ const App = React.createClass({
 
 const ModalSetUser = React.createClass({
   getInitialState: function () {
-    return {error: false};
+    return {
+      fields: {},
+      fieldErrors: {}
+    };
   },
 
+  onInputChange(evt) {
+    const fields = this.state.fields;
+    fields[evt.target.name] = evt.target.value;
+    this.setState({ fields });
+  },
 
-  // close  () { 
-  //   this.setState({ open: false })
-  // }
+  validate(person) {
+    const errors = {};
+    if (!person.name) errors.name = 'Name Required';
+    if (person.email && !isEmail(person.email)) errors.email = 'Invalid Email';
+    return errors;
+  },
 
-  handleFormSubmit: function () {
+  handleFormSubmit(evt) {
+
+
     let self = this;
-    let name = this.refs.user.value;
-    let email = this.refs.email.value;
+    const person = this.state.fields;
+    const fieldErrors = this.validate(person);
+    this.setState({ fieldErrors });
+    evt.preventDefault();
 
-    this.props.onUserSubmit(name, email)
+    console.log(this.state.fieldErrors.length);
+
+    if (Object.keys(fieldErrors).length) return;
+
+  
+    this.props.onUserSubmit(person.name, person.email)
       .then(function (isOk){
         if (!isOk) {
-          self.setState({error: true});
+          console.log('User duplicate!');
+          self.setState({
+            fields: {},
+            fieldErrors: Object.assign({}, 
+              self.state.fieldErrors, 
+              {nameUnique: 'The username you have chose is already used. Please choose another one!'}
+            )
+          });
         }
       });
-    console.log(name, email, 'ekeje');
   },
 
   render: function() {
@@ -78,25 +105,28 @@ const ModalSetUser = React.createClass({
       <Modal
         open={!this.props.user}
         closeOnEscape={false}
-        closeOnRootNodeClick={false}
-        onClose={this.close}>
-        <div className="ui segment"> {this.props.user}
+        closeOnRootNodeClick={false}>
+        <div className="ui segment">
           <h1>Enter a username </h1>
-          <div className={"ui form " + (this.state.error ? 'error': '')} >
+          <div className={"ui form " + (Object.keys(this.state.fieldErrors).length ? 'error' : '')}>
             <div className="field">
               <label>Username*</label>
-              <input type="text" ref="user" placeholder="Username" required/>
+              <input name="name" placeholder="Username" value={this.state.fields.name} onChange={this.onInputChange} />
             </div>
             <div className="field">
               <label>Email address</label>
-              <input type="email" ref="email" placeholder="Email"/>
+              <input name="email" placeholder="Email" value={this.state.fields.email} onChange={this.onInputChange}/>
               <p>Promise, we won't spam you or give your email to anyone else. This is only for us to </p>
             </div>
-            <div className="ui error message">
-              <div className="header">Invalid username</div>
-              <p>The username you have chose is already used. Please choose another one!</p>
+            <div className="ui error message " >
+              <div className="header">Invalid input</div>
+              <ul>
+                { Object.keys(this.state.fieldErrors).map((key, i) => <li key={i}>{this.state.fieldErrors[key]}</li>) }
+              </ul>
             </div>
-            <button className="ui basic button green" onClick={this.handleFormSubmit}>Submit</button>
+            <button className="ui submit button green" onClick={this.handleFormSubmit}>
+              Submit
+            </button>
           </div>
         </div>
       </Modal>

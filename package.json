@@ -20,7 +20,8 @@
     "lokijs": "^1.4.1",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "semantic-ui-react": "^0.56.4"
+    "semantic-ui-react": "^0.56.4",
+    "validator": "5.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
