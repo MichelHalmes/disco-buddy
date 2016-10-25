@@ -1,32 +1,35 @@
-import React, { Component } from 'react';
+import React from 'react';
 import isEmail from 'validator/lib/isEmail';
-import ReactDOM from 'react-dom';
 import Client from './client.js';
 import Helper from './helper.js';
 import './App.css';
 
-import { Modal, Button, Icon } from 'semantic-ui-react'
+import { Modal} from 'semantic-ui-react'
 
 
 const App = React.createClass({
   getInitialState: function () {
-    let user = JSON.parse(localStorage.getItem('user'));
-    return {code: undefined, user: user};
+    let username = JSON.parse(localStorage.getItem('username'));
+    return {code: undefined, username: username};
   },
 
-  handleUserSubmit: function (name, email) {
+  componentDidMount: function () {
+    this.handelCodeRequest();
+  },
+
+  handleLoginSubmit: function (username, email) {
     let self = this;
-    return Client.login(name, email)
+    return Client.requestLogin(username, email)
       .then(function() {
-        console.log('settting ', name);
-        self.setState({code: undefined, user: name});
-        localStorage.setItem('user', JSON.stringify(name));
+        console.log('Username: ', username);
+        self.setState({username});
+        localStorage.setItem('username', JSON.stringify(username));
+        self.handelCodeRequest();
         return true;
       })
       .catch(function(error){
-        console.log('App.handleUserSubmit', error.status);
         console.log('%O', error);
-        if (error.response.status == 403) { // User already exists!
+        if (parseInt(error.response.status) === 403) { // username already exists!
           return false;
         } else {
            throw error;
@@ -34,14 +37,24 @@ const App = React.createClass({
       });
   },
 
+  handelCodeRequest: function () {
+    let self = this;
+    if (!this.state.username) return Promise.resolve();
+    return Client.requestCode(this.state.username)
+      .then(function(code) {
+        console.log('Got code', code)
+        self.setState({code});
+      })
+  },
+
   render() {
     return (
       <div className="ui centered" >
         <Header />
-        <CodeArea code="1234"/>
-        <AudioPlayer />
+        <CodeArea code={this.state.code}/>
+        <AudioPlayer code={this.state.code}/>
         <NextButton />
-        <ModalSetUser user={this.state.user} onUserSubmit={this.handleUserSubmit}/>
+        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
       </div>
     );
   }
@@ -65,7 +78,7 @@ const ModalSetUser = React.createClass({
 
   validate(person) {
     const errors = {};
-    if (!person.name) errors.name = 'Name Required';
+    if (!person.username) errors.username = 'Name Required';
     if (person.email && !isEmail(person.email)) errors.email = 'Invalid Email';
     return errors;
   },
@@ -79,12 +92,12 @@ const ModalSetUser = React.createClass({
     this.setState({ fieldErrors });
     evt.preventDefault();
 
-    console.log(this.state.fieldErrors.length);
+    console.log(this.state);
 
     if (Object.keys(fieldErrors).length) return;
 
   
-    this.props.onUserSubmit(person.name, person.email)
+    this.props.onLoginSubmit(person.username, person.email)
       .then(function (isOk){
         if (!isOk) {
           console.log('User duplicate!');
@@ -103,7 +116,7 @@ const ModalSetUser = React.createClass({
 
     return (
       <Modal
-        open={!this.props.user}
+        open={!this.props.username}
         closeOnEscape={false}
         closeOnRootNodeClick={false}>
         <div className="ui segment">
@@ -111,7 +124,7 @@ const ModalSetUser = React.createClass({
           <div className={"ui form " + (Object.keys(this.state.fieldErrors).length ? 'error' : '')}>
             <div className="field">
               <label>Username*</label>
-              <input name="name" placeholder="Username" value={this.state.fields.name} onChange={this.onInputChange} />
+              <input name="username" placeholder="Username" value={this.state.fields.name} onChange={this.onInputChange} />
             </div>
             <div className="field">
               <label>Email address</label>
@@ -206,7 +219,7 @@ const AudioPlayer = React.createClass({
         <i className="big play icon" ></i>
         <i className="big refresh loading icon" ></i>
         <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
-        <audio ref="audio_tag" src="http://localhost:4000/api/song"  onTimeUpdate={updateTrackTime}/>
+        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} controls onTimeUpdate={updateTrackTime}/>
       </div>   
     );
   },
