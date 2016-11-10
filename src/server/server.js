@@ -23,13 +23,12 @@ const SONGS = fs.readdirSync(SONG_FOLDER)
 
 // SETUP WORK DB ++++++++++++++++++++++++++++++++++++
 const loki = require('lokijs');
-
 let DB = new loki('./loki.json');
-let SA = DB.addCollection('SongAllocations', {unique: ['code']});
-SA.insert({code: '2222', song: 'U2 - Beautiful Day', user: 'michel'});
 
+let SA = DB.addCollection('SongAllocations', {unique: ['code', 'username']});
+let LOG = DB.addCollection('Logs');
 let USR = DB.addCollection('Users', {unique: ['username']});
-USR.insert({username: 'michel', email: ''});
+
 
 
 // REST API ++++++++++++++++++++++++++++++++++++
@@ -51,25 +50,63 @@ app.post('/api/login', (req, res) => {
 });
 
 
+// REST API ++++++++++++++++++++++++++++++++++++
+let nextCode = 1;
+let nextSongIdx = 0;
+const MIN_PROBA_MATCH = 0.1;
+
+USR.insert({username: 'michel', email: ''});
+LOG.insert({username: 'michel', songIdx: '0'});
+LOG.insert({username: 'michel', songIdx: '1'});
+SA.insert({code: '0000', songIdx: 0, username: 'a'});
+SA.insert({code: '0001', songIdx: 0, username: 'b'});
+SA.insert({code: '0002', songIdx: 1, username: 'c'});
+
+nextCode = 3;
+nextSongIdx = 2;
+
+
 app.get('/api/code', (req, res) => {
   console.log('/api/code');
-
-  console.log(req.headers.authorization);
-  console.log('---')
-  let code = 2222;
-  let song = SONGS[0]
-
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
-  console.log( username)
+  console.log('code for: ' + username)
+
+  let code = nextCode;
+  nextCode = (nextCode+1) % 10000;
   code = '000' + code.toString();
   code = code.slice(-4);
 
+  let songsPlayed = SA.find({}).map((sa) => sa.songIdx);
+  let songCounts = {};
+  songsPlayed.forEach(function (songIdx) {
+    songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
+  });
+  let songIdxBest; 
+  Object.keys(songsPlayed).forEach(function (songIdx) {
+    if ((songIdxBest == undefined || songCounts[songIdx] > songCounts[songIdxBest]) && LOG.findOne({username, songIdx}) == undefined) {
+      songIdxBest = songIdx;
+    }
+  });
+
+  let nbPlayers = songsPlayed.length;
+  if (songIdxBest == undefined) {
+    songIdxBest = nextSongIdx;
+    nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
+  } else if (nbPlayers != 1 && (songCounts[songIdxBest]-1) / (nbPlayers - 1) > MIN_PROBA_MATCH) {
+    songIdxBest = nextSongIdx;
+    nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
+  }
+
+
+  let song = SONGS[songIdxBest]
   
-  // SA.insert({code, song, user});
+  SA.insert({code, song, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
   res.json(code);
 });
 
+
+// REST API ++++++++++++++++++++++++++++++++++++
 
 app.get('/api/song/:code', (req, res) => {
   let code = req.params.code;
