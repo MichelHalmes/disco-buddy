@@ -43,7 +43,7 @@ app.post('/api/login', (req, res) => {
     console.log('/api/login', 'Already exists!');
     res.status(403).send('A user with this username exists already!');
   } else {
-    USR.insert({username, email});
+    USR.insert({username, email, points: 0});
     console.log('/api/login', 'OK!')
     res.json({});
   }
@@ -55,7 +55,7 @@ let nextCode = 1;
 let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.1;
 
-USR.insert({username: 'michel', email: ''});
+USR.insert({username: 'michel', email: '', points: 0});
 LOG.insert({username: 'michel', songIdx: '0'});
 LOG.insert({username: 'michel', songIdx: '1'});
 SA.insert({code: '0000', songIdx: 0, username: 'a'});
@@ -96,11 +96,16 @@ app.get('/api/code', (req, res) => {
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
   }
-
-
-  let song = SONGS[songIdxBest]
   
-  SA.insert({code, song, username});
+  let previousAllocation = SA.findOne({username});
+  let usr = USR.findOne({username});
+  if (previousAllocation) {
+    SA.remove(previousAllocation);
+    usr.points -= 5;
+    USR.update(usr);
+  }
+  SA.insert({code, songIdx: songIdxBest, username});
+  LOG.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
   res.json(code);
 });
@@ -113,7 +118,7 @@ app.get('/api/song/:code', (req, res) => {
   let allocation = SA.findOne({code});
 
   if (allocation) {
-    let songFile = allocation.song + '.mp3';
+    let songFile = SONGS[allocation.songIdx] + '.mp3';
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
     res.sendFile(path.join(SONG_FOLDER, songFile));
   } else {
@@ -122,7 +127,11 @@ app.get('/api/song/:code', (req, res) => {
 
 });
 
-
+process.on('SIGTERM', function () {
+  console.log("Closing");
+  DB.saveDatabase();
+  app.close();
+});
 
 app.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
