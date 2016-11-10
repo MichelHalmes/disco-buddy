@@ -107,7 +107,7 @@ app.get('/api/code', (req, res) => {
   SA.insert({code, songIdx: songIdxBest, username});
   LOG.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-  res.json(code);
+  res.json({code, points: usr.points});
 });
 
 

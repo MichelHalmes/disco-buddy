@@ -10,7 +10,7 @@ import { Modal} from 'semantic-ui-react'
 const App = React.createClass({
   getInitialState: function () {
     let username = JSON.parse(localStorage.getItem('username'));
-    return {code: undefined, username: username};
+    return {code: undefined, username: username, points: 0};
   },
 
   componentDidMount: function () {
@@ -29,7 +29,7 @@ const App = React.createClass({
       })
       .catch(function(error){
         console.log('%O', error);
-        if (parseInt(error.response.status) === 403) { // username already exists!
+        if (parseInt(error.response.status, 10) === 403) { // username already exists!
           return false;
         } else {
            throw error;
@@ -41,16 +41,17 @@ const App = React.createClass({
     let self = this;
     if (!this.state.username) return Promise.resolve();
     return Client.requestCode(this.state.username)
-      .then(function(code) {
-        console.log('Got code', code)
-        self.setState({code});
+      .then(function(res) {
+        console.log('Got code', res.code)
+        self.setState({code: res.code, points: res.points});
       })
   },
 
   render() {
     return (
-      <div className="ui centered" >
+      <div className="ui center aligned basic segment" >
         <Header />
+        <Points username={this.state.username} points={this.state.points}/>
         <CodeArea code={this.state.code}/>
         <AudioPlayer code={this.state.code}/>
         <NextButton onNextClick={this.handelCodeRequest}/>
@@ -151,9 +152,24 @@ const ModalSetUser = React.createClass({
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-function Header(props) {
+function Points(props) {
   return (
     <div id="main" className="ui center aligned basic segment">
+      <div className="ui labeled button" tabIndex="0">
+        <div className="ui basic blue button">
+           {props.username}
+        </div>
+        <a className="ui basic left pointing blue label">
+          {props.points} points
+        </a>
+      </div>
+    </div>  
+    );
+}
+
+function Header(props) {
+  return (
+    <div id="main">
       <h2 >
         <i className="music icon"></i> 
         Disco Match 
@@ -189,7 +205,7 @@ function CodeArea(props) {
 
 function NextButton(props) {
   return (
-    <div className="ui center aligned basic segment">
+    <div>
       <button className="ui labeled icon yellow button" onClick={props.onNextClick}>
         <i className="forward icon"></i>
         Next
@@ -219,7 +235,7 @@ const AudioPlayer = React.createClass({
         <i className="big play icon" ></i>
         <i className="big refresh loading icon" ></i>
         <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
-        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} controls onTimeUpdate={updateTrackTime}/>
+        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
       </div>   
     );
   },
