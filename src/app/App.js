@@ -53,7 +53,7 @@ const App = React.createClass({
         <Header />
         <CodeArea code={this.state.code}/>
         <AudioPlayer code={this.state.code}/>
-        <NextButton />
+        <NextButton onNextClick={this.handelCodeRequest}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
       </div>
     );
@@ -187,10 +187,10 @@ function CodeArea(props) {
     );
 }
 
-function NextButton() {
+function NextButton(props) {
   return (
     <div className="ui center aligned basic segment">
-      <button className="ui labeled icon yellow button">
+      <button className="ui labeled icon yellow button" onClick={props.onNextClick}>
         <i className="forward icon"></i>
         Next
       </button>
