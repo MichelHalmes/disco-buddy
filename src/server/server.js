@@ -127,6 +127,42 @@ app.get('/api/song/:code', (req, res) => {
 
 });
 
+// REST API ++++++++++++++++++++++++++++++++++++
+
+app.post('/api/matchcode', (req, res) => {
+  let username = req.body.username;
+  let matchCode = req.body.matchCode;
+  console.log('/api/matchcode', username, matchCode);
+
+  let saUser = SA.findOne({username});
+  let usrUser = USR.findOne({username});
+
+  let saMatch = SA.findOne({code: matchCode});
+  if (!usrUser) {
+    res.status(403).send('Invalid username: ' + username);
+  } else if (saUser && saMatch &&saUser.songIdx === saMatch.songIdx) {
+    SA.remove(saUser);
+    SA.remove(saMatch);
+    
+    usrUser.points += 50;
+    USR.update(usrUser);
+
+    let usrMatch = USR.findOne({username: saMatch.username});
+    usrMartch.points += 50;
+    USR.update(usrMatch);
+
+    console.log('/api/matchcode', 'It is a match!');
+    res.json({accepted: true, points: usrUser.points});
+  } else {
+    console.log('/api/matchcode', 'Nope, keep trying!');
+    res.json({accepted: false, points: usrUser.points});
+  }
+});
+
+
+
+// ================================================
+
 process.on('SIGTERM', function () {
   console.log("Closing");
   DB.saveDatabase();

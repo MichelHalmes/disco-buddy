@@ -9,7 +9,7 @@
 //   }).then(checkStatus)
 // }
 
-function requestLogin(username, email) {
+function postLogin(username, email) {
   console.log('/api/login', username);
   return fetch('/api/login', {
     method: 'post',
@@ -21,7 +21,7 @@ function requestLogin(username, email) {
   }).then(checkStatus);
 }
 
-function requestCode(username) {
+function getCode(username) {
   return fetch('/api/code', {
     method: 'get',
     headers: {
@@ -30,6 +30,18 @@ function requestCode(username) {
     },
   }).then(checkStatus)
     .then(parseJSON);
+}
+
+function postMatchCode(username, matchCode) {
+  console.log('/api/matchcode', username, matchCode);
+  return fetch('/api/matchcode', {
+    method: 'post',
+    body: JSON.stringify({username, matchCode}),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }).then(checkStatus);
 }
 
 
@@ -50,6 +62,7 @@ function parseJSON(response) {
 }
 
 module.exports = {
-  requestLogin,
-  requestCode
+  postLogin,
+  getCode,
+  postMatchCode
 };

@@ -19,15 +19,15 @@ const App = React.createClass({
 
   handleLoginSubmit: function (username, email) {
     let self = this;
-    return Client.requestLogin(username, email)
-      .then(function() {
+    return Client.postLogin(username, email)
+      .then(function () {
         console.log('Username: ', username);
         self.setState({username});
         localStorage.setItem('username', JSON.stringify(username));
         self.handelCodeRequest();
         return true;
       })
-      .catch(function(error){
+      .catch(function (error) {
         console.log('%O', error);
         if (parseInt(error.response.status, 10) === 403) { // username already exists!
           return false;
@@ -40,20 +40,37 @@ const App = React.createClass({
   handelCodeRequest: function () {
     let self = this;
     if (!this.state.username) return Promise.resolve();
-    return Client.requestCode(this.state.username)
+    return Client.getCode(this.state.username)
       .then(function(res) {
         console.log('Got code', res.code)
         self.setState({code: res.code, points: res.points});
       })
   },
 
+  handleCodeSubmit: function (matchCode) {
+    let self = this;
+    console.log('handleCodeSubmit', matchCode);
+    return Client.postMatchCode(this.state.username, matchCode)
+      .then(function ({accepted, points}) {
+        self.setState({points});
+        if (accepted) {
+          self.setState({code: '----'});
+          self.handelCodeRequest();
+          return true;
+        } else {
+          return false;
+        }
+      })
+  },
+
+
   render() {
     return (
       <div className="ui center aligned basic segment" >
         <Header />
-        <Points username={this.state.username} points={this.state.points}/>
-        <CodeArea code={this.state.code}/>
         <AudioPlayer code={this.state.code}/>
+        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
+        <Points username={this.state.username} points={this.state.points}/>
         <NextButton onNextClick={this.handelCodeRequest}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
       </div>
@@ -85,8 +102,6 @@ const ModalSetUser = React.createClass({
   },
 
   handleFormSubmit(evt) {
-
-
     let self = this;
     const person = this.state.fields;
     const fieldErrors = this.validate(person);
@@ -149,6 +164,88 @@ const ModalSetUser = React.createClass({
 });
 
 
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+const AudioPlayer = React.createClass({
+  getInitialState: function () {
+    return {timeRemaining: 120};
+  },
+
+  render() {
+    let self = this;
+    function updateTrackTime(event){
+      let timePlayed = event.nativeEvent.srcElement.currentTime;
+      self.setState({timeRemaining: 120 - timePlayed});
+    }
+
+     /*autoPlay="false"*/
+    return (
+      <div className="ui center aligned basic segment">
+        <i className="big play icon" ></i>
+        <i className="big refresh loading icon" ></i>
+        <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
+        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
+      </div>   
+    );
+  },
+});
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+const CodeArea = React.createClass({
+
+  getInitialState() {
+    return {matchCode: '', isValid: false};
+  },
+
+  onFormSubmit(evt) {
+    const matchCode = this.state.matchCode;
+    const isValid = this.validate(matchCode);
+    this.setState({isValid});
+    evt.preventDefault();
+
+    if (!isValid) return;
+
+    console.log('codearea', matchCode);
+
+    this.props.onCodeSubmit(matchCode);
+    this.setState({ matchCode: ''});
+  },
+
+  onInputChange(evt) {
+    this.setState({ matchCode: evt.target.value });
+  },
+
+  validate(matchCode) {
+    const errors = {};
+    parseInt(matchCode, 10);
+    return true;
+  },
+
+  render() {
+    return (
+    <div className="ui centered grid">
+      <div className="ui twelve wide column center aligned raised segment">
+        <p>Give your code to a match </p>
+        <div className="ui black button">
+          <i className="exchange icon"></i> {this.props.code}
+        </div>
+        <div className="ui horizontal divider">
+          Or
+        </div>
+        <p>Enter code of match</p>
+        <div className="ui left icon mini action input">
+          <i className="exchange icon"></i>
+          <input placeholder="Code" value={this.state.matchCode} onChange={this.onInputChange} />
+          <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
+        </div>
+      </div>
+    </div>
+    );
+  }
+});
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
@@ -181,28 +278,6 @@ function Header(props) {
     );
 }
 
-function CodeArea(props) {
-  return (
-    <div className="ui centered grid">
-      <div className="ui twelve wide column center aligned raised segment">
-        <p>Give your code to a match </p>
-        <div className="ui black button">
-          <i className="exchange icon"></i> {props.code}
-        </div>
-        <div className="ui horizontal divider">
-          Or
-        </div>
-        <p>Enter code of match</p>
-        <div className="ui left icon mini action input">
-          <i className="exchange icon"></i>
-          <input type="text" placeholder="Code"/>
-          <div className="ui green submit button">Enter</div>
-        </div>
-      </div>
-    </div>
-    );
-}
-
 function NextButton(props) {
   return (
     <div>
@@ -213,32 +288,5 @@ function NextButton(props) {
     </div> 
     );
 }
-
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-const AudioPlayer = React.createClass({
-  getInitialState: function () {
-    return {timeRemaining: 120};
-  },
-
-  render() {
-    let self = this;
-    function updateTrackTime(event){
-      let timePlayed = event.nativeEvent.srcElement.currentTime;
-      self.setState({timeRemaining: 120 - timePlayed});
-    }
-
-     /*autoPlay="false"*/
-    return (
-      <div className="ui center aligned basic segment">
-        <i className="big play icon" ></i>
-        <i className="big refresh loading icon" ></i>
-        <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
-        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
-      </div>   
-    );
-  },
-});
 
 export default App;
