@@ -4,17 +4,33 @@ import Client from './client.js';
 import Helper from './helper.js';
 import './App.css';
 
+import io from 'socket.io-client';
+
+
 import { Modal} from 'semantic-ui-react'
 
 
 const App = React.createClass({
   getInitialState: function () {
+    console.log('getInitialState');
     let username = JSON.parse(localStorage.getItem('username'));
     return {code: undefined, username: username, points: 0};
   },
 
   componentDidMount: function () {
+    console.log('componentDidMount', this.state);
     this.handelCodeRequest();
+    this.socket = io();
+    this.socket.emit('send:username', this.state.username);
+    this.socket.on('code:match', function ({username, matchUsername, points}) {
+      console.log('yeah, code matched');
+    });
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (prevState.username === this.state.username) return;
+    console.log('componentDidUpdate');
+    this.socket.emit('send:username', this.state.username);
   },
 
   handleLoginSubmit: function (username, email) {

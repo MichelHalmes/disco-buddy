@@ -1,4 +1,3 @@
-const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
@@ -6,12 +5,15 @@ const path = require('path');
 
 const SONG_FOLDER = path.join(__dirname, '../../songs');
 
+const express = require('express');
 const app = express();
+const http = require('http').Server(app);
 
 app.set('port', (process.env.PORT || 4000));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
 
 // GET SONG NAME ++++++++++++++++++++++++++++++++++++
 
@@ -55,7 +57,7 @@ let nextCode = 1;
 let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.1;
 
-USR.insert({username: 'michel', email: '', points: 0});
+USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
 USR.insert({username: 'a', email: '', points: 0});
 USR.insert({username: 'b', email: '', points: 0});
 USR.insert({username: 'c', email: '', points: 0});
@@ -135,6 +137,29 @@ app.get('/api/song/:code', (req, res) => {
 
 // REST API ++++++++++++++++++++++++++++++++++++
 
+const io = require('socket.io')(http);
+
+io.on('connection', function (socket) {
+  console.log('connection', socket.id); 
+  socket.on('send:username', function (username) {
+    console.log('send:username', username);
+    USR.findAndUpdate(
+      (usr) => usr.username === username,
+      (usr) => usr.socketId = socket.id
+    )
+  });
+  socket.on('disconnect', function() {
+    console.log('connection-disconnect', socket.id);
+
+    USR.findAndUpdate(
+      (usr) => usr.socketId === socket.id,
+      (usr) => usr.socketId = undefined
+    )
+    console.log(USR.data);
+  });
+});
+
+
 app.post('/api/matchcode', (req, res) => {
   let username = req.body.username;
   let matchCode = req.body.matchCode;
@@ -146,7 +171,7 @@ app.post('/api/matchcode', (req, res) => {
   let saMatch = SA.findOne({code: matchCode});
   if (!usrUser) {
     res.status(403).send('Invalid username: ' + username);
-  } else if (saUser && saMatch &&saUser.songIdx === saMatch.songIdx) {
+  } else if (saUser && saMatch && saUser.songIdx === saMatch.songIdx) {
     SA.remove(saUser);
     SA.remove(saMatch);
     
@@ -159,7 +184,9 @@ app.post('/api/matchcode', (req, res) => {
 
     console.log('/api/matchcode', 'It is a match!');
     res.json({accepted: true, points: usrUser.points});
-    console.log({accepted: true, points: usrUser.points});
+
+    io.sockets.connected[socketid].emit();
+
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});
@@ -176,6 +203,6 @@ process.on('SIGTERM', function () {
   app.close();
 });
 
-app.listen(app.get('port'), () => {
+http.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
 });
