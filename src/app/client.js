@@ -41,7 +41,8 @@ function postMatchCode(username, matchCode) {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
-  }).then(checkStatus);
+  }).then(checkStatus)
+    .then(parseJSON);
 }
 
 

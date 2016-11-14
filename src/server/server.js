@@ -56,14 +56,20 @@ let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.1;
 
 USR.insert({username: 'michel', email: '', points: 0});
+USR.insert({username: 'a', email: '', points: 0});
+USR.insert({username: 'b', email: '', points: 0});
+USR.insert({username: 'c', email: '', points: 0});
+
 LOG.insert({username: 'michel', songIdx: '0'});
 LOG.insert({username: 'michel', songIdx: '1'});
-SA.insert({code: '0000', songIdx: 0, username: 'a'});
-SA.insert({code: '0001', songIdx: 0, username: 'b'});
-SA.insert({code: '0002', songIdx: 1, username: 'c'});
 
-nextCode = 3;
-nextSongIdx = 2;
+SA.insert({code: '0000', songIdx: 0, username: 'a'});
+SA.insert({code: '0001', songIdx: 1, username: 'b'});
+SA.insert({code: '0002', songIdx: 2, username: 'c'});
+SA.insert({code: '0003', songIdx: 3, username: 'd'});
+
+nextCode = 4;
+nextSongIdx = 0;
 
 
 app.get('/api/code', (req, res) => {
@@ -148,11 +154,12 @@ app.post('/api/matchcode', (req, res) => {
     USR.update(usrUser);
 
     let usrMatch = USR.findOne({username: saMatch.username});
-    usrMartch.points += 50;
+    usrMatch.points += 50;
     USR.update(usrMatch);
 
     console.log('/api/matchcode', 'It is a match!');
     res.json({accepted: true, points: usrUser.points});
+    console.log({accepted: true, points: usrUser.points});
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});

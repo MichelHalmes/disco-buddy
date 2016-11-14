@@ -54,7 +54,6 @@ const App = React.createClass({
       .then(function ({accepted, points}) {
         self.setState({points});
         if (accepted) {
-          self.setState({code: '----'});
           self.handelCodeRequest();
           return true;
         } else {
@@ -62,7 +61,6 @@ const App = React.createClass({
         }
       })
   },
-
 
   render() {
     return (
@@ -203,7 +201,7 @@ const CodeArea = React.createClass({
     const matchCode = this.state.matchCode;
     const isValid = this.validate(matchCode);
     this.setState({isValid});
-    evt.preventDefault();
+    // evt.preventDefault();
 
     if (!isValid) return;
 
@@ -235,7 +233,7 @@ const CodeArea = React.createClass({
           Or
         </div>
         <p>Enter code of match</p>
-        <div className="ui left icon mini action input">
+        <div className="ui left icon action input">
           <i className="exchange icon"></i>
           <input placeholder="Code" value={this.state.matchCode} onChange={this.onInputChange} />
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
