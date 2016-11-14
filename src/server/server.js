@@ -20,6 +20,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 const SONGS = fs.readdirSync(SONG_FOLDER)
               .filter((fn) => fn.endsWith('.mp3'))
               .map((fn) => fn.slice(0, fn.length - 4));
+
               
 
 
@@ -62,13 +63,13 @@ USR.insert({username: 'a', email: '', points: 0});
 USR.insert({username: 'b', email: '', points: 0});
 USR.insert({username: 'c', email: '', points: 0});
 
-LOG.insert({username: 'michel', songIdx: '0'});
-LOG.insert({username: 'michel', songIdx: '1'});
+// LOG.insert({username: 'michel', songIdx: '0'});
+// LOG.insert({username: 'michel', songIdx: '0'});
 
 SA.insert({code: '0000', songIdx: 0, username: 'a'});
-SA.insert({code: '0001', songIdx: 1, username: 'b'});
-SA.insert({code: '0002', songIdx: 2, username: 'c'});
-SA.insert({code: '0003', songIdx: 3, username: 'd'});
+SA.insert({code: '0001', songIdx: 0, username: 'b'});
+SA.insert({code: '0002', songIdx: 0, username: 'c'});
+SA.insert({code: '0003', songIdx: 0, username: 'd'});
 
 nextCode = 4;
 nextSongIdx = 0;
@@ -146,16 +147,16 @@ io.on('connection', function (socket) {
     USR.findAndUpdate(
       (usr) => usr.username === username,
       (usr) => usr.socketId = socket.id
-    )
+    );
   });
+
   socket.on('disconnect', function() {
     console.log('connection-disconnect', socket.id);
 
     USR.findAndUpdate(
       (usr) => usr.socketId === socket.id,
       (usr) => usr.socketId = undefined
-    )
-    console.log(USR.data);
+    );
   });
 });
 
@@ -185,7 +186,15 @@ app.post('/api/matchcode', (req, res) => {
     console.log('/api/matchcode', 'It is a match!');
     res.json({accepted: true, points: usrUser.points});
 
-    io.sockets.connected[socketid].emit();
+    let matchSocket = io.sockets.connected[usrMatch.socketId]
+    if (matchSocket) {
+      matchSocket.emit('code:match', 
+        {username: usrMatch.username, matchUsername: usrUser.username, points: usrMatch.points}
+      );
+    } else {
+      console.log('No socket found for :' + usrMatch.username);
+    }
+   
 
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');

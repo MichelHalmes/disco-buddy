@@ -18,12 +18,17 @@ const App = React.createClass({
   },
 
   componentDidMount: function () {
-    console.log('componentDidMount', this.state);
-    this.handelCodeRequest();
-    this.socket = io();
-    this.socket.emit('send:username', this.state.username);
-    this.socket.on('code:match', function ({username, matchUsername, points}) {
-      console.log('yeah, code matched');
+    let self = this;
+    console.log('componentDidMount', self.state);
+    self.handelCodeRequest();
+
+    self.socket = io();
+    self.socket.emit('send:username', self.state.username);
+    self.socket.on('code:match', function ({username, matchUsername, points}) {
+      console.log('yeah, code matched', {username, matchUsername, points});
+      if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
+      self.setState({points});
+      self.handelCodeRequest();
     });
   },
 
