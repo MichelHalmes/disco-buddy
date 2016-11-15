@@ -7,7 +7,7 @@ import './App.css';
 import io from 'socket.io-client';
 
 
-import { Modal} from 'semantic-ui-react'
+import { Modal, Popup, Button} from 'semantic-ui-react'
 
 
 const App = React.createClass({
@@ -89,7 +89,7 @@ const App = React.createClass({
         <Header />
         <AudioPlayer code={this.state.code}/>
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
-        <Points username={this.state.username} points={this.state.points}/>
+        <PointsMessagePopup username={this.state.username} points={this.state.points}/>
         <NextButton onNextClick={this.handelCodeRequest}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
       </div>
@@ -265,12 +265,56 @@ const CodeArea = React.createClass({
   }
 });
 
+
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+const timeoutLength = 2000;
+
+const PointsMessagePopup = React.createClass({
+  getInitialState() {
+    return { isOpen: false };
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    console.log(prevProps.points, this.props.points);
+    if (prevProps.points === this.props.points) return;
+    console.log('got points');
+    this.handleOpen()
+  },
+
+  handleOpen() {
+    this.setState({isOpen: true})
+
+    this.timeout = setTimeout(() => {
+      this.setState({isOpen: false})
+    }, timeoutLength)
+  },
+
+  handleClose()  {
+    this.setState({isOpen: false})
+    clearTimeout(this.timeout)
+  },
+
+  render() {
+    return (
+      <div className="ui center aligned basic segment">
+        <Popup
+            trigger={<Points username={this.props.username} points={this.props.points}/>}
+            content={`''' This message will self-destruct in ${timeoutLength / 1000} seconds!`}
+            open={this.state.isOpen}
+            onClose={this.handleClose}
+            onOpen={this.handleOpen}
+            positioning='bottom left'
+            inverted
+          />
+      </div>  
+    );
+  }
+});
 
 function Points(props) {
   return (
-    <div id="main" className="ui center aligned basic segment">
+    <div className="button">
       <div className="ui labeled button" tabIndex="0">
         <div className="ui basic blue button">
            {props.username}
@@ -282,6 +326,15 @@ function Points(props) {
     </div>  
     );
 }
+
+
+
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
 
 function Header(props) {
   return (
