@@ -14,7 +14,11 @@ const App = React.createClass({
   getInitialState: function () {
     console.log('getInitialState');
     let username = JSON.parse(localStorage.getItem('username'));
-    return {code: undefined, username: username, points: 0};
+    return {code: undefined, 
+      username: username, 
+      points: 0,
+      messages: []
+    };
   },
 
   componentDidMount: function () {
@@ -33,9 +37,17 @@ const App = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    if (prevState.username === this.state.username) return;
-    console.log('componentDidUpdate');
-    this.socket.emit('send:username', this.state.username);
+    if (prevState.username !== this.state.username) {
+      console.log('componentDidUpdate');
+      this.socket.emit('send:username', this.state.username);
+    }
+    if (prevState.points < this.state.points) {
+      const newMessage = `Congrats; You have gained ${this.state.points-prevState.points} points! :-)`
+      this.setState({messages: this.state.messages.concat([newMessage])});
+    } else if (prevState.points > this.state.points) {
+      const newMessage = `Oooh; You have lost ${prevState.points-this.state.points} points! :-(`
+      this.setState({messages: this.state.messages.concat([newMessage])});
+    }
   },
 
   handleLoginSubmit: function (username, email) {
@@ -83,106 +95,24 @@ const App = React.createClass({
       })
   },
 
+  voidMessages: function () {
+    this.setState({messages: []})
+  },
+
   render() {
     return (
       <div className="ui center aligned basic segment" >
+        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
         <Header />
         <AudioPlayer code={this.state.code}/>
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
-        <PointsMessagePopup username={this.state.username} points={this.state.points}/>
+        <Points username={this.state.username} points={this.state.points}/>
         <NextButton onNextClick={this.handelCodeRequest}/>
-        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
+        <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
       </div>
     );
   }
 });
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-const ModalSetUser = React.createClass({
-  getInitialState: function () {
-    return {
-      fields: {},
-      fieldErrors: {}
-    };
-  },
-
-  onInputChange(evt) {
-    const fields = this.state.fields;
-    fields[evt.target.name] = evt.target.value;
-    this.setState({ fields });
-  },
-
-  validate(person) {
-    const errors = {};
-    if (!person.username) errors.username = 'Name Required';
-    if (person.email && !isEmail(person.email)) errors.email = 'Invalid Email';
-    return errors;
-  },
-
-  handleFormSubmit(evt) {
-    let self = this;
-    const person = this.state.fields;
-    const fieldErrors = this.validate(person);
-    this.setState({ fieldErrors });
-    evt.preventDefault();
-
-    console.log(this.state);
-
-    if (Object.keys(fieldErrors).length) return;
-
-  
-    this.props.onLoginSubmit(person.username, person.email)
-      .then(function (isOk){
-        if (!isOk) {
-          console.log('User duplicate!');
-          self.setState({
-            fields: {},
-            fieldErrors: Object.assign({}, 
-              self.state.fieldErrors, 
-              {nameUnique: 'The username you have chose is already used. Please choose another one!'}
-            )
-          });
-        }
-      });
-  },
-
-  render: function() {
-
-    return (
-      <Modal
-        open={!this.props.username}
-        closeOnEscape={false}
-        closeOnRootNodeClick={false}>
-        <div className="ui segment">
-          <h1>Enter a username </h1>
-          <div className={"ui form " + (Object.keys(this.state.fieldErrors).length ? 'error' : '')}>
-            <div className="field">
-              <label>Username*</label>
-              <input name="username" placeholder="Username" value={this.state.fields.name} onChange={this.onInputChange} />
-            </div>
-            <div className="field">
-              <label>Email address</label>
-              <input name="email" placeholder="Email" value={this.state.fields.email} onChange={this.onInputChange}/>
-              <p>Promise, we won't spam you or give your email to anyone else. This is only for us to </p>
-            </div>
-            <div className="ui error message " >
-              <div className="header">Invalid input</div>
-              <ul>
-                { Object.keys(this.state.fieldErrors).map((key, i) => <li key={i}>{this.state.fieldErrors[key]}</li>) }
-              </ul>
-            </div>
-            <button className="ui submit button green" onClick={this.handleFormSubmit}>
-              Submit
-            </button>
-          </div>
-        </div>
-      </Modal>
-    );
-  },
-});
-
-
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -198,17 +128,18 @@ const AudioPlayer = React.createClass({
       self.setState({timeRemaining: 120 - timePlayed});
     }
 
-     /*autoPlay="false"*/
+     /*autoPlay="false"  <i className="big refresh loading icon" ></i>*/
     return (
       <div className="ui center aligned basic segment">
         <i className="big play icon" ></i>
-        <i className="big refresh loading icon" ></i>
         <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
         <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
       </div>   
     );
   },
 });
+
+
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -268,53 +199,146 @@ const CodeArea = React.createClass({
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-const timeoutLength = 2000;
+const timeoutLength = 4000;
 
-const PointsMessagePopup = React.createClass({
+const MessagePopup = React.createClass({
   getInitialState() {
     return { isOpen: false };
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    console.log(prevProps.points, this.props.points);
-    if (prevProps.points === this.props.points) return;
-    console.log('got points');
-    this.handleOpen()
-  },
-
-  handleOpen() {
+    if (this.props.messages.length === 0 || prevProps.messages === this.props.messages) return;
+    console.log('got messages');
     this.setState({isOpen: true})
 
+    clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
-      this.setState({isOpen: false})
+      this.handleClose();
+
     }, timeoutLength)
   },
 
+  // handleOpen() {
+  //   console.log('handleOpen')
+  //   this.setState({isOpen: true})
+  // },
+
   handleClose()  {
-    this.setState({isOpen: false})
-    clearTimeout(this.timeout)
+    console.log('handleClose')
+    this.setState({isOpen: false});
+    this.props.onMessagesRead();
+    clearTimeout(this.timeout);
   },
 
   render() {
     return (
       <div className="ui center aligned basic segment">
         <Popup
-            trigger={<Points username={this.props.username} points={this.props.points}/>}
-            content={`''' This message will self-destruct in ${timeoutLength / 1000} seconds!`}
+            content={"undefined"}
             open={this.state.isOpen}
+            basic
+            on="click"
             onClose={this.handleClose}
-            onOpen={this.handleOpen}
-            positioning='bottom left'
             inverted
-          />
+            flowing
+          >
+            {this.props.messages.map((msg, i) => <p key={i}>{msg}</p>)}
+        </Popup>
       </div>  
     );
   }
 });
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+const ModalSetUser = React.createClass({
+  getInitialState: function () {
+    return {
+      fields: {},
+      fieldErrors: {}
+    };
+  },
+
+  onInputChange(evt) {
+    const fields = this.state.fields;
+    fields[evt.target.name] = evt.target.value;
+    this.setState({ fields });
+  },
+
+  validate(person) {
+    const errors = {};
+    if (!person.username) errors.username = 'Name Required';
+    if (person.email && !isEmail(person.email)) errors.email = 'Invalid Email';
+    return errors;
+  },
+
+  handleFormSubmit(evt) {
+    let self = this;
+    const person = this.state.fields;
+    const fieldErrors = this.validate(person);
+    this.setState({ fieldErrors });
+    evt.preventDefault();
+
+    console.log(this.state);
+
+    if (Object.keys(fieldErrors).length) return;
+
+    this.props.onLoginSubmit(person.username, person.email)
+      .then(function (isOk){
+        if (!isOk) {
+          console.log('User duplicate!');
+          self.setState({
+            fields: {},
+            fieldErrors: Object.assign({}, 
+              self.state.fieldErrors, 
+              {nameUnique: 'The username you have chose is already used. Please choose another one!'}
+            )
+          });
+        }
+      });
+  },
+
+  render: function() {
+    return (
+      <Modal
+        open={!this.props.username}
+        closeOnEscape={false}
+        closeOnRootNodeClick={false}>
+        <div className="ui segment">
+          <h1>Enter a username </h1>
+          <div className={"ui form " + (Object.keys(this.state.fieldErrors).length ? 'error' : '')}>
+            <div className="field">
+              <label>Username*</label>
+              <input name="username" placeholder="Username" value={this.state.fields.name} onChange={this.onInputChange} />
+            </div>
+            <div className="field">
+              <label>Email address</label>
+              <input name="email" placeholder="Email" value={this.state.fields.email} onChange={this.onInputChange}/>
+              <p>Promise, we won't spam you or give your email to anyone else. This is only for us to </p>
+            </div>
+            <div className="ui error message " >
+              <div className="header">Invalid input</div>
+              <ul>
+                { Object.keys(this.state.fieldErrors).map((key, i) => <li key={i}>{this.state.fieldErrors[key]}</li>) }
+              </ul>
+            </div>
+            <button className="ui submit button green" onClick={this.handleFormSubmit}>
+              Submit
+            </button>
+          </div>
+        </div>
+      </Modal>
+    );
+  },
+});
+
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 function Points(props) {
   return (
-    <div className="button">
+    <div className="ui center aligned basic segment">
       <div className="ui labeled button" tabIndex="0">
         <div className="ui basic blue button">
            {props.username}
@@ -324,15 +348,8 @@ function Points(props) {
         </a>
       </div>
     </div>  
-    );
+  );
 }
-
-
-
-
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 
 
 
