@@ -7,7 +7,7 @@ import './App.css';
 import io from 'socket.io-client';
 
 
-import { Modal, Popup, Button, Grid} from 'semantic-ui-react'
+import { Modal, Popup, Grid} from 'semantic-ui-react'
 
 
 const App = React.createClass({
@@ -78,6 +78,7 @@ const App = React.createClass({
         console.log('Got code', res.code)
         self.setState({code: res.code, points: res.points});
       })
+      .catch(this.catchLoginError);
   },
 
   handleCodeSubmit: function (matchCode) {
@@ -97,6 +98,17 @@ const App = React.createClass({
 
   voidMessages: function () {
     this.setState({messages: []})
+  },
+
+  catchLoginError: function (error) {
+    console.log('%O', error);
+    if (parseInt(error.response.status, 10) === 401) { // username not found
+      this.setState({username: undefined});
+      localStorage.removeItem('username')
+      return false;
+    } else {
+       throw error;
+    }
   },
 
   render() {
@@ -193,7 +205,11 @@ const CodeArea = React.createClass({
         <p>Enter code of match</p>
         <div className="ui left icon action input">
           <i className="exchange icon"></i>
-          <input placeholder="Code" value={this.state.matchCode} onChange={this.onInputChange} style={{'max-width': '100px'}}/>
+          <input type="number" 
+            placeholder="Code" 
+            value={this.state.matchCode} 
+            onChange={this.onInputChange} 
+            style={{maxWidth: '100px'}}/>
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
         </div>
       </div>

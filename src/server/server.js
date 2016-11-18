@@ -33,8 +33,7 @@ let LOG = DB.addCollection('Logs');
 let USR = DB.addCollection('Users', {unique: ['username']});
 
 
-
-// REST API ++++++++++++++++++++++++++++++++++++
+// POST LOGIN ++++++++++++++++++++++++++++++++++++"
 
 app.post('/api/login', (req, res) => {
   let username = req.body.username;
@@ -53,32 +52,36 @@ app.post('/api/login', (req, res) => {
 });
 
 
-// REST API ++++++++++++++++++++++++++++++++++++
+// GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.1;
 
-USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
-USR.insert({username: 'a', email: '', points: 0});
-USR.insert({username: 'b', email: '', points: 0});
-USR.insert({username: 'c', email: '', points: 0});
+// USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
+// USR.insert({username: 'a', email: '', points: 0});
+// USR.insert({username: 'b', email: '', points: 0});
+// USR.insert({username: 'c', email: '', points: 0});
 
-// LOG.insert({username: 'michel', songIdx: '0'});
-// LOG.insert({username: 'michel', songIdx: '0'});
-
-SA.insert({code: '0000', songIdx: 0, username: 'a'});
-SA.insert({code: '0001', songIdx: 0, username: 'b'});
-SA.insert({code: '0002', songIdx: 0, username: 'c'});
-SA.insert({code: '0003', songIdx: 0, username: 'd'});
-
-nextCode = 4;
-nextSongIdx = 0;
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// SA.insert({code: '0000', songIdx: 0, username: 'a'});
+// SA.insert({code: '0001', songIdx: 0, username: 'b'});
+// SA.insert({code: '0002', songIdx: 0, username: 'c'});
+// SA.insert({code: '0003', songIdx: 0, username: 'd'});
+// nextCode = 4;
+// nextSongIdx = 0;
 
 
 app.get('/api/code', (req, res) => {
   console.log('/api/code');
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
-  console.log('code for: ' + username)
+  
+  let usr = USR.findOne({username});
+  if (!usr) {
+    console.log('Could not find user :' + username);
+    res.status(401).send(`A user with the name ${username} does not exist!`);
+    return;
+  }
 
   let code = nextCode;
   nextCode = (nextCode+1) % 10000;
@@ -92,8 +95,9 @@ app.get('/api/code', (req, res) => {
   });
   let songIdxBest; 
   Object.keys(songsPlayed).forEach(function (songIdx) {
-    if ((songIdxBest == undefined || songCounts[songIdx] > songCounts[songIdxBest]) && LOG.findOne({username, songIdx}) == undefined) {
-      songIdxBest = songIdx;
+    if ((songIdxBest == undefined || songCounts[songIdx] > songCounts[songIdxBest]) 
+      && LOG.findOne({username, songIdx}) == undefined) {
+        songIdxBest = parseInt(songIdx);
     }
   });
 
@@ -107,7 +111,6 @@ app.get('/api/code', (req, res) => {
   }
   
   let previousAllocation = SA.findOne({username});
-  let usr = USR.findOne({username});
   if (previousAllocation) {
     SA.remove(previousAllocation);
     usr.points -= 5;
@@ -117,10 +120,12 @@ app.get('/api/code', (req, res) => {
   LOG.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
   res.json({code, points: usr.points});
+
+  console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
 });
 
 
-// REST API ++++++++++++++++++++++++++++++++++++
+// GET SONG ++++++++++++++++++++++++++++++++++++
 
 app.get('/api/song/:code', (req, res) => {
   let code = req.params.code;
@@ -136,7 +141,7 @@ app.get('/api/song/:code', (req, res) => {
 
 });
 
-// REST API ++++++++++++++++++++++++++++++++++++
+// POST MACTHCODE ++++++++++++++++++++++++++++++++++++
 
 const io = require('socket.io')(http);
 
@@ -166,13 +171,20 @@ app.post('/api/matchcode', (req, res) => {
   let matchCode = req.body.matchCode;
   console.log('/api/matchcode', username, matchCode);
 
-  let saUser = SA.findOne({username});
   let usrUser = USR.findOne({username});
-
-  let saMatch = SA.findOne({code: matchCode});
   if (!usrUser) {
-    res.status(403).send('Invalid username: ' + username);
-  } else if (saUser && saMatch && saUser.songIdx === saMatch.songIdx) {
+    res.status(401).send(`A user with the name ${username} does not exist!`);
+    return;
+  }
+
+  matchCode = '000' + matchCode.toString();
+  matchCode = matchCode.slice(-4);
+  let saMatch = SA.findOne({code: matchCode});
+  let saUser = SA.findOne({username});
+  console.log(SA.data);
+
+  
+  if (saUser && saMatch && saUser.songIdx == saMatch.songIdx) {
     SA.remove(saUser);
     SA.remove(saMatch);
     
@@ -194,8 +206,6 @@ app.post('/api/matchcode', (req, res) => {
     } else {
       console.log('No socket found for :' + usrMatch.username);
     }
-   
-
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});
