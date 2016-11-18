@@ -7,7 +7,7 @@ import './App.css';
 import io from 'socket.io-client';
 
 
-import { Modal, Popup, Button} from 'semantic-ui-react'
+import { Modal, Popup, Button, Grid} from 'semantic-ui-react'
 
 
 const App = React.createClass({
@@ -104,10 +104,16 @@ const App = React.createClass({
       <div className="ui center aligned basic segment" >
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
         <Header />
-        <AudioPlayer code={this.state.code}/>
-        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
         <Points username={this.state.username} points={this.state.points}/>
-        <NextButton onNextClick={this.handelCodeRequest}/>
+        <Grid centered columns={4}>
+          <Grid.Column>
+            <AudioPlayer code={this.state.code}/>
+          </Grid.Column>
+          <Grid.Column>
+            <NextButton onNextClick={this.handelCodeRequest}/>
+          </Grid.Column>
+        </Grid>
+        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
       </div>
     );
@@ -130,7 +136,7 @@ const AudioPlayer = React.createClass({
 
      /*autoPlay="false"  <i className="big refresh loading icon" ></i>*/
     return (
-      <div className="ui center aligned basic segment">
+      <div className="ui ">
         <i className="big play icon" ></i>
         <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
         <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
@@ -187,7 +193,7 @@ const CodeArea = React.createClass({
         <p>Enter code of match</p>
         <div className="ui left icon action input">
           <i className="exchange icon"></i>
-          <input placeholder="Code" value={this.state.matchCode} onChange={this.onInputChange} />
+          <input placeholder="Code" value={this.state.matchCode} onChange={this.onInputChange} style={{'max-width': '100px'}}/>
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
         </div>
       </div>
