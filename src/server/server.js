@@ -55,7 +55,7 @@ app.post('/api/login', (req, res) => {
 // GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
-const MIN_PROBA_MATCH = 0.1;
+const MIN_PROBA_MATCH = 0.5;
 
 // USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
 // USR.insert({username: 'a', email: '', points: 0});
@@ -67,14 +67,24 @@ const MIN_PROBA_MATCH = 0.1;
 // SA.insert({code: '0000', songIdx: 0, username: 'a'});
 // SA.insert({code: '0001', songIdx: 0, username: 'b'});
 // SA.insert({code: '0002', songIdx: 0, username: 'c'});
-// SA.insert({code: '0003', songIdx: 0, username: 'd'});
+// SA.insert({code: '0003', songIdx: 1, username: 'd'});
 // nextCode = 4;
-// nextSongIdx = 0;
+// nextSongIdx = 2;
+
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+      if ((new Date().getTime() - start) > milliseconds){
+        break;
+      }
+    }
+  }
 
 
 app.get('/api/code', (req, res) => {
   console.log('/api/code');
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
+
   
   let usr = USR.findOne({username});
   if (!usr) {
@@ -93,11 +103,13 @@ app.get('/api/code', (req, res) => {
   songsPlayed.forEach(function (songIdx) {
     songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
   });
+
   let songIdxBest; 
-  Object.keys(songsPlayed).forEach(function (songIdx) {
-    if ((songIdxBest == undefined || songCounts[songIdx] > songCounts[songIdxBest]) 
+  Object.keys(songCounts).forEach(function (songIdx) {
+    songIdx = parseInt(songIdx)
+    if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest]) 
       && LOG.findOne({username, songIdx}) == undefined) {
-        songIdxBest = parseInt(songIdx);
+        songIdxBest = songIdx;
     }
   });
 
@@ -181,8 +193,6 @@ app.post('/api/matchcode', (req, res) => {
   matchCode = matchCode.slice(-4);
   let saMatch = SA.findOne({code: matchCode});
   let saUser = SA.findOne({username});
-  console.log(SA.data);
-
   
   if (saUser && saMatch && saUser.songIdx == saMatch.songIdx) {
     SA.remove(saUser);
@@ -196,7 +206,7 @@ app.post('/api/matchcode', (req, res) => {
     USR.update(usrMatch);
 
     console.log('/api/matchcode', 'It is a match!');
-    res.json({accepted: true, points: usrUser.points});
+    res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
 
     let matchSocket = io.sockets.connected[usrMatch.socketId]
     if (matchSocket) {

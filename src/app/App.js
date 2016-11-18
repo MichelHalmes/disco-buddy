@@ -12,7 +12,6 @@ import { Modal, Popup, Grid} from 'semantic-ui-react'
 
 const App = React.createClass({
   getInitialState: function () {
-    console.log('getInitialState');
     let username = JSON.parse(localStorage.getItem('username'));
     return {code: undefined, 
       username: username, 
@@ -23,30 +22,29 @@ const App = React.createClass({
 
   componentDidMount: function () {
     let self = this;
-    console.log('componentDidMount', self.state);
     self.handelCodeRequest();
 
     self.socket = io();
-    self.socket.emit('send:username', self.state.username);
+    self.socket.on('connect', () => self.socket.emit('send:username', self.state.username));
+    
+
     self.socket.on('code:match', function ({username, matchUsername, points}) {
-      console.log('yeah, code matched', {username, matchUsername, points});
       if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
+      this.pushMessage(`You have matched with ${matchUsername}!`);
       self.setState({points});
       self.handelCodeRequest();
     });
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    if (prevState.username !== this.state.username) {
-      console.log('componentDidUpdate');
+    if (this.state.username && prevState.username !== this.state.username) {
+      this.pushMessage(`Welcome ${this.state.username}!`);
       this.socket.emit('send:username', this.state.username);
     }
     if (prevState.points < this.state.points) {
-      const newMessage = `Congrats; You have gained ${this.state.points-prevState.points} points! :-)`
-      this.setState({messages: this.state.messages.concat([newMessage])});
+      this.pushMessage(`Congrats; You have gained ${this.state.points-prevState.points} points! :-)`);
     } else if (prevState.points > this.state.points) {
-      const newMessage = `Oooh; You have lost ${prevState.points-this.state.points} points! :-(`
-      this.setState({messages: this.state.messages.concat([newMessage])});
+      this.pushMessage(`Oooh; You have lost ${prevState.points-this.state.points} points! :-(`);
     }
   },
 
@@ -54,15 +52,13 @@ const App = React.createClass({
     let self = this;
     return Client.postLogin(username, email)
       .then(function () {
-        console.log('Username: ', username);
         self.setState({username});
         localStorage.setItem('username', JSON.stringify(username));
         self.handelCodeRequest();
         return true;
       })
       .catch(function (error) {
-        console.log('%O', error);
-        if (parseInt(error.response.status, 10) === 403) { // username already exists!
+        if (error.response.status == 403) { // username already exists!
           return false;
         } else {
            throw error;
@@ -72,10 +68,11 @@ const App = React.createClass({
 
   handelCodeRequest: function () {
     let self = this;
+    self.setState({code: undefined});
     if (!this.state.username) return Promise.resolve();
     return Client.getCode(this.state.username)
       .then(function(res) {
-        console.log('Got code', res.code)
+        self.pushMessage(`New song, new luck...!`);
         self.setState({code: res.code, points: res.points});
       })
       .catch(this.catchLoginError);
@@ -83,14 +80,15 @@ const App = React.createClass({
 
   handleCodeSubmit: function (matchCode) {
     let self = this;
-    console.log('handleCodeSubmit', matchCode);
     return Client.postMatchCode(this.state.username, matchCode)
-      .then(function ({accepted, points}) {
+      .then(function ({accepted, points, matchUsername}) {
         self.setState({points});
         if (accepted) {
+          self.pushMessage(`You have matched with ${matchUsername}!`);
           self.handelCodeRequest();
           return true;
         } else {
+          self.pushMessage(`Nope, wrong code!`);
           return false;
         }
       })
@@ -100,9 +98,12 @@ const App = React.createClass({
     this.setState({messages: []})
   },
 
+  pushMessage: function (newMessage) {
+    this.setState({messages: this.state.messages.concat([newMessage])});
+  },
+
   catchLoginError: function (error) {
-    console.log('%O', error);
-    if (parseInt(error.response.status, 10) === 401) { // username not found
+    if (error.response.status == 401) { // username not found
       this.setState({username: undefined});
       localStorage.removeItem('username')
       return false;
@@ -119,7 +120,7 @@ const App = React.createClass({
         <Points username={this.state.username} points={this.state.points}/>
         <Grid centered columns={4}>
           <Grid.Column>
-            <AudioPlayer code={this.state.code}/>
+            <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} handelCodeRequest={this.handelCodeRequest}/>
           </Grid.Column>
           <Grid.Column>
             <NextButton onNextClick={this.handelCodeRequest}/>
@@ -133,25 +134,34 @@ const App = React.createClass({
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+const SECONDS_TO_PLAY = 60;
 
 const AudioPlayer = React.createClass({
   getInitialState: function () {
-    return {timeRemaining: 120};
+    return {timeRemaining: SECONDS_TO_PLAY};
   },
 
   render() {
     let self = this;
     function updateTrackTime(event){
       let timePlayed = event.nativeEvent.srcElement.currentTime;
-      self.setState({timeRemaining: 120 - timePlayed});
+      if (timePlayed < SECONDS_TO_PLAY ) {
+        self.setState({timeRemaining: SECONDS_TO_PLAY - timePlayed});
+      } else if (self.props.code) {
+        self.props.handelCodeRequest();
+        self.setState({timeRemaining: 0});
+        self.props.pushMessage(`Time's up!`);        
+      }     
     }
 
-     /*autoPlay="false"  <i className="big refresh loading icon" ></i>*/
     return (
       <div className="ui ">
-        <i className="big play icon" ></i>
+        {this.props.code ?
+          <i className="big play icon" ></i>  :
+          <i className="big refresh loading icon" ></i>
+        }
         <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
-        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} onTimeUpdate={updateTrackTime}/>
+        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} autoPlay onTimeUpdate={updateTrackTime}/>
       </div>   
     );
   },
@@ -175,8 +185,6 @@ const CodeArea = React.createClass({
 
     if (!isValid) return;
 
-    console.log('codearea', matchCode);
-
     this.props.onCodeSubmit(matchCode);
     this.setState({ matchCode: ''});
   },
@@ -186,7 +194,6 @@ const CodeArea = React.createClass({
   },
 
   validate(matchCode) {
-    const errors = {};
     parseInt(matchCode, 10);
     return true;
   },
@@ -197,7 +204,7 @@ const CodeArea = React.createClass({
       <div className="ui twelve wide column center aligned raised segment">
         <p>Give your code to a match </p>
         <div className="ui black button">
-          <i className="exchange icon"></i> {this.props.code}
+          <i className="exchange icon"></i> {this.props.code || '????'}
         </div>
         <div className="ui horizontal divider">
           Or
@@ -209,7 +216,8 @@ const CodeArea = React.createClass({
             placeholder="Code" 
             value={this.state.matchCode} 
             onChange={this.onInputChange} 
-            style={{maxWidth: '100px'}}/>
+            style={{maxWidth: '100px'}}
+            />
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
         </div>
       </div>
@@ -230,7 +238,6 @@ const MessagePopup = React.createClass({
 
   componentDidUpdate: function (prevProps, prevState) {
     if (this.props.messages.length === 0 || prevProps.messages === this.props.messages) return;
-    console.log('got messages');
     this.setState({isOpen: true})
 
     clearTimeout(this.timeout);
@@ -240,13 +247,7 @@ const MessagePopup = React.createClass({
     }, timeoutLength)
   },
 
-  // handleOpen() {
-  //   console.log('handleOpen')
-  //   this.setState({isOpen: true})
-  // },
-
   handleClose()  {
-    console.log('handleClose')
     this.setState({isOpen: false});
     this.props.onMessagesRead();
     clearTimeout(this.timeout);
@@ -301,14 +302,11 @@ const ModalSetUser = React.createClass({
     this.setState({ fieldErrors });
     evt.preventDefault();
 
-    console.log(this.state);
-
     if (Object.keys(fieldErrors).length) return;
 
     this.props.onLoginSubmit(person.username, person.email)
       .then(function (isOk){
         if (!isOk) {
-          console.log('User duplicate!');
           self.setState({
             fields: {},
             fieldErrors: Object.assign({}, 
