@@ -133,7 +133,7 @@ const App = React.createClass({
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-const SECONDS_TO_PLAY = 10;
+const SECONDS_TO_PLAY = 60;
 
 const AudioPlayer = React.createClass({
   getInitialState: function () {
@@ -155,7 +155,7 @@ const AudioPlayer = React.createClass({
   },
 
   updateTrackTime: function (event){
-    if (!this.props.code || this.refs.myAudio.readyState!=4) return;
+    if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
     if (timePlayed < SECONDS_TO_PLAY) {
       this.setState({timeRemaining: SECONDS_TO_PLAY - timePlayed});

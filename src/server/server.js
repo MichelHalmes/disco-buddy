@@ -85,8 +85,6 @@ app.get('/api/code', (req, res) => {
   console.log('/api/code');
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
 
-  sleep(10000);
-  
   let usr = USR.findOne({username});
   if (!usr) {
     console.log('Could not find user :' + username);
@@ -105,20 +103,22 @@ app.get('/api/code', (req, res) => {
     songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
   });
 
+  let songIdxUser = LOG.find({username}).map((log) => log.songIdx);
+
   let songIdxBest; 
   Object.keys(songCounts).forEach(function (songIdx) {
     songIdx = parseInt(songIdx)
     if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest]) 
-      && LOG.findOne({username, songIdx}) == undefined) {
+      && songIdxUser.indexOf(songIdx) == -1) {
         songIdxBest = songIdx;
     }
   });
 
   let nbPlayers = songsPlayed.length;
-  if (songIdxBest == undefined) {
-    songIdxBest = nextSongIdx;
-    nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
-  } else if (nbPlayers != 1 && (songCounts[songIdxBest]-1) / (nbPlayers - 1) > MIN_PROBA_MATCH) {
+  if (songIdxBest == undefined) { // The player has heard everything
+    let lastSongUser = songIdxUser.length ? Math.max(... songIdxUser): -1;
+    songIdxBest = (lastSongUser + 1) % SONGS.length;; 
+  } else if (nbPlayers != 1 && (songCounts[songIdxBest]-1) / (nbPlayers - 1) > MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
   }
@@ -143,8 +143,6 @@ app.get('/api/code', (req, res) => {
 app.get('/api/song/:code', (req, res) => {
   let code = req.params.code;
   let allocation = SA.findOne({code});
-
-  sleep(10000);
 
   if (allocation) {
     let songFile = SONGS[allocation.songIdx] + '.mp3';

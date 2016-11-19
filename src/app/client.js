@@ -1,14 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
 
-// function getSong() {
-//   return fetch('/api/song', {
-//     headers: {
-//       Accept: 'application/json',
-//     },
-//   }).then(checkStatus)
-// }
-
 function postLogin(username, email) {
   console.log('/api/login', username);
   return fetch('/api/login', {
