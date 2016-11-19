@@ -85,6 +85,7 @@ app.get('/api/code', (req, res) => {
   console.log('/api/code');
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
 
+  sleep(10000);
   
   let usr = USR.findOne({username});
   if (!usr) {
@@ -142,6 +143,8 @@ app.get('/api/code', (req, res) => {
 app.get('/api/song/:code', (req, res) => {
   let code = req.params.code;
   let allocation = SA.findOne({code});
+
+  sleep(10000);
 
   if (allocation) {
     let songFile = SONGS[allocation.songIdx] + '.mp3';

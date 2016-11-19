@@ -1,7 +1,6 @@
 import React from 'react';
 import isEmail from 'validator/lib/isEmail';
 import Client from './client.js';
-import Helper from './helper.js';
 import './App.css';
 
 import io from 'socket.io-client';
@@ -103,7 +102,7 @@ const App = React.createClass({
   },
 
   catchLoginError: function (error) {
-    if (error.response.status == 401) { // username not found
+    if (error.response && error.response.status == 401) { // username not found
       this.setState({username: undefined});
       localStorage.removeItem('username')
       return false;
@@ -134,34 +133,72 @@ const App = React.createClass({
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-const SECONDS_TO_PLAY = 60;
+const SECONDS_TO_PLAY = 10;
 
 const AudioPlayer = React.createClass({
   getInitialState: function () {
-    return {timeRemaining: SECONDS_TO_PLAY};
+    return {timeRemaining: -1, noAutoplay: true};
+  },
+
+  playMusic: function () {
+    this.refs.myAudio.play();
+  },
+
+  handlePlay: function () {
+    this.setState({noAutoplay: false});
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!this.props.code && prevProps.code) {
+      this.setState({timeRemaining: -1});
+    }
+  },
+
+  updateTrackTime: function (event){
+    if (!this.props.code || this.refs.myAudio.readyState!=4) return;
+    let timePlayed = event.nativeEvent.srcElement.currentTime;
+    if (timePlayed < SECONDS_TO_PLAY) {
+      this.setState({timeRemaining: SECONDS_TO_PLAY - timePlayed});
+    } else {
+      this.props.handelCodeRequest();
+      this.props.pushMessage(`Time's up!`);        
+    } 
   },
 
   render() {
-    let self = this;
-    function updateTrackTime(event){
-      let timePlayed = event.nativeEvent.srcElement.currentTime;
-      if (timePlayed < SECONDS_TO_PLAY ) {
-        self.setState({timeRemaining: SECONDS_TO_PLAY - timePlayed});
-      } else if (self.props.code) {
-        self.props.handelCodeRequest();
-        self.setState({timeRemaining: 0});
-        self.props.pushMessage(`Time's up!`);        
-      }     
+    function secondsToHuman(time) {
+      if (time < 0) return '--:--';
+      return [
+        pad(Math.floor(time / 60).toString(), 2),
+        pad(Math.floor(time % 60).toString(), 2),
+      ].join(':');
+    }
+
+    function pad(numberString, size) {
+      let padded = numberString;
+      while (padded.length < size) padded = `0${padded}`;
+      return padded;
     }
 
     return (
-      <div className="ui ">
-        {this.props.code ?
-          <i className="big play icon" ></i>  :
-          <i className="big refresh loading icon" ></i>
+      <div>
+        {this.state.timeRemaining == -1 ?
+          <i className="big refresh loading icon" ></i> :
+          <i className="big play icon" ></i>          
         }
-        <div>{Helper.secondsToHuman(this.state.timeRemaining)}</div>
-        <audio src={ this.props.code && "http://localhost:4000/api/song/" + this.props.code} autoPlay onTimeUpdate={updateTrackTime}/>
+        <div>{secondsToHuman(this.state.timeRemaining)}</div>
+        <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
+          src={this.props.code && "/api/song/" + this.props.code} 
+          onTimeUpdate={this.updateTrackTime}
+          onPlay={this.handlePlay}/>
+        <Modal open={this.state.noAutoplay && !!this.props.code} >
+          <div className="ui center aligned basic segment">
+            <h1>You are good to go!</h1>
+            <button className="ui submit button green" onClick={this.playMusic}>
+              Play music!
+            </button>
+          </div>
+        </Modal>
       </div>   
     );
   },
@@ -301,6 +338,8 @@ const ModalSetUser = React.createClass({
     const fieldErrors = this.validate(person);
     this.setState({ fieldErrors });
     evt.preventDefault();
+
+    document.getElementById('yourAudioTag').play();
 
     if (Object.keys(fieldErrors).length) return;
 
