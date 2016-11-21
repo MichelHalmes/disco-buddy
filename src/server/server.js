@@ -16,10 +16,19 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 
 // GET SONG NAME ++++++++++++++++++++++++++++++++++++
+function shuffle(a) {
+  for (let i = a.length; i; i--) {
+    let j = Math.floor(Math.random() * i);
+    [a[i - 1], a[j]] = [a[j], a[i - 1]];
+  }
+  return a;
+}
 
-const SONGS = fs.readdirSync(SONG_FOLDER)
-              .filter((fn) => fn.endsWith('.mp3'))
-              .map((fn) => fn.slice(0, fn.length - 4));
+const SONGS = shuffle(
+                fs.readdirSync(SONG_FOLDER)
+                .filter((fn) => fn.endsWith('.mp3'))
+                .map((fn) => fn.slice(0, fn.length - 4))
+              );
 
               
 

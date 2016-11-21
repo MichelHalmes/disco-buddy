@@ -26,10 +26,9 @@ const App = React.createClass({
     self.socket = io();
     self.socket.on('connect', () => self.socket.emit('send:username', self.state.username));
     
-
     self.socket.on('code:match', function ({username, matchUsername, points}) {
       if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
-      this.pushMessage(`You have matched with ${matchUsername}!`);
+      self.pushMessage(`You have matched with ${matchUsername}!`);
       self.setState({points});
       self.handelCodeRequest();
     });
