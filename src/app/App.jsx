@@ -116,14 +116,7 @@ const App = React.createClass({
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <Grid centered columns={4}>
-          <Grid.Column>
-            <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} handelCodeRequest={this.handelCodeRequest}/>
-          </Grid.Column>
-          <Grid.Column>
-            <NextButton onNextClick={this.handelCodeRequest}/>
-          </Grid.Column>
-        </Grid>
+        <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} handelCodeRequest={this.handelCodeRequest}/>
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
       </div>
@@ -180,16 +173,26 @@ const AudioPlayer = React.createClass({
     }
 
     return (
-      <div>
-        {this.state.timeRemaining == -1 ?
-          <i className="big refresh loading icon" ></i> :
-          <i className="big play icon" ></i>          
-        }
-        <div>{secondsToHuman(this.state.timeRemaining)}</div>
-        <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
-          src={this.props.code && "/api/song/" + this.props.code} 
-          onTimeUpdate={this.updateTrackTime}
-          onPlay={this.handlePlay}/>
+      <div className="ui four column centered grid">
+        <div className="column">
+          <div className="ui horizontal segments">
+            <div className="ui tertiary green inverted center aligned segment">
+              {this.state.timeRemaining == -1 ?
+                <i className="big refresh loading icon" ></i> :
+                <i className="big play icon" ></i>          
+              }
+              <p>{secondsToHuman(this.state.timeRemaining)}</p>
+            </div>
+            <div className="ui secondary red inverted center aligned segment" onClick={this.props.handelCodeRequest}>
+              <i className="big forward icon"></i>
+              <p>Next</p>
+            </div>
+          </div>
+        </div>
+         <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
+              src={this.props.code && "/api/song/" + this.props.code} 
+              onTimeUpdate={this.updateTrackTime}
+              onPlay={this.handlePlay}/>
         <Modal open={this.state.noAutoplay && !!this.props.code} >
           <div className="ui center aligned basic segment">
             <h1>You are good to go!</h1>
@@ -198,12 +201,10 @@ const AudioPlayer = React.createClass({
             </button>
           </div>
         </Modal>
-      </div>   
+      </div>
     );
-  },
+  }, 
 });
-
-
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -425,15 +426,6 @@ function Header(props) {
     );
 }
 
-function NextButton(props) {
-  return (
-    <div>
-      <button className="ui labeled icon yellow button" onClick={props.onNextClick}>
-        <i className="forward icon"></i>
-        Next
-      </button>
-    </div> 
-    );
-}
+
 
 export default App;

@@ -42,6 +42,37 @@ let LOG = DB.addCollection('Logs');
 let USR = DB.addCollection('Users', {unique: ['username']});
 
 
+// SOCKETS ++++++++++++++++++++++++++++++++++++
+const io = require('socket.io')(http);
+
+io.on('connection', function (socket) {
+  console.log('connection', socket.id); 
+  socket.on('send:username', function (username) {
+    console.log('send:username', username);
+    USR.findAndUpdate(
+      (usr) => usr.username === username,
+      (usr) => usr.socketId = socket.id
+    );
+  });
+
+  socket.on('disconnect', function() {
+    console.log('connection-disconnect', socket.id);
+
+    USR.findAndUpdate(
+      (usr) => usr.socketId === socket.id,
+      (usr) => usr.socketId = undefined
+    );
+  });
+});
+
+let monitorSocket = io.of('/monitor');
+monitorSocket.on('connection', function(socket){
+  console.log('Someone is monitoring!');
+});
+
+// monitorSocket.emit('send:newsEvent', );
+
+
 // POST LOGIN ++++++++++++++++++++++++++++++++++++"
 
 app.post('/api/login', (req, res) => {
@@ -54,9 +85,10 @@ app.post('/api/login', (req, res) => {
     console.log('/api/login', 'Already exists!');
     res.status(403).send('A user with this username exists already!');
   } else {
-    USR.insert({username, email, points: 0});
+    USR.insert({username, email, points: 10});
     console.log('/api/login', 'OK!')
     res.json({});
+    monitorSocket.emit('send:newsEvent', {type: 'login', points: 10, data: {username: username}});
   }
 });
 
@@ -66,28 +98,28 @@ let nextCode = 1;
 let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.5;
 
-// USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
-// USR.insert({username: 'a', email: '', points: 0});
-// USR.insert({username: 'b', email: '', points: 0});
-// USR.insert({username: 'c', email: '', points: 0});
+USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
+USR.insert({username: 'a', email: '', points: 0});
+USR.insert({username: 'b', email: '', points: 0});
+USR.insert({username: 'c', email: '', points: 0});
 
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// SA.insert({code: '0000', songIdx: 0, username: 'a'});
-// SA.insert({code: '0001', songIdx: 0, username: 'b'});
-// SA.insert({code: '0002', songIdx: 0, username: 'c'});
-// SA.insert({code: '0003', songIdx: 1, username: 'd'});
-// nextCode = 4;
-// nextSongIdx = 2;
+// LOG.insert({username: 'michel', songIdx: '0'});
+// LOG.insert({username: 'michel', songIdx: '0'});
+SA.insert({code: '0000', songIdx: 1, username: 'a'});
+SA.insert({code: '0001', songIdx: 0, username: 'b'});
+SA.insert({code: '0002', songIdx: 0, username: 'c'});
+SA.insert({code: '0003', songIdx: 0, username: 'd'});
+nextCode = 4;
+nextSongIdx = 2;
 
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-      if ((new Date().getTime() - start) > milliseconds){
-        break;
-      }
-    }
-  }
+// function sleep(milliseconds) {
+//     var start = new Date().getTime();
+//     for (var i = 0; i < 1e7; i++) {
+//       if ((new Date().getTime() - start) > milliseconds){
+//         break;
+//       }
+//     }
+//   }
 
 
 app.get('/api/code', (req, res) => {
@@ -113,6 +145,7 @@ app.get('/api/code', (req, res) => {
   });
 
   let songIdxUser = LOG.find({username}).map((log) => log.songIdx);
+  console.log(songIdxUser);
 
   let songIdxBest; 
   Object.keys(songCounts).forEach(function (songIdx) {
@@ -165,27 +198,7 @@ app.get('/api/song/:code', (req, res) => {
 
 // POST MACTHCODE ++++++++++++++++++++++++++++++++++++
 
-const io = require('socket.io')(http);
 
-io.on('connection', function (socket) {
-  console.log('connection', socket.id); 
-  socket.on('send:username', function (username) {
-    console.log('send:username', username);
-    USR.findAndUpdate(
-      (usr) => usr.username === username,
-      (usr) => usr.socketId = socket.id
-    );
-  });
-
-  socket.on('disconnect', function() {
-    console.log('connection-disconnect', socket.id);
-
-    USR.findAndUpdate(
-      (usr) => usr.socketId === socket.id,
-      (usr) => usr.socketId = undefined
-    );
-  });
-});
 
 
 app.post('/api/matchcode', (req, res) => {
@@ -226,6 +239,10 @@ app.post('/api/matchcode', (req, res) => {
     } else {
       console.log('No socket found for :' + usrMatch.username);
     }
+
+    monitorSocket.emit('send:newsEvent', {type: 'match', points: 50, data: 
+      {username: username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
+    
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});
