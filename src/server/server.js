@@ -76,9 +76,11 @@ setInterval(function(){
   let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
+  console.time('rank');
   let ranking = SA.eqJoin(USR.data, 'username', 'username', 
       (left,right) => ({username: right.username, points: right.points}))
     .simplesort('points', true).data();
+  console.timeEnd('rank');
 
   monitorSocket.emit('send:ranking', ranking);
 
@@ -271,6 +273,22 @@ app.post('/api/matchcode', (req, res) => {
   }
 });
 
+// POST LOGIN ++++++++++++++++++++++++++++++++++++"
+
+app.post('/api/message', (req, res) => {
+  let username = req.body.username;
+  let message = req.body.message;
+  console.log('/api/message', username, message);
+
+  let usr = USR.findOne({username});
+  if (usr) {
+    usr.points += 1;
+    USR.update(usr);
+    monitorSocket.emit('send:newsEvent', {type: 'message', points: 1, data: {username, message}});
+  } else {
+    res.status(401).send(`A user with the name ${username} does not exist!`);
+  }
+});
 
 
 // ================================================

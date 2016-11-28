@@ -1,5 +1,4 @@
 import React from 'react';
-import Client from './client.js';
 
 import io from 'socket.io-client';
 import './Monitor.css';

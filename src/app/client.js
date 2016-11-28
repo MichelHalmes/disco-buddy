@@ -37,6 +37,18 @@ function postMatchCode(username, matchCode) {
     .then(parseJSON);
 }
 
+function postMessage(username, message) {
+  console.log('/api/message', username);
+  return fetch('/api/message', {
+    method: 'post',
+    body: JSON.stringify({username, message}),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+  }).then(checkStatus);
+}
+
 
 function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
@@ -56,5 +68,6 @@ function parseJSON(response) {
 module.exports = {
   postLogin,
   getCode,
-  postMatchCode
+  postMatchCode,
+  postMessage
 };

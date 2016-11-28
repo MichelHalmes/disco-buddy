@@ -120,6 +120,7 @@ const App = React.createClass({
         <Points username={this.state.username} points={this.state.points}/>
         <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} handelCodeRequest={this.handelCodeRequest}/>
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
+        <TweetMessage username={this.state.username}/>
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
       </div>
     );
@@ -391,6 +392,39 @@ const ModalSetUser = React.createClass({
     );
   },
 });
+
+
+const TweetMessage  = React.createClass({
+  getInitialState() {
+    return { message: ''};
+  },
+
+  onFormSubmit(evt) {
+    Client.postMessage(this.props.username, this.state.message);
+    this.setState({ message: '' });
+    // evt.preventDefault();
+  },
+
+  onInputChange(evt) {
+    this.setState({ message: evt.target.value });
+  },
+
+  render() {
+    return (
+      <div className="ui center aligned basic segment">
+        <div className="ui left icon action input">
+          <i className="comment icon"></i>
+          <input type="text" 
+            placeholder="Message" 
+            value={this.state.message} 
+            onChange={this.onInputChange} 
+            />
+          <button className="ui green submit button" onClick={this.onFormSubmit}>Tweet</button>
+        </div>
+      </div>
+    );
+  },
+})
 
 
 
