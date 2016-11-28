@@ -70,7 +70,10 @@ monitorSocket.on('connection', function(socket){
   console.log('Someone is monitoring!');
 });
 
-// monitorSocket.emit('send:newsEvent', );
+setInterval(function(){
+  console.log('Ssend:stats');
+  monitorSocket.emit('send:statistics', {nbUsers: 3, nbSongs: 5});
+}, 4000);
 
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++"
@@ -199,8 +202,6 @@ app.get('/api/song/:code', (req, res) => {
 // POST MACTHCODE ++++++++++++++++++++++++++++++++++++
 
 
-
-
 app.post('/api/matchcode', (req, res) => {
   let username = req.body.username;
   let matchCode = req.body.matchCode;
@@ -242,7 +243,7 @@ app.post('/api/matchcode', (req, res) => {
 
     monitorSocket.emit('send:newsEvent', {type: 'match', points: 50, data: 
       {username: username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
-    
+
   } else {
     console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});

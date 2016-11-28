@@ -25,7 +25,65 @@ const Monitor = React.createClass({
   }
 });
 
-export default Monitor;
+function Header(props) {
+  return (
+    <div className="ui center aligned basic segment" >
+      <h2 >
+        <i className="music icon"></i> 
+        Disco Match 
+        <i className="music icon"></i> 
+      </h2>
+      <p className="side-margins">Find a dancer with your song</p>
+      <div className="ui divider"></div>
+    </div>
+   
+  );
+}
+
+const Statistics = React.createClass({
+  getInitialState: function () {
+    return {
+      nbUsers: 55,
+      nbSongs: 5
+    };
+  },
+
+  componentDidMount: function () {
+    let self = this;
+    self.socket = io('/monitor');
+    
+    self.socket.on('send:statistics', function (stats) {
+      self.setState({nbUsers: stats.nbUsers, nbSongs: stats.nbSongs});
+    });
+  },
+
+  render() {
+    return (
+      <div className="ui two column centered grid" >
+        <div className="column">
+          <div className="ui statistics">
+            <div className="ui statistic">
+              <div className="value">
+                <i className="child icon"> </i> 
+                <a> {this.state.nbUsers}</a>
+              </div>  
+              <div className="label"> Players </div>  
+            </div>
+            <div className="ui statistic">
+              <div className="value"> 
+                <i className="music icon"> </i> 
+                <a> {this.state.nbSongs}</a>
+              </div>  
+              <div className="label"> Songs </div>  
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+});
+
+
 
 const NewsFeed = React.createClass({
   getInitialState: function () {
@@ -72,7 +130,7 @@ const NewsFeed = React.createClass({
 // <NewsEvent event={{type: 'next', points: -5, data: {username: 'Michel', song: 'Recondite'}}} />
 // <NewsEvent event={{type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
 // <NewsEvent event={{type: 'login', points: +10, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
-        
+
 
 
 
@@ -130,42 +188,5 @@ function NewsEvent({event}) {
 
 
 
-function Header(props) {
-  return (
-    <div className="ui center aligned basic segment" >
-      <h2 >
-        <i className="music icon"></i> 
-        Disco Match 
-        <i className="music icon"></i> 
-      </h2>
-      <p className="side-margins">Find a dancer with your song</p>
-      <div className="ui divider"></div>
-    </div>
-   
-  );
-}
 
-function Statistics(props) {
-  return (
-    <div className="ui two column centered grid" >
-      <div className="column">
-        <div className="ui mini statistics">
-          <div className="ui statistic">
-            <div className="value">
-              <i className="child icon"> </i> 
-              <a> 500 </a>
-            </div>  
-            <div className="label"> Players </div>  
-          </div>
-          <div className="ui statistic">
-            <div className="value"> 
-              <i className="music icon"> </i> 
-              <a> 20 </a>
-            </div>  
-            <div className="label"> Songs </div>  
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default Monitor;
