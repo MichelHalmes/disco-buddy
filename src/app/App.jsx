@@ -114,7 +114,7 @@ const App = React.createClass({
 
   render() {
     return (
-      <div className="ui center aligned basic segment" >
+      <div className="ui center aligned basic segment no-margins" >
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
@@ -174,17 +174,17 @@ const AudioPlayer = React.createClass({
     }
 
     return (
-      <div className="ui four column centered grid">
-        <div className="column">
-          <div className="ui horizontal segments">
-            <div className="ui tertiary green inverted center aligned segment">
+      <div className="ui two column centered grid no-margins">
+        <div className="column no-margins">
+          <div className="ui horizontal segments no-margins">
+            <div className="ui tertiary green inverted center aligned segment no-margins">
               {this.state.timeRemaining == -1 ?
                 <i className="big refresh loading icon" ></i> :
                 <i className="big play icon" ></i>          
               }
               <p>{secondsToHuman(this.state.timeRemaining)}</p>
             </div>
-            <div className="ui secondary red inverted center aligned segment" onClick={this.props.handelCodeRequest}>
+            <div className="ui secondary red inverted center aligned segment no-margins" onClick={this.props.handelCodeRequest}>
               <i className="big forward icon"></i>
               <p>Next</p>
             </div>
@@ -238,16 +238,16 @@ const CodeArea = React.createClass({
 
   render() {
     return (
-    <div className="ui centered grid">
-      <div className="ui twelve wide column center aligned raised segment">
-        <p>Give your code to a match </p>
+    <div className="ui centered grid no-margins">
+      <div className="ui twelve wide column center aligned raised segment no-margins">
+        <div>Give your code to a match </div>
         <div className="ui black button">
           <i className="exchange icon"></i> {this.props.code || '????'}
         </div>
-        <div className="ui horizontal divider">
+        <div className="ui horizontal divider no-margins">
           Or
         </div>
-        <p>Enter code of match</p>
+        <div>Enter code of match</div>
         <div className="ui left icon action input">
           <i className="exchange icon"></i>
           <input type="number" 
@@ -398,7 +398,7 @@ const ModalSetUser = React.createClass({
 
 function Points(props) {
   return (
-    <div className="ui center aligned basic segment">
+    <div className="ui center aligned basic segment no-margins">
       <div className="ui labeled button" tabIndex="0">
         <div className="ui basic blue button">
            {props.username}
@@ -415,14 +415,14 @@ function Points(props) {
 
 function Header(props) {
   return (
-    <div id="main">
-      <h2 >
+    <div >
+      <h2 className="no-margins">
         <i className="music icon"></i> 
         Disco Match 
         <i className="music icon"></i> 
       </h2>
-      <p className="side-margins">Find a dancer with your song</p>
-      <div className="ui divider"></div>
+      <div className="">Find a dancer with your song</div>
+      <div className="ui divider no-margins"></div>
     </div>  
     );
 }

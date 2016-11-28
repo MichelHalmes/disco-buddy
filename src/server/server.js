@@ -73,7 +73,7 @@ setInterval(function(){
   let now = Date.now();
   SA.removeWhere((obj) => now - obj.meta.created > CONFIG.SECONDS_TO_PLAY * 1000 * 1.5);
 
-  let nbUsers = SA.data.lenth;
+  let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
   let ranking = SA.eqJoin(USR.data, 'username', 'username', 
@@ -206,7 +206,9 @@ app.get('/api/code', (req, res) => {
 
 app.get('/api/song/:code', (req, res) => {
   let code = req.params.code;
+  console.time('someFunction');
   let allocation = SA.findOne({code});
+  console.timeEnd('someFunction');
 
   if (allocation) {
     let songFile = SONGS[allocation.songIdx] + '.mp3';
