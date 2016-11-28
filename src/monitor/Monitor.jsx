@@ -43,8 +43,8 @@ function Header(props) {
 const Statistics = React.createClass({
   getInitialState: function () {
     return {
-      nbUsers: 55,
-      nbSongs: 5
+      nbUsers: 0,
+      nbSongs: 0
     };
   },
 
@@ -53,7 +53,8 @@ const Statistics = React.createClass({
     self.socket = io('/monitor');
     
     self.socket.on('send:statistics', function (stats) {
-      self.setState({nbUsers: stats.nbUsers, nbSongs: stats.nbSongs});
+      stats.nbUsers && self.setState({nbUsers: stats.nbUsers});
+      stats.nbSongs && self.setState({nbSongs: stats.nbSongs});
     });
   },
 

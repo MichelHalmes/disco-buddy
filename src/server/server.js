@@ -35,11 +35,13 @@ const SONGS = shuffle(
 
 // SETUP WORK DB ++++++++++++++++++++++++++++++++++++
 const loki = require('lokijs');
-let DB = new loki('./loki.json');
+let DB = new loki('./loki.json', {verbose: true, autosave: true, autosaveInterval: 60000});
 
-let SA = DB.addCollection('SongAllocations', {unique: ['code', 'username']});
-let LOG = DB.addCollection('Logs');
-let USR = DB.addCollection('Users', {unique: ['username']});
+let USR = DB.addCollection('Users', {unique: ['username'], indices: ['username']});
+let SA = DB.addCollection('SongAllocations', 
+  {unique: ['code', 'username'], indices: ['username']});
+let LOG = DB.addCollection('Logs', {indices: ['username']});
+
 
 
 // SOCKETS ++++++++++++++++++++++++++++++++++++
@@ -71,8 +73,14 @@ monitorSocket.on('connection', function(socket){
 });
 
 setInterval(function(){
-  console.log('Ssend:stats');
-  monitorSocket.emit('send:statistics', {nbUsers: 3, nbSongs: 5});
+  let now = Date.now();
+  SA.removeWhere((obj) => now - obj.meta.created < 8*1000);
+
+  let nbUsers = SA.data.lenth;
+  monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
+
+  
+
 }, 4000);
 
 
@@ -141,31 +149,33 @@ app.get('/api/code', (req, res) => {
   code = '000' + code.toString();
   code = code.slice(-4);
 
-  let songsPlayed = SA.find({}).map((sa) => sa.songIdx);
+  let saSongIdxAll = SA.find({}).map((sa) => sa.songIdx);
   let songCounts = {};
-  songsPlayed.forEach(function (songIdx) {
+  saSongIdxAll.forEach(function (songIdx) {
     songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
   });
 
-  let songIdxUser = LOG.find({username}).map((log) => log.songIdx);
-  console.log(songIdxUser);
+  let logSongIdxUser = LOG.find({username}).map((log) => log.songIdx);
 
   let songIdxBest; 
   Object.keys(songCounts).forEach(function (songIdx) {
     songIdx = parseInt(songIdx)
     if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest]) 
-      && songIdxUser.indexOf(songIdx) == -1) {
+      && logSongIdxUser.indexOf(songIdx) == -1) {
         songIdxBest = songIdx;
     }
   });
 
-  let nbPlayers = songsPlayed.length;
+  let nbUsers = saSongIdxAll.length;
+  let nbSongs = Object.keys(songCounts).length;
   if (songIdxBest == undefined) { // The player has heard everything
-    let lastSongUser = songIdxUser.length ? Math.max(... songIdxUser): -1;
-    songIdxBest = (lastSongUser + 1) % SONGS.length;; 
-  } else if (nbPlayers != 1 && (songCounts[songIdxBest]-1) / (nbPlayers - 1) > MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
+    let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
+    songIdxBest = (lastSongUser + 1) % SONGS.length;
+    nbSongs += 1; 
+  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
-    nextSongIdx = (nextSongIdx + 1) % SONGS.length; 
+    nextSongIdx = (nextSongIdx + 1) % SONGS.length;
+    nbSongs += 1; 
   }
   
   let previousAllocation = SA.findOne({username});
@@ -173,6 +183,8 @@ app.get('/api/code', (req, res) => {
     SA.remove(previousAllocation);
     usr.points -= 5;
     USR.update(usr);
+  } else { // This is a new user, that was not yet in SA
+    nbUsers += 1; 
   }
   SA.insert({code, songIdx: songIdxBest, username});
   LOG.insert({songIdx: songIdxBest, username});
@@ -180,6 +192,8 @@ app.get('/api/code', (req, res) => {
   res.json({code, points: usr.points});
 
   console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
+
+  monitorSocket.emit('send:statistics', {nbUsers: nbUsers , nbSongs: nbSongs});
 });
 
 
