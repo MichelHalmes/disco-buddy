@@ -2,9 +2,6 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
 
-
-const SONG_FOLDER = path.join(__dirname, '../../songs');
-
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
@@ -13,6 +10,9 @@ app.set('port', (process.env.PORT || 4000));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+const SONG_FOLDER = path.join(__dirname, '../../songs');
+const CONFIG  = require('../../config.json');
 
 
 // GET SONG NAME ++++++++++++++++++++++++++++++++++++
@@ -35,7 +35,7 @@ const SONGS = shuffle(
 
 // SETUP WORK DB ++++++++++++++++++++++++++++++++++++
 const loki = require('lokijs');
-let DB = new loki('./loki.json', {verbose: true, autosave: true, autosaveInterval: 60000});
+let DB = new loki('./loki.json', {verbose: false, autosave: true, autosaveInterval: 60000});
 
 let USR = DB.addCollection('Users', {unique: ['username'], indices: ['username']});
 let SA = DB.addCollection('SongAllocations', 
@@ -68,20 +68,17 @@ io.on('connection', function (socket) {
 });
 
 let monitorSocket = io.of('/monitor');
-monitorSocket.on('connection', function(socket){
-  console.log('Someone is monitoring!');
-});
 
 setInterval(function(){
   let now = Date.now();
-  // SA.removeWhere((obj) => now - obj.meta.created < 8*1000);
+  SA.removeWhere((obj) => now - obj.meta.created > CONFIG.SECONDS_TO_PLAY * 1000 * 1.5);
 
   let nbUsers = SA.data.lenth;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
-  let ranking = SA.eqJoin(USR.data, 'username', 'username')
-    .data().map(function(usr) {return {username: usr.right.username, points: usr.right.points}; })
-    .sort((a,b) => Math.sign(b.points - a.points));
+  let ranking = SA.eqJoin(USR.data, 'username', 'username', 
+      (left,right) => ({username: right.username, points: right.points}))
+    .simplesort('points', true).data();
 
   monitorSocket.emit('send:ranking', ranking);
 
@@ -111,7 +108,6 @@ app.post('/api/login', (req, res) => {
 // GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
-const MIN_PROBA_MATCH = 0.5;
 
 USR.insert({username: 'michel', email: '', points: 9, socketId: undefined});
 USR.insert({username: 'a', email: '', points: 10});
@@ -175,23 +171,23 @@ app.get('/api/code', (req, res) => {
     }
   });
 
+
   let nbUsers = saSongIdxAll.length;
-  let nbSongs = Object.keys(songCounts).length;
   if (songIdxBest == undefined) { // The player has heard everything
     let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
     songIdxBest = (lastSongUser + 1) % SONGS.length;
-    nbSongs += 1; 
-  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
+  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > CONFIG.MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
-    nbSongs += 1; 
   }
   
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
+    if (Date.now() - previousAllocation.meta.created < 0.98 * 1000 * CONFIG.SECONDS_TO_PLAY) {
+      usr.points -= 5;
+      USR.update(usr);
+    } 
     SA.remove(previousAllocation);
-    usr.points -= 5;
-    USR.update(usr);
   } else { // This is a new user, that was not yet in SA
     nbUsers += 1; 
   }
@@ -202,7 +198,7 @@ app.get('/api/code', (req, res) => {
 
   console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
 
-  monitorSocket.emit('send:statistics', {nbUsers: nbUsers , nbSongs: nbSongs});
+  monitorSocket.emit('send:statistics', {nbUsers: nbUsers , nbSongs: Object.keys(songCounts).length});
 });
 
 

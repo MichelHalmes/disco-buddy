@@ -3,6 +3,8 @@ import isEmail from 'validator/lib/isEmail';
 import Client from './client.js';
 import './App.css';
 
+const CONFIG  = require('../../config.json');
+
 import io from 'socket.io-client';
 
 
@@ -125,7 +127,6 @@ const App = React.createClass({
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-const SECONDS_TO_PLAY = 60;
 
 const AudioPlayer = React.createClass({
   getInitialState: function () {
@@ -149,8 +150,8 @@ const AudioPlayer = React.createClass({
   updateTrackTime: function (event){
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
-    if (timePlayed < SECONDS_TO_PLAY) {
-      this.setState({timeRemaining: SECONDS_TO_PLAY - timePlayed});
+    if (timePlayed < CONFIG.SECONDS_TO_PLAY) {
+      this.setState({timeRemaining: CONFIG.SECONDS_TO_PLAY - timePlayed});
     } else {
       this.props.handelCodeRequest();
       this.props.pushMessage(`Time's up!`);        
