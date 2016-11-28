@@ -74,12 +74,16 @@ monitorSocket.on('connection', function(socket){
 
 setInterval(function(){
   let now = Date.now();
-  SA.removeWhere((obj) => now - obj.meta.created < 8*1000);
+  // SA.removeWhere((obj) => now - obj.meta.created < 8*1000);
 
   let nbUsers = SA.data.lenth;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
-  
+  let ranking = SA.eqJoin(USR.data, 'username', 'username')
+    .data().map(function(usr) {return {username: usr.right.username, points: usr.right.points}; })
+    .sort((a,b) => Math.sign(b.points - a.points));
+
+  monitorSocket.emit('send:ranking', ranking);
 
 }, 4000);
 
@@ -109,10 +113,11 @@ let nextCode = 1;
 let nextSongIdx = 0;
 const MIN_PROBA_MATCH = 0.5;
 
-USR.insert({username: 'michel', email: '', points: 0, socketId: undefined});
-USR.insert({username: 'a', email: '', points: 0});
-USR.insert({username: 'b', email: '', points: 0});
-USR.insert({username: 'c', email: '', points: 0});
+USR.insert({username: 'michel', email: '', points: 9, socketId: undefined});
+USR.insert({username: 'a', email: '', points: 10});
+USR.insert({username: 'b', email: '', points: 30});
+USR.insert({username: 'c', email: '', points: -5});
+USR.insert({username: 'd', email: '', points: 20});
 
 // LOG.insert({username: 'michel', songIdx: '0'});
 // LOG.insert({username: 'michel', songIdx: '0'});
@@ -122,6 +127,10 @@ SA.insert({code: '0002', songIdx: 0, username: 'c'});
 SA.insert({code: '0003', songIdx: 0, username: 'd'});
 nextCode = 4;
 nextSongIdx = 2;
+
+
+
+
 
 // function sleep(milliseconds) {
 //     var start = new Date().getTime();

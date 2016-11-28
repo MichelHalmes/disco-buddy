@@ -2,6 +2,7 @@ import React from 'react';
 import Client from './client.js';
 
 import io from 'socket.io-client';
+import './Monitor.css';
 
 
 import { Modal, Popup, Grid} from 'semantic-ui-react'
@@ -84,93 +85,49 @@ const Statistics = React.createClass({
   }
 });
 
-import * as d3 from "d3";
-import nv from 'nvd3';
-
 
 const Ranking = React.createClass({
   getInitialState: function () {
     return {
-      data: [{Peter: 50}, {john: 30}, {Mike:3}]
+      ranking: [{username: '', points: 0}]
     };
   },
 
+  componentDidMount: function () {
+    let self = this;
+
+    self.socket = io('/monitor');
+    
+    self.socket.on('send:ranking', function (ranking) {
+      self.setState({ranking: ranking});
+    });
+  },
 
   render() {
-    console.log(nv.models)
-    let data =   
-  [{
-    "key": "Series1",
-    "color": "#d62728",
-    "values": [
-      { 
-        "label" : "Group A" ,
-        "value" : -1.8746444827653
-      } , 
-      { 
-        "label" : "Group B" ,
-        "value" : -8.0961543492239
-      } , 
-      { 
-        "label" : "Group C" ,
-        "value" : -0.57072943117674
-      } , 
-      { 
-        "label" : "Group D" ,
-        "value" : -2.4174010336624
-      } , 
-      {
-        "label" : "Group E" ,
-        "value" : -0.72009071426284
-      } , 
-      { 
-        "label" : "Group F" ,
-        "value" : -0.77154485523777
-      } , 
-      { 
-        "label" : "Group G" ,
-        "value" : -0.90152097798131
-      } , 
-      {
-        "label" : "Group H" ,
-        "value" : -0.91445417330854
-      } , 
-      { 
-        "label" : "Group I" ,
-        "value" : -0.055746319141851
-      }
-    ]
-  }
-]
-
-      nv.addGraph(function() {
-         var chart = nv.models.multiBarHorizontalChart()
-      .x(function(d) { return d.label })
-      .y(function(d) { return d.value })
-      .margin({top: 30, right: 20, bottom: 50, left: 175})
-      .showControls(false);
-
-  chart.yAxis
-      .tickFormat(d3.format(',.2f'));
-
-  d3.select('#chart svg')
-      .datum(data)
-    .transition().duration(500)
-      .call(chart);
-
-  nv.utils.windowResize(chart.update);
-
-        return chart;
-      });
-    
     return (
-      <div id="chart">
-        <svg></svg>
+      <div className="ui four column grid">
+      {this.state.ranking.map((usr, i) => <RankingItem {...usr} rank={i+1} key={i} />)}  
       </div>
-
     );
   }
 });
+
+
+function RankingItem(props) {
+  return (
+    <div className="column">
+      <div className="large item">
+        <span className="">
+          <strong style={{fontSize: '150%'}}># {props.rank} </strong>
+        </span>
+        <span className="content top aligned ">
+          <a className="header" style={{verticalAlign:'top'}}>{props.username}</a>
+          <div>({props.points} points)</div>
+        </span> 
+      </div>
+    </div>
+  );
+}
 
 
 
