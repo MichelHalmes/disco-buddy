@@ -24,6 +24,7 @@ for filename in listdir(SONG_FOLDER):
         continue
     print "Shrinking: ", filename
     segment = AudioSegment.from_mp3(path.join(SONG_FOLDER, filename))
+    # If this fails, it's because ffmpeg is not installed
     idx_start = CUT_START * 1000
     idx_end = (CUT_START + CUT_DURATION) * 1000
     segment = segment[idx_start:idx_end].fade_in(2000).fade_out(3000)

@@ -26,7 +26,7 @@ function shuffle(a) {
 
 let SONGS;
 let exec = require('child_process').exec;
-let child = exec(`python shrink.py --duration ${CONFIG.SECONDS_TO_PLAY+1}`);
+let child = exec(`python shrink.py --duration ${CONFIG.SECONDS_TO_PLAY+1}`, {cwd: __dirname});
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
