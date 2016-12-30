@@ -375,7 +375,7 @@ const ModalSetUser = React.createClass({
             <div className="field">
               <label>Email address</label>
               <input name="email" placeholder="Email" value={this.state.fields.email} onChange={this.onInputChange}/>
-              <p>Promise, we won't spam you or give your email to anyone else. This is only for us to </p>
+              <p>Promise, we won't spam you or give your email to anyone else. This is only for us to send you pictures and information about the event!</p>
             </div>
             <div className="ui error message " >
               <div className="header">Invalid input</div>
