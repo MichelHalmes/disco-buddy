@@ -11,7 +11,7 @@ app.set('port', (process.env.PORT || 4000));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
-const SONG_FOLDER = path.join(__dirname, '../../songs');
+const SONG_FOLDER = path.join(__dirname, '../../songs/shrink');
 const CONFIG  = require('../../config.json');
 
 
@@ -24,13 +24,25 @@ function shuffle(a) {
   return a;
 }
 
-const SONGS = shuffle(
+let SONGS;
+let exec = require('child_process').exec;
+let child = exec('python shrink.py');
+child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
+child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
+child.on('close', function(code) {
+  SONGS = shuffle(
                 fs.readdirSync(SONG_FOLDER)
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
+  http.listen(app.get('port'), () => {
+    console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
+  });
+});
 
-              
+
+
+
 
 
 // SETUP WORK DB ++++++++++++++++++++++++++++++++++++
@@ -76,11 +88,9 @@ setInterval(function(){
   let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
-  console.time('rank');
   let ranking = SA.eqJoin(USR.data, 'username', 'username', 
       (left,right) => ({username: right.username, points: right.points}))
     .simplesort('points', true).data();
-  console.timeEnd('rank');
 
   monitorSocket.emit('send:ranking', ranking);
 
@@ -299,6 +309,4 @@ process.on('SIGTERM', function () {
   app.close();
 });
 
-http.listen(app.get('port'), () => {
-  console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
-});
+
