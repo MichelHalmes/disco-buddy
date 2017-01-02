@@ -4,14 +4,15 @@ import io from 'socket.io-client';
 import './Monitor.css';
 
 
-import { Modal, Popup, Grid} from 'semantic-ui-react'
+
+const CONFIG  = require('../../config.json');
 
 
 const Monitor = React.createClass({
   render() {
     return (
       
-        <div className="ui two column internally celled grid">
+        <div className="ui two column internally celled grid full-window-height">
           <div className="column">
             <Header/>
             <Statistics />
@@ -53,8 +54,10 @@ const Statistics = React.createClass({
     self.socket = io('/monitor');
     
     self.socket.on('send:statistics', function (stats) {
-      stats.nbUsers && self.setState({nbUsers: stats.nbUsers});
-      stats.nbSongs && self.setState({nbSongs: stats.nbSongs});
+      // eslint-disable-next-line
+      stats.nbUsers && self.setState({nbUsers: stats.nbUsers})
+      // eslint-disable-next-line
+      stats.nbSongs && self.setState({nbSongs: stats.nbSongs})
     });
   },
 
@@ -142,7 +145,9 @@ const NewsFeed = React.createClass({
        + Exchange codes to gain points (One exchange is enough for both of you)
        + Keep playing!`;
     return {
-      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Match', message: initalMessage}}]
+      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Match', message: initalMessage}},
+      {type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}},
+      {type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}]
     };
   },
 
@@ -150,12 +155,16 @@ const NewsFeed = React.createClass({
     let self = this;
 
     self.socket = io('/monitor');
+    self.socket.on('connect', () => {console.log('connect')});
+    self.socket.on('connection', () => {console.log('connection')});
     
     self.socket.on('send:newsEvent', function (event) {
+      console.log(event);
       let events = self.state.newsEvents;
       events.push(event);
-      if (events.length > 3) {
-        events.swift()
+      if (events.length > CONFIG.MAX_NEWS_EVENTS) {
+        events.shift();
+        console.log(events);
       }
       self.setState({newsEvents: events});
     });
@@ -164,7 +173,7 @@ const NewsFeed = React.createClass({
   render() {
 
     return (
-      <div className="ui feed" >
+      <div className="ui feed chat">
         {this.state.newsEvents.map((evt, i) => <NewsEvent event={evt} key={i}/>)}
       </div> 
     );
@@ -175,9 +184,6 @@ const NewsFeed = React.createClass({
 // <NewsEvent event={{type: 'next', points: -5, data: {username: 'Michel', song: 'Recondite'}}} />
 // <NewsEvent event={{type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
 // <NewsEvent event={{type: 'login', points: +10, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
-
-
-
 
 
 function NewsEvent({event}) {
@@ -211,6 +217,8 @@ function NewsEvent({event}) {
           <div>
             <a>{data.username}</a> joined. Welcome!
           </div>);
+      default:
+        throw new Error('Unrecognized event type: ' + event.type);
     }
   }
   

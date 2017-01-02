@@ -8,7 +8,7 @@ const CONFIG  = require('../../config.json');
 import io from 'socket.io-client';
 
 
-import { Modal, Popup, Grid} from 'semantic-ui-react'
+import { Modal, Popup} from 'semantic-ui-react'
 
 
 const App = React.createClass({
@@ -58,6 +58,7 @@ const App = React.createClass({
         return true;
       })
       .catch(function (error) {
+        // eslint-disable-next-line
         if (error.response.status == 403) { // username already exists!
           return false;
         } else {
@@ -103,6 +104,7 @@ const App = React.createClass({
   },
 
   catchLoginError: function (error) {
+    // eslint-disable-next-line
     if (error.response && error.response.status == 401) { // username not found
       this.setState({username: undefined});
       localStorage.removeItem('username')
@@ -149,6 +151,7 @@ const AudioPlayer = React.createClass({
   },
 
   updateTrackTime: function (event){
+    // eslint-disable-next-line
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
     if (timePlayed < CONFIG.SECONDS_TO_PLAY) {
@@ -179,7 +182,7 @@ const AudioPlayer = React.createClass({
         <div className="column no-margins">
           <div className="ui horizontal segments no-margins">
             <div className="ui tertiary green inverted center aligned segment no-margins">
-              {this.state.timeRemaining == -1 ?
+              {this.state.timeRemaining === -1 ?
                 <i className="big refresh loading icon" ></i> :
                 <i className="big play icon" ></i>          
               }
@@ -339,7 +342,7 @@ const ModalSetUser = React.createClass({
     const person = this.state.fields;
     const fieldErrors = this.validate(person);
     this.setState({ fieldErrors });
-    evt.preventDefault();
+    // evt.preventDefault();
 
     document.getElementById('yourAudioTag').play();
 

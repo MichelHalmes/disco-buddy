@@ -1,0 +1,23 @@
+.full-window-height {
+	height: 80vh;
+}
+
+.chat {
+    position: absolute;
+    overflow: hidden;
+    bottom: 5px;
+    flex-direction: column;
+    
+/*    &.active-chat {
+        display: block;
+        display: flex;
+        .bubble {
+            @include transition-timing-function(cubic-bezier(.4,-.04, 1, 1));
+            @for $i from 1 through 10 {
+                &:nth-of-type(#{$i}) {
+                    @include animation-duration(.15s *$i);
+                }
+            }
+        }
+    }*/
+}

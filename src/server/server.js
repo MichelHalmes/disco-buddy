@@ -42,9 +42,6 @@ child.on('close', function(code) {
 
 
 
-
-
-
 // SETUP WORK DB ++++++++++++++++++++++++++++++++++++
 const loki = require('lokijs');
 let DB = new loki('./loki.json', {verbose: false, autosave: true, autosaveInterval: 60000});
@@ -81,7 +78,7 @@ io.on('connection', function (socket) {
 
 let monitorSocket = io.of('/monitor');
 
-setInterval(function(){
+setInterval(function () {
   let now = Date.now();
   SA.removeWhere((obj) => now - obj.meta.created > CONFIG.SECONDS_TO_PLAY * 1000 * 1.5);
 

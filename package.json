@@ -26,7 +26,8 @@
     "validator": "5.1.0"
   },
   "scripts": {
-    "start": "env \"PORT=80\" react-scripts start ",
+    "appW": "env \"PORT=80\" react-scripts start ",
+    "appM": "react-scripts start ",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
