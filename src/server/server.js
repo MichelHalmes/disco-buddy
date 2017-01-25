@@ -10,6 +10,18 @@ app.set('port', (process.env.PORT || 4000));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static('./build'));
+
+app.get('/', function (req, res) {
+  res.sendFile(path.join(__dirname, './build', 'index.html'));
+});
+
+function launch_server() {
+  http.listen(app.get('port'), () => {
+    console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
+  });
+}
+
 
 const SONG_FOLDER = path.join(__dirname, '../../songs/shrink');
 const CONFIG  = require('../../config.json');
@@ -35,9 +47,7 @@ child.on('close', function(code) {
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
-  http.listen(app.get('port'), () => {
-    console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
-  });
+  launch_server();
 });
 
 
