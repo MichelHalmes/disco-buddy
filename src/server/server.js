@@ -12,9 +12,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static('./build'));
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, './build', 'index.html'));
-});
+
 
 function launch_server() {
   http.listen(app.get('port'), () => {
@@ -103,8 +101,14 @@ setInterval(function () {
 
 }, 4000);
 
+// SERVE BUILD ++++++++++++++++++++++++++++++++++++
 
-// POST LOGIN ++++++++++++++++++++++++++++++++++++"
+// app.get('/', function (req, res) {
+//   res.sendFile(path.join(__dirname, './build', 'index.html'));
+// });
+
+
+// POST LOGIN ++++++++++++++++++++++++++++++++++++
 
 app.post('/api/login', (req, res) => {
   let username = req.body.username;

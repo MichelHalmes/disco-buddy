@@ -23,8 +23,10 @@ for filename in listdir(SONG_FOLDER):
     if not filename.endswith(".mp3") or path.exists(path.join(SHRINK_FOLDER, filename)):
         continue
     print "Shrinking: ", filename
+
+    # If this fails, it's because ffmpeg is not installed...
     segment = AudioSegment.from_mp3(path.join(SONG_FOLDER, filename))
-    # If this fails, it's because ffmpeg is not installed
+    
     idx_start = CUT_START * 1000
     idx_end = (CUT_START + CUT_DURATION) * 1000
     segment = segment[idx_start:idx_end].fade_in(2000).fade_out(3000)
