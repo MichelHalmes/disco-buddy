@@ -132,20 +132,20 @@ app.post('/api/login', (req, res) => {
 let nextCode = 1;
 let nextSongIdx = 0;
 
-USR.insert({username: 'michel', email: '', points: 9, socketId: undefined});
-USR.insert({username: 'a', email: '', points: 10});
-USR.insert({username: 'b', email: '', points: 30});
-USR.insert({username: 'c', email: '', points: -5});
-USR.insert({username: 'd', email: '', points: 20});
+// USR.insert({username: 'michel', email: '', points: 9, socketId: undefined});
+// USR.insert({username: 'a', email: '', points: 10});
+// USR.insert({username: 'b', email: '', points: 30});
+// USR.insert({username: 'c', email: '', points: -5});
+// USR.insert({username: 'd', email: '', points: 20});
 
-// LOG.insert({username: 'michel', songIdx: '0'});
-// LOG.insert({username: 'michel', songIdx: '0'});
-SA.insert({code: '0000', songIdx: 1, username: 'a'});
-SA.insert({code: '0001', songIdx: 0, username: 'b'});
-SA.insert({code: '0002', songIdx: 0, username: 'c'});
-SA.insert({code: '0003', songIdx: 0, username: 'd'});
-nextCode = 4;
-nextSongIdx = 2;
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// SA.insert({code: '0000', songIdx: 1, username: 'a'});
+// SA.insert({code: '0001', songIdx: 0, username: 'b'});
+// SA.insert({code: '0002', songIdx: 0, username: 'c'});
+// SA.insert({code: '0003', songIdx: 0, username: 'd'});
+// nextCode = 4;
+// nextSongIdx = 2;
 
 
 

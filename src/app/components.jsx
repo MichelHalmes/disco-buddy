@@ -221,7 +221,7 @@ export const ModalSetUser = React.createClass({
     this.setState({ fieldErrors });
     // evt.preventDefault();
 
-    // document.getElementById('yourAudioTag').play();
+    document.getElementById('yourAudioTag').play();
 
     if (Object.keys(fieldErrors).length) return;
 
