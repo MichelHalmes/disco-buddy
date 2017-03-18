@@ -65,9 +65,7 @@ let LOG = DB.addCollection('Logs', {indices: ['username']});
 const io = require('socket.io')(http);
 
 io.on('connection', function (socket) {
-  console.log('connection', socket.id); 
   socket.on('send:username', function (username) {
-    console.log('send:username', username);
     USR.findAndUpdate(
       (usr) => usr.username === username,
       (usr) => usr.socketId = socket.id
@@ -75,8 +73,6 @@ io.on('connection', function (socket) {
   });
 
   socket.on('disconnect', function() {
-    console.log('connection-disconnect', socket.id);
-
     USR.findAndUpdate(
       (usr) => usr.socketId === socket.id,
       (usr) => usr.socketId = undefined
@@ -113,15 +109,12 @@ setInterval(function () {
 app.post('/api/login', (req, res) => {
   let username = req.body.username;
   let email = req.body.email;
-  console.log('/api/login', username, email);
 
   let existingUser = USR.findOne({username});
   if (existingUser) {
-    console.log('/api/login', 'Already exists!');
     res.status(403).send('A user with this username exists already!');
   } else {
     USR.insert({username, email, points: 10});
-    console.log('/api/login', 'OK!')
     res.json({});
     monitorSocket.emit('send:newsEvent', {type: 'login', points: 10, data: {username: username}});
   }
@@ -162,7 +155,6 @@ let nextSongIdx = 0;
 
 
 app.get('/api/code', (req, res) => {
-  console.log('/api/code');
   let username = Buffer.from(req.headers.authorization, 'base64').toString();
 
   let usr = USR.findOne({username});
@@ -273,7 +265,6 @@ app.post('/api/matchcode', (req, res) => {
     usrMatch.points += 50;
     USR.update(usrMatch);
 
-    console.log('/api/matchcode', 'It is a match!');
     res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
 
     let matchSocket = io.sockets.connected[usrMatch.socketId]
@@ -289,7 +280,6 @@ app.post('/api/matchcode', (req, res) => {
       {username: username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
 
   } else {
-    console.log('/api/matchcode', 'Nope, keep trying!');
     res.json({accepted: false, points: usrUser.points});
   }
 });
@@ -299,7 +289,10 @@ app.post('/api/matchcode', (req, res) => {
 app.post('/api/message', (req, res) => {
   let username = req.body.username;
   let message = req.body.message;
-  console.log('/api/message', username, message);
+  if (message.length < 4) {
+    res.status(406).send(`Message must have at least 4 characters!`);
+    return;
+  }
 
   let usr = USR.findOne({username});
   if (usr) {
