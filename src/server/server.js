@@ -87,4 +87,6 @@ process.on('SIGTERM', function () {
   app.close();
 });
 
+module.exports = http;
+
 

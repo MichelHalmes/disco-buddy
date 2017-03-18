@@ -4,7 +4,9 @@
   "private": true,
   "proxy": "http://localhost:4000",
   "devDependencies": {
-    "react-scripts": "0.6.1"
+    "react-scripts": "0.6.1",
+    "mocha": "^3.2.0",
+        "sinon": "^2.0.0"
   },
   "babel": {
     "presets": [
@@ -30,6 +32,7 @@
     "appM": "react-scripts start ",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+    "test_server": "mocha -- src/server/test_api.js",
     "eject": "react-scripts eject",
     "server": "nodemon src/server/server.js --watch src/server/"
   }

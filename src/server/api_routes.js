@@ -1,5 +1,5 @@
 const path = require('path');
-const fs = require('fs');
+var fs = require('fs');
 
 const CONFIG  = require('../../config.js');
 
@@ -22,7 +22,10 @@ child.on('close', function(code) {
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
+  console.log(SONGS);
 });
+
+
 
 
 
