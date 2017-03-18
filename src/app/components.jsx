@@ -5,7 +5,7 @@ import isEmail from 'validator/lib/isEmail';
 import Client from './client.js';
 
 
-const CONFIG  = require('../../config.json');
+const CONFIG  = require('../../config.js');
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 export const AudioPlayer = React.createClass({

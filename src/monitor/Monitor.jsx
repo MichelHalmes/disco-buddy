@@ -5,7 +5,7 @@ import './Monitor.css';
 
 
 
-const CONFIG  = require('../../config.json');
+const CONFIG  = require('../../config.js');
 
 
 const Monitor = React.createClass({
@@ -15,6 +15,7 @@ const Monitor = React.createClass({
         <div className="ui two column internally celled grid full-window-height">
           <div className="column">
             <Header/>
+            <Guide />
             <Statistics />
             <Ranking />
           </div>
@@ -26,6 +27,36 @@ const Monitor = React.createClass({
   }
 });
 
+function Guide(props) {
+  return (
+    <div className="ui two column centered grid" >
+      <div className="column">
+        <h1 className="ui ordered list">
+          <GuideItem icon="wifi" text="Connect your phone to the Wifi 'DISCO-MATCH'" />
+          <GuideItem icon="signal" text="Switch off your mobile-data" />
+          <GuideItem icon="chrome" text="Visit 'disco-match.me' with your browser" />
+          <GuideItem icon="volume up" text="Plug some headphones" />
+          <GuideItem icon="exchange" text="Find players with the same song and exchange a code" />
+          <GuideItem icon="comment" text="Gain points, have fun, be lekker...  and tweet" />
+        </h1>
+      </div>
+    </div>
+   
+  );
+}
+
+function GuideItem(props) {
+  return (
+    <div className="item">
+      <i className={`large ${props.icon} icon`}></i> 
+      <div className="content">
+        {props.text}
+      </div>
+    </div>
+  );
+}
+
+
 function Header(props) {
   return (
     <div className="ui center aligned basic segment" >
@@ -34,7 +65,7 @@ function Header(props) {
         Disco Match 
         <i className="music icon"></i> 
       </h2>
-      <p className="side-margins">Find a dancer with your song</p>
+      <p className="side-margins">Find a dancer with your song!</p>
       <div className="ui divider"></div>
     </div>
    
@@ -145,9 +176,7 @@ const NewsFeed = React.createClass({
        + Exchange codes to gain points (One exchange is enough for both of you)
        + Keep playing!`;
     return {
-      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Match', message: initalMessage}},
-      {type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}},
-      {type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}]
+      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Match', message: initalMessage}}]
     };
   },
 

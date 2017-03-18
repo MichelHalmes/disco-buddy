@@ -22,7 +22,6 @@ child.on('close', function(code) {
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
-  console.log(SONGS);
 });
 
 
