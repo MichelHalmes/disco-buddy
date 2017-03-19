@@ -31,8 +31,8 @@ export const AudioPlayer = React.createClass({
     // eslint-disable-next-line
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
-    if (timePlayed < CONFIG.SECONDS_TO_PLAY) {
-      this.setState({timeRemaining: CONFIG.SECONDS_TO_PLAY - timePlayed});
+    if (timePlayed < CONFIG.TIME_TO_PLAY_S) {
+      this.setState({timeRemaining: CONFIG.TIME_TO_PLAY_S - timePlayed});
     } else {
       this.props.handelCodeRequest();
       this.props.pushMessage(`Time's up!`);        

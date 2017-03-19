@@ -13,7 +13,7 @@ function shuffle(a) {
 
 let SONGS;
 let exec = require('child_process').exec;
-let child = exec(`python shrink.py --duration ${CONFIG.SECONDS_TO_PLAY+1}`, {cwd: __dirname});
+let child = exec(`python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+1}`, {cwd: __dirname});
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
@@ -124,7 +124,7 @@ app.get('/api/code', (req, res) => {
   
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
-    if (Date.now() - previousAllocation.meta.created < 0.98 * 1000 * CONFIG.SECONDS_TO_PLAY) {
+    if (Date.now() - previousAllocation.meta.created < 0.98 * 1000 * CONFIG.TIME_TO_PLAY_S) {
       usr.points -= 5;
       USR.update(usr);
     } 

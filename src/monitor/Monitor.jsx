@@ -11,11 +11,12 @@ const CONFIG  = require('../../config.js');
 const Monitor = React.createClass({
   render() {
     return (
-      
         <div className="ui two column internally celled grid full-window-height">
           <div className="column">
             <Header/>
+            <div className="ui divider"></div>
             <Guide />
+            <div className="ui divider"></div>
             <Statistics />
             <Ranking />
           </div>
@@ -27,19 +28,38 @@ const Monitor = React.createClass({
   }
 });
 
+function Header(props) {
+  return (
+    <div className="ui center aligned basic segment no-margins" >
+      <h2 >
+        <i className="music icon"></i> 
+        Disco Match 
+        <i className="music icon"></i> 
+      </h2>
+      <p className="no-margins-paddings">A gamification of Silent Disco...</p>
+      <p className="no-margins-paddings">Find a dancer with your song!</p>
+    </div>
+   
+  );
+}
+
 function Guide(props) {
   return (
-    <div className="ui two column centered grid" >
-      <div className="column">
-        <h1 className="ui ordered list">
-          <GuideItem icon="wifi" text="Connect your phone to the Wifi 'DISCO-MATCH'" />
-          <GuideItem icon="signal" text="Switch off your mobile-data" />
-          <GuideItem icon="chrome" text="Visit 'disco-match.me' with your browser" />
-          <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text="Find players with the same song and exchange a code" />
-          <GuideItem icon="comment" text="Gain points, have fun, be lekker...  and tweet" />
-        </h1>
+    <div className="ui centered grid" >
+      <div className="two wide column">
       </div>
+      <div className="fourteen wide column">
+        <div className="ui large ordered list">
+          <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
+          <GuideItem icon="signal" text="Switch off your mobile-data" />
+          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
+          <GuideItem icon="volume up" text="Plug some headphones" />
+          <GuideItem icon="exchange" text="Find players with the same song and exchange a code (+50Points)" />
+          <GuideItem icon="forward" text="You can skip song after 1 minute, but you better dance until the end... (+15Points)" />
+          <GuideItem icon="comment" text="Gain points, have fun, be lekker...  and tweet (+1Point)" />
+        </div>
+      </div>
+
     </div>
    
   );
@@ -57,20 +77,7 @@ function GuideItem(props) {
 }
 
 
-function Header(props) {
-  return (
-    <div className="ui center aligned basic segment" >
-      <h2 >
-        <i className="music icon"></i> 
-        Disco Match 
-        <i className="music icon"></i> 
-      </h2>
-      <p className="side-margins">Find a dancer with your song!</p>
-      <div className="ui divider"></div>
-    </div>
-   
-  );
-}
+
 
 const Statistics = React.createClass({
   getInitialState: function () {
@@ -138,7 +145,7 @@ const Ranking = React.createClass({
 
   render() {
     return (
-      <div className="ui four column grid">
+      <div className="ui five column grid">
       {this.state.ranking.map((usr, i) => <RankingItem {...usr} rank={i+1} key={i} />)}  
       </div>
     );
@@ -252,15 +259,15 @@ function NewsEvent({event}) {
   }
   
   return (
-    <div className="event" >
+    <div className="event no-margins" >
       <div className="label" >
         <i className={`big ${EVENT_TYPE_ICON[event.type]} icon`}></i>
       </div> 
-      <div className="content" >
+      <div className="content no-margins-paddings" >
         <div className="summary" >
           {formatSummary(event)}
         </div>
-        <div className="meta" >
+        <div className="meta no-margins-paddings" >
           {event.points} Points 
         </div>
       </div>

@@ -2,11 +2,20 @@
 	height: 90vh;
 }
 
+
+.no-margins-paddings {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding-top: 0pt !important;
+  padding-bottom: 0pt !important;
+}
+
 .chat {
     position: absolute;
     overflow: hidden;
     bottom: 5px;
     flex-direction: column;
+
     
 /*    &.active-chat {
         display: block;

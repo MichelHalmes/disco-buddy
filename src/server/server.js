@@ -51,7 +51,7 @@ let monitorSocket = io.of('/monitor');
 
 setInterval(function () {
   let now = Date.now();
-  SA.removeWhere((obj) => now - obj.meta.created > CONFIG.SECONDS_TO_PLAY * 1000 * 1.5);
+  SA.removeWhere((obj) => now - obj.meta.created > CONFIG.TIME_TO_PLAY_S * 1000 * 1.5);
 
   let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
