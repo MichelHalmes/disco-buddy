@@ -105,28 +105,28 @@ export const AudioPlayer = React.createClass({
 export const CodeArea = React.createClass({
 
   getInitialState() {
-    return {matchCode: '', isValid: false};
+    return {matchCode: '', isValid: true};
   },
 
   onFormSubmit(evt) {
     const matchCode = this.state.matchCode;
     const isValid = this.validate(matchCode);
-    this.setState({isValid});
     // evt.preventDefault();
 
-    if (!isValid) return;
-
-    this.props.onCodeSubmit(matchCode);
-    this.setState({ matchCode: ''});
+    if (isValid) {
+      this.props.onCodeSubmit(matchCode);
+      this.setState({matchCode: ''});
+    } else {
+      this.setState({isValid: false});
+    }
   },
 
   onInputChange(evt) {
-    this.setState({ matchCode: evt.target.value });
+    this.setState({ matchCode: evt.target.value, isValid: true});
   },
 
   validate(matchCode) {
-    parseInt(matchCode, 10);
-    return true;
+    return matchCode && matchCode>=0 && matchCode<=9999;
   },
 
   render() {
@@ -141,13 +141,13 @@ export const CodeArea = React.createClass({
           Or
         </div>
         <div>Enter code of match</div>
-        <div className="ui left icon action input">
+        <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
           <i className="exchange icon"></i>
           <input type="number" 
             placeholder="Code" 
             value={this.state.matchCode} 
             onChange={this.onInputChange} 
-            style={{maxWidth: '100px'}}
+            style={{maxWidth: '110px'}}
             />
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
         </div>
@@ -287,27 +287,32 @@ export const ModalSetUser = React.createClass({
   },
 });
 
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 export const TweetMessage  = React.createClass({
   getInitialState() {
-    return { message: ''};
+    return { message: '', isValid: true};
   },
 
   onFormSubmit(evt) {
-    Client.postMessage(this.props.username, this.state.message);
-    this.setState({ message: '' });
-    // evt.preventDefault();
+    if (this.state.message.length > 3) {
+      Client.postTweet(this.props.username, this.state.message);
+      this.setState({message: '' });
+      // evt.preventDefault();
+    } else {
+      this.setState({isValid: false});
+    }
   },
 
   onInputChange(evt) {
-    this.setState({ message: evt.target.value });
+    this.setState({message: evt.target.value, isValid: true});
   },
 
   render() {
     return (
       <div className="ui center aligned basic segment">
-        <div className="ui left icon action input">
-          <i className="comment icon"></i>
+        <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
+          <i className="talk icon"></i>
           <input type="text" 
             placeholder="Message" 
             value={this.state.message} 

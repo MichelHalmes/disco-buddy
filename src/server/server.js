@@ -64,14 +64,14 @@ setInterval(function () {
 
 }, 4000);
 
-// SERVE BUILD ++++++++++++++++++++++++++++++++++++
-
-// app.get('/', function (req, res) {
-//   res.sendFile(path.join(__dirname, './build', 'index.html'));
-// });
-
 
 require('./api_routes')(app, USR, SA, LOG, monitorSocket);
+
+// SERVE BUILD ++++++++++++++++++++++++++++++++++++
+
+// app.get('/*', function (req, res) {
+//   res.sendFile(path.join(__dirname, './build', 'index.html'));
+// });
 
 http.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console

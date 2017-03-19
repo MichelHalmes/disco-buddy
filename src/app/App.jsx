@@ -17,7 +17,7 @@ const App = React.createClass({
     return {code: undefined, 
       username: username, 
       points: 0,
-      messages: ["Welcome!"],
+      messages: [],
       matchedCurrent: false
     };
   },

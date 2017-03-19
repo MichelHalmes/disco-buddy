@@ -40,9 +40,10 @@ app.post('/api/login', (req, res) => {
   if (existingUser) {
     res.status(403).send('A user with this username exists already!');
   } else {
-    USR.insert({username, email, points: 10});
+    let points = email ? 25 : 0
+    USR.insert({username, email, points});
     res.json({});
-    monitorSocket.emit('send:newsEvent', {type: 'login', points: 10, data: {username: username}});
+    monitorSocket.emit('send:newsEvent', {type: 'login', points, data: {username}});
   }
 });
 
@@ -211,11 +212,11 @@ app.post('/api/matchcode', (req, res) => {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++"
 
-app.post('/api/message', (req, res) => {
+app.post('/api/tweet', (req, res) => {
   let username = req.body.username;
   let message = req.body.message;
-  if (message.length < 4) {
-    res.status(406).send(`Message must have at least 4 characters!`);
+  if (message.length < 2) {
+    res.status(406).send(`Message must have at least 2 characters!`);
     return;
   }
 

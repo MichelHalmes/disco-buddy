@@ -37,9 +37,8 @@ function postMatchCode(username, matchCode) {
     .then(parseJSON);
 }
 
-function postMessage(username, message) {
-  console.log('/api/message', username);
-  return fetch('/api/message', {
+function postTweet(username, message) {
+  return fetch('/api/tweet', {
     method: 'post',
     body: JSON.stringify({username, message}),
     headers: {
@@ -70,5 +69,5 @@ module.exports = {
   postLogin,
   getCode,
   postMatchCode,
-  postMessage
+  postTweet
 };
