@@ -118,6 +118,7 @@ export const CodeArea = React.createClass({
       this.setState({matchCode: ''});
     } else {
       this.setState({isValid: false});
+      this.props.pushMessage(`Bad input!`);
     }
   },
 
@@ -301,6 +302,7 @@ export const TweetMessage  = React.createClass({
       // evt.preventDefault();
     } else {
       this.setState({isValid: false});
+      this.props.pushMessage(`Bad input!`);
     }
   },
 

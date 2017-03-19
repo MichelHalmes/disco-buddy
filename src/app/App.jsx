@@ -118,13 +118,13 @@ const App = React.createClass({
   render() {
     return (
       <div className="ui center aligned basic segment no-margins" >
-        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
+        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} onCodeRequest={this.handelCodeRequest}/>
-        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
-        <TweetMessage username={this.state.username}/>
-        <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
+        <AudioPlayer code={this.state.code} onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} />
+        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} pushMessage={this.pushMessage} />
+        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} />
+        <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />
       </div>
     );
   }
