@@ -10,16 +10,25 @@ const CONFIG  = require('../../config.js');
 
 export const AudioPlayer = React.createClass({
   getInitialState: function () {
-    return {timeRemaining: -1, noAutoplay: true};
+    return {timeRemaining: -1, noAutoplay: true, canClickNext: false};
   },
 
-  playMusic: function () {
+  handleClickPlay: function () {
     this.refs.myAudio.play();
   },
 
-  handlePlay: function () {
+  handlePlayEvent: function () {
     this.setState({noAutoplay: false});
   },
+
+  handleClickNext: function () {
+    if (this.state.canClickNext) {
+      this.props.onCodeRequest();
+    } else {
+      this.props.pushMessage(`Play longer to click next!`);
+    }
+  },
+
 
   componentDidUpdate: function (prevProps, prevState) {
     if (!this.props.code && prevProps.code) {
@@ -32,9 +41,9 @@ export const AudioPlayer = React.createClass({
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
     if (timePlayed < CONFIG.TIME_TO_PLAY_S) {
-      this.setState({timeRemaining: CONFIG.TIME_TO_PLAY_S - timePlayed});
+      this.setState({timeRemaining: CONFIG.TIME_TO_PLAY_S - timePlayed, canClickNext: timePlayed > CONFIG.TIME_TO_NEXT_S});
     } else {
-      this.props.handelCodeRequest();
+      this.props.onCodeRequest();
       this.props.pushMessage(`Time's up!`);        
     } 
   },
@@ -56,29 +65,32 @@ export const AudioPlayer = React.createClass({
 
     return (
       <div className="ui two column centered grid no-margins">
+        <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
+              src={this.props.code && "/api/song/" + this.props.code} 
+              onTimeUpdate={this.updateTrackTime}
+              onPlay={this.handlePlayEvent}/>
+
         <div className="column no-margins">
-          <div className="ui horizontal segments no-margins">
-            <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.playMusic}>
+          <div className="ui horizontal segments button no-margins">
+            <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>
               {this.state.timeRemaining === -1 ?
                 <i className="big refresh loading icon" ></i> :
-                <i className="big play icon" ></i>          
+                <i className="big play icon"></i>          
               }
               <p>{secondsToHuman(this.state.timeRemaining)}</p>
             </div>
-            <div className="ui secondary red inverted center aligned segment no-margins" onClick={this.props.handelCodeRequest}>
+            <div className={"ui secondary inverted center aligned segment no-margins " + (this.state.canClickNext ? "blue" : "grey")}
+              onClick={this.handleClickNext}>
               <i className="big forward icon"></i>
               <p>Next</p>
             </div>
           </div>
         </div>
-         <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
-              src={this.props.code && "/api/song/" + this.props.code} 
-              onTimeUpdate={this.updateTrackTime}
-              onPlay={this.handlePlay}/>
+    
         <Modal open={this.state.noAutoplay && !!this.props.code} >
           <div className="ui center aligned basic segment">
             <h1>You are good to go!</h1>
-            <button className="ui submit button green" onClick={this.playMusic}>
+            <button className="ui submit button green" onClick={this.handleClickPlay}>
               Play music!
             </button>
           </div>
@@ -156,7 +168,9 @@ export const MessagePopup = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
+    console.log('message')
     if (this.props.messages.length === 0 || prevProps.messages === this.props.messages) return;
+    console.log(this.props.messages);
     this.setState({isOpen: true})
 
     clearTimeout(this.timeout);
@@ -167,6 +181,7 @@ export const MessagePopup = React.createClass({
   },
 
   handleClose()  {
+    console.log('close popup')
     this.setState({isOpen: false});
     this.props.onMessagesRead();
     clearTimeout(this.timeout);
@@ -182,8 +197,7 @@ export const MessagePopup = React.createClass({
             on="click"
             onClose={this.handleClose}
             inverted
-            flowing
-          >
+            flowing>
             {this.props.messages.map((msg, i) => <p key={i}>{msg}</p>)}
         </Popup>
       </div>  

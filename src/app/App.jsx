@@ -17,7 +17,8 @@ const App = React.createClass({
     return {code: undefined, 
       username: username, 
       points: 0,
-      messages: []
+      messages: ["Welcome!"],
+      matchedCurrent: false
     };
   },
 
@@ -120,7 +121,7 @@ const App = React.createClass({
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit}/>
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} handelCodeRequest={this.handelCodeRequest}/>
+        <AudioPlayer code={this.state.code} pushMessage={this.pushMessage} onCodeRequest={this.handelCodeRequest}/>
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}/>
         <TweetMessage username={this.state.username}/>
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages}/>
