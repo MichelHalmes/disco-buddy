@@ -28,7 +28,7 @@ child.on('close', function(code) {
 
 
 
-module.exports = function(app, USR, SA, LOG, monitorSocket) {
+module.exports = function(app, USR, SA, LOG, matchSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
 
@@ -125,7 +125,7 @@ app.get('/api/code', (req, res) => {
   
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
-    if (Date.now() - previousAllocation.meta.created > 0.95 * 1000 * CONFIG.TIME_TO_PLAY_S) {
+    if (Date.now() - previousAllocation.meta.created > 0.9 * 1000 * CONFIG.TIME_TO_PLAY_S) {
       usr.points += 15;
       USR.update(usr);
     } 
@@ -140,7 +140,7 @@ app.get('/api/code', (req, res) => {
 
   console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
 
-  monitorSocket.emit('send:statistics', {nbUsers: nbUsers , nbSongs: Object.keys(songCounts).length});
+  monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(songCounts).length});
   console.timeEnd('NewCode');
 });
 
@@ -193,7 +193,7 @@ app.post('/api/matchcode', (req, res) => {
 
     res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
 
-    let matchSocket = io.sockets.connected[usrMatch.socketId]
+    let matchSocket = matchSockets.connected[usrMatch.socketId]
     if (matchSocket) {
       matchSocket.emit('code:match', 
         {username: usrMatch.username, matchUsername: usrUser.username, points: usrMatch.points}

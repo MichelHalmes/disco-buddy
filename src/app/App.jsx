@@ -14,6 +14,7 @@ import './App.css';
 const App = React.createClass({
   getInitialState: function () {
     let username = JSON.parse(localStorage.getItem('username'));
+
     return {code: undefined, 
       username: username, 
       points: 0,
@@ -23,7 +24,7 @@ const App = React.createClass({
   },
 
   componentDidMount: function () {
-    let self = this;
+    let self = this; 
     self.handelCodeRequest();
 
     self.socket = io();
@@ -31,9 +32,8 @@ const App = React.createClass({
     
     self.socket.on('code:match', function ({username, matchUsername, points}) {
       if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
-      self.pushMessage(`You have matched with ${matchUsername}!`);
-      self.setState({points});
-      self.handelCodeRequest();
+      self.setState({points, matchedCurrent: true, 
+        messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
     });
   },
 
@@ -71,26 +71,25 @@ const App = React.createClass({
   handelCodeRequest: function () {
     let self = this;
     self.setState({code: undefined});
-    if (!this.state.username) return Promise.resolve();
-    return Client.getCode(this.state.username)
+    if (!self.state.username) return Promise.resolve();
+    return Client.getCode(self.state.username)
       .then(function(res) {
         self.pushMessage(`New song, new luck...!`);
-        self.setState({code: res.code, points: res.points});
+        self.setState({code: res.code, points: res.points, matchedCurrent: false});
       })
-      .catch(this.catchLoginError);
+      .catch(self.catchLoginError);
   },
 
   handleCodeSubmit: function (matchCode) {
     let self = this;
     return Client.postMatchCode(this.state.username, matchCode)
       .then(function ({accepted, points, matchUsername}) {
-        self.setState({points});
         if (accepted) {
-          self.pushMessage(`You have matched with ${matchUsername}!`);
-          self.handelCodeRequest();
+          self.setState({points, matchedCurrent: true, 
+            messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
           return true;
         } else {
-          self.pushMessage(`Nope, wrong code!`);
+          self.setState({points, messages: self.state.messages.concat([`Nope, wrong code!`]) });
           return false;
         }
       })
@@ -121,7 +120,7 @@ const App = React.createClass({
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <AudioPlayer code={this.state.code} onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} />
+        <AudioPlayer code={this.state.code} allowNext={this.state.matchedCurrent} onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} />
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} pushMessage={this.pushMessage} />
         <TweetMessage username={this.state.username} pushMessage={this.pushMessage} />
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />

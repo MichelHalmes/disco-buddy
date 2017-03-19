@@ -10,7 +10,7 @@ const CONFIG  = require('../../config.js');
 
 export const AudioPlayer = React.createClass({
   getInitialState: function () {
-    return {timeRemaining: -1, noAutoplay: true, canClickNext: false};
+    return {timePlayed: -1, noAutoplay: true};
   },
 
   handleClickPlay: function () {
@@ -22,17 +22,20 @@ export const AudioPlayer = React.createClass({
   },
 
   handleClickNext: function () {
-    if (this.state.canClickNext) {
+    if (this.canClickNext()) {
       this.props.onCodeRequest();
     } else {
       this.props.pushMessage(`Play longer to click next!`);
     }
   },
 
+  canClickNext: function () {
+    return this.state.timePlayed > CONFIG.TIME_TO_NEXT_S || this.props.allowNext;
+  },
 
   componentDidUpdate: function (prevProps, prevState) {
     if (!this.props.code && prevProps.code) {
-      this.setState({timeRemaining: -1});
+      this.setState({timePlayed: -1});
     }
   },
 
@@ -41,7 +44,7 @@ export const AudioPlayer = React.createClass({
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
     let timePlayed = event.nativeEvent.srcElement.currentTime;
     if (timePlayed < CONFIG.TIME_TO_PLAY_S) {
-      this.setState({timeRemaining: CONFIG.TIME_TO_PLAY_S - timePlayed, canClickNext: timePlayed > CONFIG.TIME_TO_NEXT_S});
+      this.setState({timePlayed: timePlayed});
     } else {
       this.props.onCodeRequest();
       this.props.pushMessage(`Time's up!`);        
@@ -73,13 +76,13 @@ export const AudioPlayer = React.createClass({
         <div className="column no-margins">
           <div className="ui horizontal segments button no-margins">
             <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>
-              {this.state.timeRemaining === -1 ?
+              {this.state.timePlayed === -1 ?
                 <i className="big refresh loading icon" ></i> :
                 <i className="big play icon"></i>          
               }
-              <p>{secondsToHuman(this.state.timeRemaining)}</p>
+              <p>{secondsToHuman(CONFIG.TIME_TO_PLAY_S - this.state.timePlayed)}</p>
             </div>
-            <div className={"ui secondary inverted center aligned segment no-margins " + (this.state.canClickNext ? "blue" : "grey")}
+            <div className={"ui secondary inverted center aligned segment no-margins " + (this.canClickNext() ? "blue" : "grey")}
               onClick={this.handleClickNext}>
               <i className="big forward icon"></i>
               <p>Next</p>

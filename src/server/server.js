@@ -65,7 +65,7 @@ setInterval(function () {
 }, 4000);
 
 
-require('./api_routes')(app, USR, SA, LOG, monitorSocket);
+require('./api_routes')(app, USR, SA, LOG, io.sockets, monitorSocket);
 
 // SERVE BUILD ++++++++++++++++++++++++++++++++++++
 
