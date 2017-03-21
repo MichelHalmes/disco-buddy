@@ -227,21 +227,31 @@ export const ModalSetUser = React.createClass({
 
   validate(person) {
     const errors = {};
-    if (!person.username) errors.username = 'Name Required';
-    if (person.email && !isEmail(person.email)) errors.email = 'Invalid Email';
-    return errors;
+    let isValid = true;
+    if (!person.username) {
+      errors.username = 'Name Required';
+      isValid = false;
+    } else if (person.username.length > CONFIG.MAX_NAME_LEN) {
+      errors.username = `Username too long for our screen (max: ${CONFIG.MAX_NAME_LEN})!`;
+      isValid = false;
+    }
+    if (person.email && !isEmail(person.email)) {
+      errors.email = 'Invalid Email';
+      isValid = false;
+    }
+    console.log(errors, CONFIG.MAX_NAME_LEN);
+    this.setState({fieldErrors: errors});
+    return isValid;
   },
 
   handleFormSubmit(evt) {
+    document.getElementById('yourAudioTag').play(); //Force play as autoplay is not allowed on mobile
     let self = this;
     const person = this.state.fields;
-    const fieldErrors = this.validate(person);
-    this.setState({ fieldErrors });
+    const isValid = this.validate(person);
     // evt.preventDefault();
 
-    document.getElementById('yourAudioTag').play();
-
-    if (Object.keys(fieldErrors).length) return;
+    if (!isValid) return;
 
     this.props.onLoginSubmit(person.username, person.email)
       .then(function (isOk){

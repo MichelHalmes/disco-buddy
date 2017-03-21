@@ -10,5 +10,6 @@ module.exports = {
 	POINTS_SONG_END: 5,
 	POINTS_TWEET: 1,
 	MAX_NEWS_EVENTS: 15,
+	MAX_NAME_LEN: 12,
 	SONG_FOLDER: path.join(__dirname, './songs/shrink')
 }

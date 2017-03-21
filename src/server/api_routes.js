@@ -26,8 +26,6 @@ child.on('close', function(code) {
 
 
 
-
-
 module.exports = function(app, USR, SA, LOG, matchSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
@@ -215,10 +213,7 @@ app.post('/api/matchcode', (req, res) => {
 app.post('/api/tweet', (req, res) => {
   let username = req.body.username;
   let message = req.body.message;
-  if (message.length < 2) {
-    res.status(406).send(`Message must have at least 2 characters!`);
-    return;
-  }
+
 
   let usr = USR.findOne({username});
   if (usr) {
