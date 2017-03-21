@@ -52,8 +52,8 @@ const App = React.createClass({
   handleLoginSubmit: function (username, email) {
     let self = this;
     return Client.postLogin(username, email)
-      .then(function () {
-        self.setState({username});
+      .then(function (res) {
+        self.setState({username, points: res.points});
         localStorage.setItem('username', JSON.stringify(username));
         self.handelCodeRequest();
         return true;

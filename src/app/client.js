@@ -10,7 +10,8 @@ function postLogin(username, email) {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
-  }).then(checkStatus);
+  }).then(checkStatus)
+    .then(parseJSON);
 }
 
 function getCode(username) {

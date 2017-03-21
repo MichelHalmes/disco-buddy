@@ -40,9 +40,9 @@ app.post('/api/login', (req, res) => {
   if (existingUser) {
     res.status(403).send('A user with this username exists already!');
   } else {
-    let points = email ? 25 : 0
+    let points = email ? CONFIG.POINTS_EMAIL : 0
     USR.insert({username, email, points});
-    res.json({});
+    res.json({points});
     monitorSocket.emit('send:newsEvent', {type: 'login', points, data: {username}});
   }
 });
@@ -51,20 +51,20 @@ app.post('/api/login', (req, res) => {
 let nextCode = 1;
 let nextSongIdx = 0;
 
-// USR.insert({username: 'michel', email: '', points: 9, socketId: undefined});
-// USR.insert({username: 'a', email: '', points: 10});
-// USR.insert({username: 'b', email: '', points: 30});
-// USR.insert({username: 'c', email: '', points: -5});
-// USR.insert({username: 'd', email: '', points: 20});
+USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
+USR.insert({username: 'Mary', email: '', points: 10});
+USR.insert({username: 'Kate', email: '', points: 30});
+USR.insert({username: 'Peter', email: '', points: -5});
+USR.insert({username: 'John', email: '', points: 20});
 
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// SA.insert({code: '0000', songIdx: 1, username: 'a'});
-// SA.insert({code: '0001', songIdx: 0, username: 'b'});
-// SA.insert({code: '0002', songIdx: 0, username: 'c'});
-// SA.insert({code: '0003', songIdx: 0, username: 'd'});
-// nextCode = 4;
-// nextSongIdx = 2;
+// LOG.insert({username: 'michel', songIdx: '0'});
+// LOG.insert({username: 'michel', songIdx: '0'});
+SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
+SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
+SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
+SA.insert({code: '0003', songIdx: 0, username: 'John'});
+nextCode = 4;
+nextSongIdx = 2;
 
 
 
@@ -118,7 +118,7 @@ app.get('/api/code', (req, res) => {
   if (songIdxBest == undefined) { // The player has heard everything
     let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
     songIdxBest = (lastSongUser + 1) % SONGS.length;
-  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > CONFIG.MIN_PROBA_MATCH) { // There are too many players per song. We need to add songs
+  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > CONFIG.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
@@ -126,7 +126,7 @@ app.get('/api/code', (req, res) => {
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
     if (Date.now() - previousAllocation.meta.created > 0.9 * 1000 * CONFIG.TIME_TO_PLAY_S) {
-      usr.points += 15;
+      usr.points += CONFIG.POINTS_SONG_END;
       USR.update(usr);
     } 
     SA.remove(previousAllocation);
@@ -184,11 +184,11 @@ app.post('/api/matchcode', (req, res) => {
     SA.remove(saUser);
     SA.remove(saMatch);
     
-    usrUser.points += 50;
+    usrUser.points += CONFIG.POINTS_MATCH;
     USR.update(usrUser);
 
     let usrMatch = USR.findOne({username: saMatch.username});
-    usrMatch.points += 50;
+    usrMatch.points += CONFIG.POINTS_MATCH;
     USR.update(usrMatch);
 
     res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
@@ -202,8 +202,8 @@ app.post('/api/matchcode', (req, res) => {
       console.log('No socket found for :' + usrMatch.username);
     }
 
-    monitorSocket.emit('send:newsEvent', {type: 'match', points: 50, data: 
-      {username: username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
+    monitorSocket.emit('send:newsEvent', {type: 'match', points: CONFIG.POINTS_MATCH, data: 
+      {username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
 
   } else {
     res.json({accepted: false, points: usrUser.points});
@@ -222,9 +222,9 @@ app.post('/api/tweet', (req, res) => {
 
   let usr = USR.findOne({username});
   if (usr) {
-    usr.points += 1;
+    usr.points += CONFIG.POINTS_TWEET;
     USR.update(usr);
-    monitorSocket.emit('send:newsEvent', {type: 'message', points: 1, data: {username, message}});
+    monitorSocket.emit('send:newsEvent', {type: 'message', points: CONFIG.POINTS_TWEET, data: {username, message}});
   } else {
     res.status(401).send(`A user with the name ${username} does not exist!`);
   }

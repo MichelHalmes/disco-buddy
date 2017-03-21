@@ -53,11 +53,12 @@ function Guide(props) {
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
           <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
-          <GuideItem icon="add user" text="Enter a username and optionally an email (+25Points)" />
+          <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL}Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text="Find players with the same song and exchange a code (+50Points)" />
-          <GuideItem icon="forward" text="You can skip song after 1 minute, but you better dance until the end... (+15Points)" />
-          <GuideItem icon="talk" text="Gain points, have fun, be lekker...  and tweet (+1Point)" />
+          <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH}Points)`} />
+          <GuideItem icon="forward" text={`Click 'Next' afer ${CONFIG.TIME_TO_NEXT_S} seconds or a match; 
+                                           But better dance until the end (+${CONFIG.POINTS_SONG_END}POINTS)`} />
+          <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET}Point)`} />
         </div>
       </div>
 
@@ -247,7 +248,7 @@ function NewsEvent({event}) {
       case 'message':
         return (
           <div>
-            <a>{data.username}:</a> {data.message.split('\n').map((s, i) => <div key={i}>{s}</div>)}
+            <a>{data.username}:</a> {data.message.split('\n').map((s, i) => i==0 ? s : <div key={i}>{s}</div> )}
           </div>);
       case 'login':
         return (
