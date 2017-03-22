@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Popup} from 'semantic-ui-react';
+import {Modal, Popup} from 'semantic-ui-react';
 import isEmail from 'validator/lib/isEmail';
 
 import Client from './client.js';
@@ -10,7 +10,25 @@ const CONFIG  = require('../../config.js');
 
 export const AudioPlayer = React.createClass({
   getInitialState: function () {
+    this.syncTimeOffsetMs = 0;
+    this.startTime = 0;
+    this.lastCodeSynced = null;
     return {timePlayed: -1, noAutoplay: true};
+  },
+
+  componentDidMount: function() {
+    let self = this;
+    let start = performance.now();
+    return Client.getSyncTime()
+      .then(function(res) {
+        self.syncTimeOffsetMs = (res.time - new Date().getTime()) 
+      });
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (!this.props.code && prevProps.code) { // No current song to play
+      this.setState({timePlayed: -1});
+    }
   },
 
   handleClickPlay: function () {
@@ -19,6 +37,14 @@ export const AudioPlayer = React.createClass({
 
   handlePlayEvent: function () {
     this.setState({noAutoplay: false});
+  },
+
+  handleCanPlay: function () {
+    if (this.props.code != this.lastCodeSynced) {
+      this.lastCodeSynced = this.props.code;
+      this.startTime = (new Date().getTime() + this.syncTimeOffsetMs) /1000 % CONFIG.SYNC_PERIOD_S
+      this.refs.myAudio.currentTime = this.startTime;
+    }
   },
 
   handleClickNext: function () {
@@ -33,16 +59,10 @@ export const AudioPlayer = React.createClass({
     return this.state.timePlayed > CONFIG.TIME_TO_NEXT_S || this.props.allowNext;
   },
 
-  componentDidUpdate: function (prevProps, prevState) {
-    if (!this.props.code && prevProps.code) {
-      this.setState({timePlayed: -1});
-    }
-  },
-
-  updateTrackTime: function (event){
+  handleTimeUpdate: function (event){
     // eslint-disable-next-line
     if (!this.props.code || this.refs.myAudio.readyState != 4) return;
-    let timePlayed = event.nativeEvent.srcElement.currentTime;
+    let timePlayed = event.nativeEvent.srcElement.currentTime - this.startTime;
     if (timePlayed < CONFIG.TIME_TO_PLAY_S) {
       this.setState({timePlayed: timePlayed});
     } else {
@@ -51,12 +71,16 @@ export const AudioPlayer = React.createClass({
     } 
   },
 
+  
+  
+
   render() {
-    function secondsToHuman(time) {
-      if (time < 0) return '--:--';
+    function renderTimeToPlay(timePlayed) {
+      if (timePlayed < 0) return '--:--';
+      let timeRemaining = CONFIG.TIME_TO_PLAY_S - timePlayed ;
       return [
-        pad(Math.floor(time / 60).toString(), 2),
-        pad(Math.floor(time % 60).toString(), 2),
+        pad(Math.floor(timeRemaining / 60).toString(), 2),
+        pad(Math.floor(timeRemaining % 60).toString(), 2),
       ].join(':');
     }
 
@@ -70,9 +94,10 @@ export const AudioPlayer = React.createClass({
       <div className="ui two column centered grid no-margins">
         <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
               src={this.props.code && "/api/song/" + this.props.code} 
-              onTimeUpdate={this.updateTrackTime}
+              onTimeUpdate={this.handleTimeUpdate}
+              onCanPlay={this.handleCanPlay}
               onPlay={this.handlePlayEvent}/>
-
+        {(new Date().getTime() + this.syncTimeOffsetMs) /1000 % 60}
         <div className="column no-margins">
           <div className="ui horizontal segments button no-margins">
             <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>
@@ -80,7 +105,7 @@ export const AudioPlayer = React.createClass({
                 <i className="big refresh loading icon" ></i> :
                 <i className="big play icon"></i>          
               }
-              <p>{secondsToHuman(CONFIG.TIME_TO_PLAY_S - this.state.timePlayed)}</p>
+              <p>{renderTimeToPlay(this.state.timePlayed)}</p>
             </div>
             <div className={"ui secondary inverted center aligned segment no-margins " + (this.canClickNext() ? "blue" : "grey")}
               onClick={this.handleClickNext}>
@@ -172,11 +197,9 @@ export const MessagePopup = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    console.log('message')
+    // console.log('message')
     if (this.props.messages.length === 0 || prevProps.messages === this.props.messages) return;
-    console.log(this.props.messages);
     this.setState({isOpen: true})
-
     clearTimeout(this.timeout);
     this.timeout = setTimeout(() => {
       this.handleClose();
@@ -185,7 +208,7 @@ export const MessagePopup = React.createClass({
   },
 
   handleClose()  {
-    console.log('close popup')
+    // console.log('close popup')
     this.setState({isOpen: false});
     this.props.onMessagesRead();
     clearTimeout(this.timeout);
@@ -239,7 +262,6 @@ export const ModalSetUser = React.createClass({
       errors.email = 'Invalid Email';
       isValid = false;
     }
-    console.log(errors, CONFIG.MAX_NAME_LEN);
     this.setState({fieldErrors: errors});
     return isValid;
   },

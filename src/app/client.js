@@ -25,6 +25,16 @@ function getCode(username) {
     .then(parseJSON);
 }
 
+function getSyncTime() {
+  return fetch('/api/synctime', {
+    method: 'get',
+    headers: {
+      'Accept': 'application/json'
+    },
+  }).then(checkStatus)
+    .then(parseJSON);
+}
+
 function postMatchCode(username, matchCode) {
   console.log('/api/matchcode', username, matchCode);
   return fetch('/api/matchcode', {
@@ -69,6 +79,7 @@ function parseJSON(response) {
 module.exports = {
   postLogin,
   getCode,
+  getSyncTime,
   postMatchCode,
   postTweet
 };

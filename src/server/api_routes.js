@@ -17,11 +17,13 @@ let child = exec(`python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+1}`, {cwd:
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
+
   SONGS = shuffle(
                 fs.readdirSync(CONFIG.SONG_FOLDER)
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
+  console.log(SONGS);
 });
 
 
@@ -49,20 +51,20 @@ app.post('/api/login', (req, res) => {
 let nextCode = 1;
 let nextSongIdx = 0;
 
-USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
-USR.insert({username: 'Mary', email: '', points: 10});
-USR.insert({username: 'Kate', email: '', points: 30});
-USR.insert({username: 'Peter', email: '', points: -5});
-USR.insert({username: 'John', email: '', points: 20});
+// USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
+// USR.insert({username: 'Mary', email: '', points: 10});
+// USR.insert({username: 'Kate', email: '', points: 30});
+// USR.insert({username: 'Peter', email: '', points: -5});
+// USR.insert({username: 'John', email: '', points: 20});
 
-// LOG.insert({username: 'michel', songIdx: '0'});
-// LOG.insert({username: 'michel', songIdx: '0'});
-SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
-SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
-SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
-SA.insert({code: '0003', songIdx: 0, username: 'John'});
-nextCode = 4;
-nextSongIdx = 2;
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
+// SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
+// SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
+// SA.insert({code: '0003', songIdx: 0, username: 'John'});
+// nextCode = 4;
+// nextSongIdx = 2;
 
 
 
@@ -156,7 +158,12 @@ app.get('/api/song/:code', (req, res) => {
   } else {
     res.status(404).send('The requested code does not correspond to any song!');
   }
+});
 
+// GET SYNCTIME ++++++++++++++++++++++++++++++++++++
+
+app.get('/api/synctime', (req, res) => {
+  res.json({time: new Date().getTime()});
 });
 
 // POST MACTHCODE ++++++++++++++++++++++++++++++++++++
