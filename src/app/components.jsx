@@ -33,6 +33,7 @@ export const AudioPlayer = React.createClass({
 
   handleClickPlay: function () {
     this.refs.myAudio.play();
+    this.props.onActivity();
   },
 
   handlePlayEvent: function () {
@@ -48,6 +49,7 @@ export const AudioPlayer = React.createClass({
   },
 
   handleClickNext: function () {
+    this.props.onActivity();
     if (this.canClickNext()) {
       this.props.onCodeRequest();
     } else {
@@ -137,6 +139,7 @@ export const CodeArea = React.createClass({
   },
 
   onFormSubmit(evt) {
+    this.props.onActivity();
     const matchCode = this.state.matchCode;
     const isValid = this.validate(matchCode);
     // evt.preventDefault();
@@ -331,6 +334,7 @@ export const TweetMessage  = React.createClass({
   },
 
   onFormSubmit(evt) {
+    this.props.onActivity();
     if (this.state.message.length > 3) {
       Client.postTweet(this.props.username, this.state.message);
       this.setState({message: '' });

@@ -13,11 +13,10 @@ function shuffle(a) {
 
 let SONGS;
 let exec = require('child_process').exec;
-let child = exec(`python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+1}`, {cwd: __dirname});
+let child = exec(`python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+CONFIG.SYNC_PERIOD_S+1}`, {cwd: __dirname});
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
-
   SONGS = shuffle(
                 fs.readdirSync(CONFIG.SONG_FOLDER)
                 .filter((fn) => fn.endsWith('.mp3'))
@@ -125,7 +124,8 @@ app.get('/api/code', (req, res) => {
   
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
-    if (Date.now() - previousAllocation.meta.created > 0.9 * 1000 * CONFIG.TIME_TO_PLAY_S) {
+    let songDuration = (Date.now() - previousAllocation.meta.created) / 1000; 
+    if (songDuration > 0.95 * CONFIG.TIME_TO_PLAY_S && songDuration < 1.25 * CONFIG.TIME_TO_PLAY_S) { // End of song without inactivity
       usr.points += CONFIG.POINTS_SONG_END;
       USR.update(usr);
     } 

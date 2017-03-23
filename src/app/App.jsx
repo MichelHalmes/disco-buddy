@@ -1,12 +1,13 @@
 import React from 'react';
 
 import io from 'socket.io-client';
-import { Modal, Popup} from 'semantic-ui-react';
+import {Modal} from 'semantic-ui-react';
 
 
 import Client from './client.js';
 import {AudioPlayer, CodeArea, MessagePopup, ModalSetUser, TweetMessage} from './components.jsx';
 import './App.css';
+import CONFIG  from '../../config.js';
 
 
 
@@ -14,12 +15,15 @@ import './App.css';
 const App = React.createClass({
   getInitialState: function () {
     let username = JSON.parse(localStorage.getItem('username'));
+    this.lastActivity = new Date().getTime();
+    this.resolveInactivity;
 
     return {code: undefined, 
       username: username, 
       points: 0,
       messages: [],
-      matchedCurrent: false
+      matchedCurrentCode: false,
+      isInactive: false
     };
   },
 
@@ -32,7 +36,7 @@ const App = React.createClass({
     
     self.socket.on('code:match', function ({username, matchUsername, points}) {
       if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
-      self.setState({points, matchedCurrent: true, 
+      self.setState({points, matchedCurrentCode: true, 
         messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
     });
   },
@@ -71,36 +75,21 @@ const App = React.createClass({
   handelCodeRequest: function () {
     let self = this;
     self.setState({code: undefined});
-    if (!self.state.username) return Promise.resolve();
-    return Client.getCode(self.state.username)
+    if (!self.state.username) return Promise.resolve(); // After Login error
+
+    return new Promise(function(resolve) { 
+      if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
+        resolve();
+      } else {
+        self.setState({isInactive: true});
+        self.resolveInactivity = resolve;
+      }})
+      .then(() => Client.getCode(self.state.username))
       .then(function(res) {
         self.pushMessage(`New song, new luck...!`);
-        self.setState({code: res.code, points: res.points, matchedCurrent: false});
+        self.setState({code: res.code, points: res.points, matchedCurrentCode: false});
       })
       .catch(self.catchLoginError);
-  },
-
-  handleCodeSubmit: function (matchCode) {
-    let self = this;
-    return Client.postMatchCode(this.state.username, matchCode)
-      .then(function ({accepted, points, matchUsername}) {
-        if (accepted) {
-          self.setState({points, matchedCurrent: true, 
-            messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
-          return true;
-        } else {
-          self.setState({points, messages: self.state.messages.concat([`Nope, wrong code!`]) });
-          return false;
-        }
-      })
-  },
-
-  voidMessages: function () {
-    this.setState({messages: []})
-  },
-
-  pushMessage: function (newMessage) {
-    this.setState({messages: this.state.messages.concat([newMessage])});
   },
 
   catchLoginError: function (error) {
@@ -114,15 +103,51 @@ const App = React.createClass({
     }
   },
 
+  handleCodeSubmit: function (matchCode) {
+    let self = this;
+    return Client.postMatchCode(this.state.username, matchCode)
+      .then(function ({accepted, points, matchUsername}) {
+        if (accepted) {
+          self.setState({points, matchedCurrentCode: true, 
+            messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
+          return true;
+        } else {
+          self.setState({points, messages: self.state.messages.concat([`Nope, wrong code!`]) });
+          return false;
+        }
+      })
+  },
+
+  handleReactivate: function () {
+    this.resolveInactivity();
+    this.recordActivity();
+    this.setState({isInactive: false});
+  },  
+
+  recordActivity: function () {
+    this.lastActivity = new Date().getTime();
+  },
+
+  voidMessages: function () {
+    this.setState({messages: []})
+  },
+
+  pushMessage: function (newMessage) {
+    this.setState({messages: this.state.messages.concat([newMessage])});
+  },
+
+
   render() {
     return (
       <div className="ui center aligned basic segment no-margins" >
-        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
+        
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <AudioPlayer code={this.state.code} allowNext={this.state.matchedCurrent} onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} />
-        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} pushMessage={this.pushMessage} />
-        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} />
+        <AudioPlayer code={this.state.code} allowNext={this.state.matchedCurrentCode} onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} onActivity={this.recordActivity} />
+        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
+        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
+        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
+        <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />
       </div>
     );
@@ -147,7 +172,6 @@ function Points(props) {
 }
 
 
-
 function Header(props) {
   return (
     <div >
@@ -156,10 +180,23 @@ function Header(props) {
         Disco Match 
         <i className="music icon"></i> 
       </h2>
-      <div className="">Find a dancer with your song</div>
+      <div className="">Find a dancer with your song!</div>
       <div className="ui divider no-margins"></div>
     </div>  
-    );
+  );
+}
+
+function ModalInactivity(props) {
+  return (
+    <Modal open={props.isInactive} >
+      <div className="ui center aligned basic segment">
+        <h1>You have been inactive for quite some time?</h1>
+        <button className="ui submit button green" onClick={props.onReactivate}>
+          Continue playing!
+        </button>
+      </div>
+    </Modal>  
+  );
 }
 
 
