@@ -13,6 +13,7 @@ export const AudioPlayer = React.createClass({
     this.syncTimeOffsetMs = 0;
     this.startTime = 0;
     this.lastCodeSynced = null;
+    this.canPause = false;
     return {timePlayed: -1, noAutoplay: true};
   },
 
@@ -26,27 +27,35 @@ export const AudioPlayer = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    if (!this.props.code && prevProps.code) { // No current song to play
+    if (!this.props.code && prevProps.code) { // The song has ended, avoid continuing on buffer
+      this.canPause = true;
+      this.refs.myAudio.pause()  
       this.setState({timePlayed: -1});
     }
   },
 
-  handleClickPlay: function () {
+  handleClickPlay: function() {
     this.refs.myAudio.play();
     this.props.onActivity();
   },
 
-  handlePlayEvent: function () {
-    this.setState({noAutoplay: false});
-  },
-
-  handleCanPlay: function () {
+  handleCanPlayEvent: function() {
     if (this.props.code != this.lastCodeSynced) {
       this.lastCodeSynced = this.props.code;
       this.startTime = (new Date().getTime() + this.syncTimeOffsetMs) /1000 % CONFIG.SYNC_PERIOD_S
       this.refs.myAudio.currentTime = this.startTime;
     }
   },
+
+  handlePlayEvent: function() {
+    this.setState({noAutoplay: false});
+  },
+
+  handlePauseEvent: function() { 
+    if (!this.canPause) this.refs.myAudio.play();
+    this.canPause = false;
+  },
+
 
   handleClickNext: function () {
     this.props.onActivity();
@@ -97,8 +106,9 @@ export const AudioPlayer = React.createClass({
         <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
               src={this.props.code && "/api/song/" + this.props.code} 
               onTimeUpdate={this.handleTimeUpdate}
-              onCanPlay={this.handleCanPlay}
-              onPlay={this.handlePlayEvent}/>
+              onCanPlay={this.handleCanPlayEvent}
+              onPlay={this.handlePlayEvent}
+              onPause={this.handlePauseEvent}/>
         {(new Date().getTime() + this.syncTimeOffsetMs) /1000 % 60}
         <div className="column no-margins">
           <div className="ui horizontal segments button no-margins">

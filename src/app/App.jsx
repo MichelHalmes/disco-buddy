@@ -190,7 +190,7 @@ function ModalInactivity(props) {
   return (
     <Modal open={props.isInactive} >
       <div className="ui center aligned basic segment">
-        <h1>You have been inactive for quite some time?</h1>
+        <h1>You have been inactive for quite some time...?</h1>
         <button className="ui submit button green" onClick={props.onReactivate}>
           Continue playing!
         </button>
