@@ -4,7 +4,8 @@ from pydub import AudioSegment
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--duration', dest='duration', type=int, default=60, help='Duration of the song to shrink')
+parser.add_argument('--duration', dest='duration', type=int, help='Duration of the song to shrink')
+parser.add_argument('--bitrate', dest='bitrate', type=int, help='MP3 bitrate')
 args = parser.parse_args()
 
 
@@ -31,5 +32,5 @@ for filename in listdir(SONG_FOLDER):
     idx_end = (CUT_START + CUT_DURATION) * 1000
     segment = segment[idx_start:idx_end].fade_in(2000).fade_out(3000)
 
-    segment.export(path.join(SHRINK_FOLDER, filename), format="mp3", bitrate="84K")
+    segment.export(path.join(SHRINK_FOLDER, filename), format="mp3", bitrate="%sK" % args.bitrate)
 

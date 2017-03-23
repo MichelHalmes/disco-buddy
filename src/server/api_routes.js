@@ -13,7 +13,8 @@ function shuffle(a) {
 
 let SONGS;
 let exec = require('child_process').exec;
-let child = exec(`python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+CONFIG.SYNC_PERIOD_S+1}`, {cwd: __dirname});
+const command = `python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+CONFIG.SYNC_PERIOD_S+1} --bitrate ${CONFIG.MP3_BITRATE}`
+let child = exec(command, {cwd: __dirname});
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
