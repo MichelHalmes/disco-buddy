@@ -10,7 +10,7 @@ args = parser.parse_args()
 
 
 SONG_FOLDER = path.abspath(path.join(__file__, '../../../songs'))
-SHRINK_FOLDER = path.join(SONG_FOLDER, "shrink")
+SHRINK_FOLDER = path.join(SONG_FOLDER, "_shrink")
 CUT_START = 10
 CUT_DURATION = args.duration
 

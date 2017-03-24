@@ -2,6 +2,8 @@
 songs
 loki.json
 npm-debug.log.*
+data
+.csv
 
 # dependencies
 node_modules
@@ -16,3 +18,5 @@ build
 .DS_Store
 .env
 npm-debug.log
+
+

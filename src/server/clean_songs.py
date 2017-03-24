@@ -46,4 +46,4 @@ for s1 in range(len(song_list)):
 
         cosine = get_cosine(vec1, vec2)
         if cosine > 0.65:
-            print cosine, song_list[s1], song_list[s2], vec1
+            print song_list[s1], '\n', song_list[s2], '\n'

@@ -1,7 +1,7 @@
 const path = require('path');
-var fs = require('fs');
+const fs = require('fs');
 
-const CONFIG  = require('../../config.js');
+const config  = require('../../config.js');
 
 function shuffle(a) {
   for (let i = a.length; i; i--) {
@@ -13,13 +13,13 @@ function shuffle(a) {
 
 let SONGS;
 let exec = require('child_process').exec;
-const command = `python shrink.py --duration ${CONFIG.TIME_TO_PLAY_S+CONFIG.SYNC_PERIOD_S+1} --bitrate ${CONFIG.MP3_BITRATE}`
+const command = `python shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
 let child = exec(command, {cwd: __dirname});
 child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
 child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
 child.on('close', function(code) {
   SONGS = shuffle(
-                fs.readdirSync(CONFIG.SONG_FOLDER)
+                fs.readdirSync(config.SONG_FOLDER)
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
@@ -40,7 +40,7 @@ app.post('/api/login', (req, res) => {
   if (existingUser) {
     res.status(403).send('A user with this username exists already!');
   } else {
-    let points = email ? CONFIG.POINTS_EMAIL : 0
+    let points = email ? config.POINTS_EMAIL : 0
     USR.insert({username, email, points});
     res.json({points});
     monitorSocket.emit('send:newsEvent', {type: 'login', points, data: {username}});
@@ -51,20 +51,20 @@ app.post('/api/login', (req, res) => {
 let nextCode = 1;
 let nextSongIdx = 0;
 
-// USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
-// USR.insert({username: 'Mary', email: '', points: 10});
-// USR.insert({username: 'Kate', email: '', points: 30});
-// USR.insert({username: 'Peter', email: '', points: -5});
-// USR.insert({username: 'John', email: '', points: 20});
+USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
+USR.insert({username: 'Mary', email: '', points: 10});
+USR.insert({username: 'Kate', email: '', points: 30});
+USR.insert({username: 'Peter', email: '', points: -5});
+USR.insert({username: 'John', email: '', points: 20});
 
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
-// SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
-// SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
-// SA.insert({code: '0003', songIdx: 0, username: 'John'});
-// nextCode = 4;
-// nextSongIdx = 2;
+// LOG.insert({username: 'michel', songIdx: '0'});
+// LOG.insert({username: 'michel', songIdx: '0'});
+SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
+SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
+SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
+SA.insert({code: '0003', songIdx: 0, username: 'John'});
+nextCode = 4;
+nextSongIdx = 2;
 
 
 
@@ -118,7 +118,7 @@ app.get('/api/code', (req, res) => {
   if (songIdxBest == undefined) { // The player has heard everything
     let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
     songIdxBest = (lastSongUser + 1) % SONGS.length;
-  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > CONFIG.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
+  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
@@ -126,8 +126,8 @@ app.get('/api/code', (req, res) => {
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
     let songDuration = (Date.now() - previousAllocation.meta.created) / 1000; 
-    if (songDuration > 0.95 * CONFIG.TIME_TO_PLAY_S && songDuration < 1.25 * CONFIG.TIME_TO_PLAY_S) { // End of song without inactivity
-      usr.points += CONFIG.POINTS_SONG_END;
+    if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
+      usr.points += config.POINTS_SONG_END;
       USR.update(usr);
     } 
     SA.remove(previousAllocation);
@@ -155,7 +155,7 @@ app.get('/api/song/:code', (req, res) => {
   if (allocation) {
     let songFile = SONGS[allocation.songIdx] + '.mp3';
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
-    res.sendFile(path.join(CONFIG.SONG_FOLDER, songFile));
+    res.sendFile(path.join(config.SONG_FOLDER, songFile));
   } else {
     res.status(404).send('The requested code does not correspond to any song!');
   }
@@ -190,11 +190,11 @@ app.post('/api/matchcode', (req, res) => {
     SA.remove(saUser);
     SA.remove(saMatch);
     
-    usrUser.points += CONFIG.POINTS_MATCH;
+    usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
     let usrMatch = USR.findOne({username: saMatch.username});
-    usrMatch.points += CONFIG.POINTS_MATCH;
+    usrMatch.points += config.POINTS_MATCH;
     USR.update(usrMatch);
 
     res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
@@ -208,7 +208,7 @@ app.post('/api/matchcode', (req, res) => {
       console.log('No socket found for :' + usrMatch.username);
     }
 
-    monitorSocket.emit('send:newsEvent', {type: 'match', points: CONFIG.POINTS_MATCH, data: 
+    monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data: 
       {username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
 
   } else {
@@ -225,9 +225,9 @@ app.post('/api/tweet', (req, res) => {
 
   let usr = USR.findOne({username});
   if (usr) {
-    usr.points += CONFIG.POINTS_TWEET;
+    usr.points += config.POINTS_TWEET;
     USR.update(usr);
-    monitorSocket.emit('send:newsEvent', {type: 'message', points: CONFIG.POINTS_TWEET, data: {username, message}});
+    monitorSocket.emit('send:newsEvent', {type: 'message', points: config.POINTS_TWEET, data: {username, message}});
   } else {
     res.status(401).send(`A user with the name ${username} does not exist!`);
   }

@@ -1,6 +1,6 @@
 const path = require('path');
 
-const timeToPLay = 180
+const timeToPLay = 15
 
 module.exports = {
 	TIME_TO_PLAY_S: timeToPLay,
@@ -15,5 +15,6 @@ module.exports = {
 	MAX_NEWS_EVENTS: 15,
 	MAX_NAME_LEN: 15,
 	MP3_BITRATE: 55,
-	SONG_FOLDER: path.join(__dirname, './songs/shrink')
+	SONG_FOLDER: path.join(__dirname, './songs/_shrink'),
+	DATA_FOLDER: path.join(__dirname, './data')
 }
