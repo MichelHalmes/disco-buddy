@@ -3,6 +3,26 @@ const fs = require('fs');
 
 const config  = require('../../config.js');
 
+
+console.log('Calling external python-shrinker...');
+let shrinkIsDone = false;
+const execSync = require('child_process').execSync;
+const command = `python shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
+let child = execSync(command, {cwd: __dirname});
+console.log(child.toString('utf-8'));
+
+
+// function sleep(milliseconds) {
+//     var start = new Date().getTime();
+//     for (var i = 0; i < 1e7; i++) {
+//       if ((new Date().getTime() - start) > milliseconds){
+//         break;
+//       }
+//     }
+//   }
+
+
+
 function shuffle(a) {
   for (let i = a.length; i; i--) {
     let j = Math.floor(Math.random() * i);
@@ -11,20 +31,13 @@ function shuffle(a) {
   return a;
 }
 
-let SONGS;
-let exec = require('child_process').exec;
-const command = `python shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
-let child = exec(command, {cwd: __dirname});
-child.stdout.on('data', (data) => {console.log('stdout: ' + data)});
-child.stderr.on('data', (data) => {console.log('stderr: ' + data)});
-child.on('close', function(code) {
-  SONGS = shuffle(
+
+
+const SONGS = shuffle(
                 fs.readdirSync(config.SONG_FOLDER)
                 .filter((fn) => fn.endsWith('.mp3'))
                 .map((fn) => fn.slice(0, fn.length - 4))
               );
-  console.log(SONGS);
-});
 
 
 
@@ -70,14 +83,7 @@ let nextSongIdx = 0;
 
 
 
-// function sleep(milliseconds) {
-//     var start = new Date().getTime();
-//     for (var i = 0; i < 1e7; i++) {
-//       if ((new Date().getTime() - start) > milliseconds){
-//         break;
-//       }
-//     }
-//   }
+
 
 
 app.get('/api/code', (req, res) => {
@@ -116,6 +122,10 @@ app.get('/api/code', (req, res) => {
 
   let nbUsers = saSongIdxAll.length;
   if (songIdxBest == undefined) { // The player has heard everything
+    console.log(`${username} has heard everything!`);
+    console.log(songCounts);
+    console.log(logSongIdxUser);
+    console.log(saSongIdxAll);
     let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
     songIdxBest = (lastSongUser + 1) % SONGS.length;
   } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
