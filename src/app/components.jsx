@@ -18,11 +18,22 @@ export const AudioPlayer = React.createClass({
   },
 
   componentDidMount: function() {
+    this.setSyncTimeOffsetMs();
+  },
+
+  setSyncTimeOffsetMs: function(nb_tries=0) {
     let self = this;
-    let start = performance.now();
     return Client.getSyncTime()
       .then(function(res) {
-        self.syncTimeOffsetMs = (res.time - new Date().getTime())
+        if (nb_tries==0) {
+          self.syncTimeOffsetMs = (res.time - new Date().getTime());
+        } else { // We get the one with the shortest delay ie maximum offset
+          self.syncTimeOffsetMs = Math.max(self.syncTimeOffsetMs, (res.time - new Date().getTime()));
+        }
+        if (nb_tries<10) {
+          setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 2000);
+        }
+        
       });
   },
 
@@ -109,6 +120,7 @@ export const AudioPlayer = React.createClass({
               onCanPlay={this.handleCanPlayEvent}
               onPlay={this.handlePlayEvent}
               onPause={this.handlePauseEvent}/>
+
         <div className="column no-margins">
           <div className="ui horizontal segments button no-margins">
             <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>

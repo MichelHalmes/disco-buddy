@@ -123,9 +123,8 @@ app.get('/api/code', (req, res) => {
   let nbUsers = saSongIdxAll.length;
   if (songIdxBest == undefined) { // The player has heard everything
     console.log(`${username} has heard everything!`);
-    console.log(songCounts);
-    console.log(logSongIdxUser);
-    console.log(saSongIdxAll);
+    console.log('songCount', songCounts);
+    console.log('logSongIdxUser', logSongIdxUser);
     let lastSongUser = logSongIdxUser.length ? Math.max(... logSongIdxUser): -1;
     songIdxBest = (lastSongUser + 1) % SONGS.length;
   } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
