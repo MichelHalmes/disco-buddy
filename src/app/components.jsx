@@ -352,14 +352,18 @@ export const TweetMessage  = React.createClass({
   },
 
   onFormSubmit(evt) {
-    this.props.onActivity();
-    if (this.state.message.length > 3) {
-      Client.postTweet(this.props.username, this.state.message);
-      this.setState({message: '' });
+    let self = this;
+    self.props.onActivity();
+    if (self.state.message.length > 3) {
+      Client.postTweet(self.props.username, self.state.message)
+        .then(function(res) {
+          self.props.updatePoints(res.points);
+        });
+      self.setState({message: '' });
       // evt.preventDefault();
     } else {
-      this.setState({isValid: false});
-      this.props.pushMessage(`Bad input!`);
+      self.setState({isValid: false});
+      self.props.pushMessage(`Bad input!`);
     }
   },
 

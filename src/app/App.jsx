@@ -136,6 +136,12 @@ const App = React.createClass({
     this.setState({messages: this.state.messages.concat([newMessage])});
   },
 
+  updatePoints: function (points) {
+    this.setState({points});
+  },
+
+
+
 
   render() {
     return (
@@ -149,7 +155,8 @@ const App = React.createClass({
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} 
           matchedCurrentCode={this.state.matchedCurrentCode}
           pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
-        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
+        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} 
+          updatePoints={this.updatePoints} onActivity={this.recordActivity}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
         <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />

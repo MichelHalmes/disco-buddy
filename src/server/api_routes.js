@@ -237,6 +237,7 @@ app.post('/api/tweet', (req, res) => {
     usr.points += config.POINTS_TWEET;
     USR.update(usr);
     monitorSocket.emit('send:newsEvent', {type: 'message', points: config.POINTS_TWEET, data: {username, message}});
+    res.json({points: usr.points});
   } else {
     res.status(401).send(`A user with the name ${username} does not exist!`);
   }
