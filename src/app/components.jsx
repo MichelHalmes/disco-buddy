@@ -32,8 +32,7 @@ export const AudioPlayer = React.createClass({
         }
         if (nb_tries<10) {
           setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 2000);
-        }
-        
+        }  
       });
   },
 
@@ -78,7 +77,7 @@ export const AudioPlayer = React.createClass({
   },
 
   canClickNext: function () {
-    return this.state.timePlayed > CONFIG.TIME_TO_NEXT_S || this.props.allowNext;
+    return this.state.timePlayed > CONFIG.TIME_TO_NEXT_S || this.props.matchedCurrentCode;
   },
 
   handleTimeUpdate: function (event){
@@ -92,8 +91,6 @@ export const AudioPlayer = React.createClass({
       this.props.pushMessage(`Time's up!`);
     }
   },
-
-
 
 
   render() {
@@ -202,7 +199,7 @@ export const CodeArea = React.createClass({
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
-          <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
+          <button className={"ui green submit button " + (this.props.matchedCurrentCode? "disabled" : "")} onClick={this.onFormSubmit}>Enter</button>
         </div>
       </div>
     </div>
