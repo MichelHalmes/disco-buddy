@@ -166,8 +166,9 @@ export const CodeArea = React.createClass({
       this.props.onCodeSubmit(matchCode);
       this.setState({matchCode: ''});
     } else {
-      this.setState({isValid: false});
       this.props.pushMessage(`Bad input!`);
+      this.setState({isValid: false});
+      setTimeout(this.setState.bind(this, {isValid: true}), 4000);
     }
   },
 
@@ -362,8 +363,10 @@ export const TweetMessage  = React.createClass({
       self.setState({message: '' });
       // evt.preventDefault();
     } else {
-      self.setState({isValid: false});
       self.props.pushMessage(`Bad input!`);
+      self.setState({isValid: false});
+      setTimeout(self.setState.bind(self, {isValid: true}), 4000);
+
     }
   },
 
