@@ -51,20 +51,20 @@ app.post('/api/login', (req, res) => {
 let nextCode = 1;
 let nextSongIdx = 0;
 
-USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
-USR.insert({username: 'Mary', email: '', points: 10});
-USR.insert({username: 'Kate', email: '', points: 30});
-USR.insert({username: 'Peter', email: '', points: -5});
-USR.insert({username: 'John', email: '', points: 20});
-
-// LOG.insert({username: 'michel', songIdx: '0'});
-// LOG.insert({username: 'michel', songIdx: '0'});
-SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
-SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
-SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
-SA.insert({code: '0003', songIdx: 0, username: 'John'});
-nextCode = 4;
-nextSongIdx = 2;
+// USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
+// USR.insert({username: 'Mary', email: '', points: 10});
+// USR.insert({username: 'Kate', email: '', points: 30});
+// USR.insert({username: 'Peter', email: '', points: -5});
+// USR.insert({username: 'John', email: '', points: 20});
+//
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// // LOG.insert({username: 'michel', songIdx: '0'});
+// SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
+// SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
+// SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
+// SA.insert({code: '0003', songIdx: 0, username: 'John'});
+// nextCode = 4;
+// nextSongIdx = 2;
 
 
 
@@ -104,10 +104,10 @@ app.get('/api/code', (req, res) => {
 
   let logSongIdxUser = LOG.find({username}).map((log) => log.songIdx);
 
-  let songIdxBest; 
+  let songIdxBest;
   Object.keys(songCounts).forEach(function (songIdx) {
     songIdx = parseInt(songIdx)
-    if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest]) 
+    if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest])
       && logSongIdxUser.indexOf(songIdx) == -1) {
         songIdxBest = songIdx;
     }
@@ -122,21 +122,21 @@ app.get('/api/code', (req, res) => {
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
-  
+
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
-    let songDuration = (Date.now() - previousAllocation.meta.created) / 1000; 
+    let songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
     if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
       usr.points += config.POINTS_SONG_END;
       USR.update(usr);
-    } 
+    }
     SA.remove(previousAllocation);
   } else { // This is a new user, that was not yet in SA
-    nbUsers += 1; 
+    nbUsers += 1;
   }
   SA.insert({code, songIdx: songIdxBest, username});
   LOG.insert({songIdx: songIdxBest, username});
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({code, points: usr.points});
 
   console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
@@ -154,7 +154,7 @@ app.get('/api/song/:code', (req, res) => {
 
   if (allocation) {
     let songFile = SONGS[allocation.songIdx] + '.mp3';
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); 
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.sendFile(path.join(config.SONG_FOLDER, songFile));
   } else {
     res.status(404).send('The requested code does not correspond to any song!');
@@ -185,11 +185,11 @@ app.post('/api/matchcode', (req, res) => {
   matchCode = matchCode.slice(-4);
   let saMatch = SA.findOne({code: matchCode});
   let saUser = SA.findOne({username});
-  
+
   if (saUser && saMatch && saUser.songIdx == saMatch.songIdx) {
     SA.remove(saUser);
     SA.remove(saMatch);
-    
+
     usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
@@ -201,14 +201,14 @@ app.post('/api/matchcode', (req, res) => {
 
     let matchSocket = matchSockets.connected[usrMatch.socketId]
     if (matchSocket) {
-      matchSocket.emit('code:match', 
+      matchSocket.emit('code:match',
         {username: usrMatch.username, matchUsername: usrUser.username, points: usrMatch.points}
       );
     } else {
       console.log('No socket found for :' + usrMatch.username);
     }
 
-    monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data: 
+    monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data:
       {username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
 
   } else {

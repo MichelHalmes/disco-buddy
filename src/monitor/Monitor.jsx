@@ -32,14 +32,14 @@ function Header(props) {
   return (
     <div className="ui center aligned basic segment no-margins" >
       <h2 >
-        <i className="music icon"></i> 
-        Disco Match 
-        <i className="music icon"></i> 
+        <i className="music icon"></i>
+        Disco Match
+        <i className="music icon"></i>
       </h2>
       <p className="no-margins-paddings">A gamification of Silent Disco...</p>
       <p className="no-margins-paddings">Find a dancer with your song!</p>
     </div>
-   
+
   );
 }
 
@@ -52,25 +52,25 @@ function Guide(props) {
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
-          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
+          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me  (192.168.1.107:4000)</a> with your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL}Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
           <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH}Points)`} />
-          <GuideItem icon="forward" text={`Click 'Next' afer ${CONFIG.TIME_TO_NEXT_S} seconds or a match; 
+          <GuideItem icon="forward" text={`Click 'Next' afer ${CONFIG.TIME_TO_NEXT_S} seconds or a match;
                                            But better dance until the end (+${CONFIG.POINTS_SONG_END}POINTS)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET}Point)`} />
         </div>
       </div>
 
     </div>
-   
+
   );
 }
 
 function GuideItem(props) {
   return (
     <div className="item">
-      <i className={`large ${props.icon} icon`}></i> 
+      <i className={`large ${props.icon} icon`}></i>
       <div className="content">
         {props.text}
       </div>
@@ -92,7 +92,7 @@ const Statistics = React.createClass({
   componentDidMount: function () {
     let self = this;
     self.socket = io('/monitor');
-    
+
     self.socket.on('send:statistics', function (stats) {
       // eslint-disable-next-line
       stats.nbUsers && self.setState({nbUsers: stats.nbUsers})
@@ -108,17 +108,17 @@ const Statistics = React.createClass({
           <div className="ui statistics">
             <div className="ui statistic">
               <div className="value">
-                <i className="child icon"> </i> 
+                <i className="child icon"> </i>
                 <a> {this.state.nbUsers}</a>
-              </div>  
-              <div className="label"> Players </div>  
+              </div>
+              <div className="label"> Players </div>
             </div>
             <div className="ui statistic">
-              <div className="value"> 
-                <i className="music icon"> </i> 
+              <div className="value">
+                <i className="music icon"> </i>
                 <a> {this.state.nbSongs}</a>
-              </div>  
-              <div className="label"> Songs </div>  
+              </div>
+              <div className="label"> Songs </div>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@ const Ranking = React.createClass({
     let self = this;
 
     self.socket = io('/monitor');
-    
+
     self.socket.on('send:ranking', function (ranking) {
       self.setState({ranking: ranking});
     });
@@ -148,7 +148,7 @@ const Ranking = React.createClass({
   render() {
     return (
       <div className="ui five column grid">
-      {this.state.ranking.map((usr, i) => <RankingItem {...usr} rank={i+1} key={i} />)}  
+      {this.state.ranking.map((usr, i) => <RankingItem {...usr} rank={i+1} key={i} />)}
       </div>
     );
   }
@@ -165,7 +165,7 @@ function RankingItem(props) {
         <span className="content top aligned ">
           <a className="header" style={{verticalAlign:'top'}}>{props.username}</a>
           <div>({props.points} points)</div>
-        </span> 
+        </span>
       </div>
     </div>
   );
@@ -179,7 +179,7 @@ const NewsFeed = React.createClass({
     Here is how it works:
        + Login by providing a username and optionally your email
        + Plug your headphones
-       + A song will start playing (be patient...). 
+       + A song will start playing (be patient...).
        + Dance and sing along as much as you can!
        + Identify other dancers with the same song as yours
        + Exchange codes to gain points (One exchange is enough for both of you)
@@ -195,7 +195,7 @@ const NewsFeed = React.createClass({
     self.socket = io('/monitor');
     self.socket.on('connect', () => {console.log('connect')});
     self.socket.on('connection', () => {console.log('connection')});
-    
+
     self.socket.on('send:newsEvent', function (event) {
       console.log(event);
       let events = self.state.newsEvents;
@@ -213,7 +213,7 @@ const NewsFeed = React.createClass({
     return (
       <div className="ui feed chat">
         {this.state.newsEvents.map((evt, i) => <NewsEvent event={evt} key={i}/>)}
-      </div> 
+      </div>
     );
   }
 });
@@ -259,21 +259,21 @@ function NewsEvent({event}) {
         throw new Error('Unrecognized event type: ' + event.type);
     }
   }
-  
+
   return (
     <div className="event no-margins" >
       <div className="label" >
         <i className={`big ${EVENT_TYPE_ICON[event.type]} icon`}></i>
-      </div> 
+      </div>
       <div className="content no-margins-paddings" >
         <div className="summary" >
           {formatSummary(event)}
         </div>
         <div className="meta no-margins-paddings" >
-          {event.points} Points 
+          {event.points} Points
         </div>
       </div>
-    </div> 
+    </div>
   );
 }
 

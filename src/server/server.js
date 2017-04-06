@@ -23,7 +23,7 @@ const loki = require('lokijs');
 let DB = new loki(config.DATA_FOLDER+'/loki.json', {verbose: false, autosave: true, autosaveInterval: 60000});
 
 let USR = DB.addCollection('Users', {unique: ['username'], indices: ['username']});
-let SA = DB.addCollection('SongAllocations', 
+let SA = DB.addCollection('SongAllocations',
   {unique: ['code', 'username'], indices: ['username']});
 let LOG = DB.addCollection('Logs', {indices: ['username']});
 
@@ -57,7 +57,7 @@ setInterval(function () {
   let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
-  let ranking = SA.eqJoin(USR.data, 'username', 'username', 
+  let ranking = SA.eqJoin(USR.data, 'username', 'username',
       (left,right) => ({username: right.username, points: right.points}))
     .simplesort('points', true).data();
 
@@ -70,9 +70,9 @@ require('./api_routes')(app, USR, SA, LOG, io.sockets, monitorSocket);
 
 // SERVE BUILD ++++++++++++++++++++++++++++++++++++
 
-// app.get('/*', function (req, res) {
-//   res.sendFile(path.join(__dirname, './build', 'index.html'));
-// });
+app.get('/*', function (req, res) {
+  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
+});
 
 http.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
@@ -84,7 +84,7 @@ module.exports = http;
 // ================================================
 
 collectionToCsv = function(col, dir, sep='|') {
-  if (!col) return;
+  if (!col.data[0]) return;
   var keys = Object.keys(col.data[0]);
   var result = keys.join(sep) + "\n";
 
@@ -94,7 +94,7 @@ collectionToCsv = function(col, dir, sep='|') {
         if (ix) result += sep;
         if (k == 'meta') result += new Date(obj[k].created).toISOString();
         else result += obj[k];
-        
+
     });
     result += "\n";
   });
@@ -114,8 +114,3 @@ process.on('SIGINT', function () {
   console.log("...done!");
   process.exit();
 });
-
-
-
-
-

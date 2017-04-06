@@ -22,14 +22,14 @@ export const AudioPlayer = React.createClass({
     let start = performance.now();
     return Client.getSyncTime()
       .then(function(res) {
-        self.syncTimeOffsetMs = (res.time - new Date().getTime()) 
+        self.syncTimeOffsetMs = (res.time - new Date().getTime())
       });
   },
 
   componentDidUpdate: function (prevProps, prevState) {
     if (!this.props.code && prevProps.code) { // The song has ended, avoid continuing on buffer
       this.canPause = true;
-      this.refs.myAudio.pause()  
+      this.refs.myAudio.pause()
       this.setState({timePlayed: -1});
     }
   },
@@ -51,7 +51,7 @@ export const AudioPlayer = React.createClass({
     this.setState({noAutoplay: false});
   },
 
-  handlePauseEvent: function() { 
+  handlePauseEvent: function() {
     if (!this.canPause) this.refs.myAudio.play();
     this.canPause = false;
   },
@@ -78,12 +78,12 @@ export const AudioPlayer = React.createClass({
       this.setState({timePlayed: timePlayed});
     } else {
       this.props.onCodeRequest();
-      this.props.pushMessage(`Time's up!`);        
-    } 
+      this.props.pushMessage(`Time's up!`);
+    }
   },
 
-  
-  
+
+
 
   render() {
     function renderTimeToPlay(timePlayed) {
@@ -104,18 +104,17 @@ export const AudioPlayer = React.createClass({
     return (
       <div className="ui two column centered grid no-margins">
         <audio id="yourAudioTag" ref="myAudio" autoPlay={true}
-              src={this.props.code && "/api/song/" + this.props.code} 
+              src={this.props.code && "/api/song/" + this.props.code}
               onTimeUpdate={this.handleTimeUpdate}
               onCanPlay={this.handleCanPlayEvent}
               onPlay={this.handlePlayEvent}
               onPause={this.handlePauseEvent}/>
-        {(new Date().getTime() + this.syncTimeOffsetMs) /1000 % 60}
         <div className="column no-margins">
           <div className="ui horizontal segments button no-margins">
             <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>
               {this.state.timePlayed === -1 ?
                 <i className="big refresh loading icon" ></i> :
-                <i className="big play icon"></i>          
+                <i className="big play icon"></i>
               }
               <p>{renderTimeToPlay(this.state.timePlayed)}</p>
             </div>
@@ -126,7 +125,7 @@ export const AudioPlayer = React.createClass({
             </div>
           </div>
         </div>
-    
+
         <Modal open={this.state.noAutoplay && !!this.props.code} >
           <div className="ui center aligned basic segment">
             <h1>You are good to go!</h1>
@@ -137,7 +136,7 @@ export const AudioPlayer = React.createClass({
         </Modal>
       </div>
     );
-  }, 
+  },
 });
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -185,10 +184,10 @@ export const CodeArea = React.createClass({
         <div>Enter code of match</div>
         <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
           <i className="exchange icon"></i>
-          <input type="number" 
-            placeholder="Code" 
-            value={this.state.matchCode} 
-            onChange={this.onInputChange} 
+          <input type="number"
+            placeholder="Code"
+            value={this.state.matchCode}
+            onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
           <button className="ui green submit button" onClick={this.onFormSubmit}>Enter</button>
@@ -240,7 +239,7 @@ export const MessagePopup = React.createClass({
             flowing>
             {this.props.messages.map((msg, i) => <p key={i}>{msg}</p>)}
         </Popup>
-      </div>  
+      </div>
     );
   }
 });
@@ -293,8 +292,8 @@ export const ModalSetUser = React.createClass({
         if (!isOk) {
           self.setState({
             fields: {},
-            fieldErrors: Object.assign({}, 
-              self.state.fieldErrors, 
+            fieldErrors: Object.assign({},
+              self.state.fieldErrors,
               {nameUnique: 'The username you have chose is already used. Please choose another one!'}
             )
           });
@@ -364,10 +363,10 @@ export const TweetMessage  = React.createClass({
       <div className="ui center aligned basic segment">
         <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
           <i className="talk icon"></i>
-          <input type="text" 
-            placeholder="Message" 
-            value={this.state.message} 
-            onChange={this.onInputChange} 
+          <input type="text"
+            placeholder="Message"
+            value={this.state.message}
+            onChange={this.onInputChange}
             />
           <button className="ui green submit button" onClick={this.onFormSubmit}>Tweet</button>
         </div>
@@ -375,7 +374,3 @@ export const TweetMessage  = React.createClass({
     );
   },
 })
-
-
-
-
