@@ -191,7 +191,7 @@ export const CodeArea = React.createClass({
         <div className="ui horizontal divider no-margins">
           Or
         </div>
-        <div>Enter code of match</div>
+        <div>Enter code of a match</div>
         <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
           <i className="exchange icon"></i>
           <input type="number"

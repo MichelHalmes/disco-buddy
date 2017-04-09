@@ -55,6 +55,7 @@ const App = React.createClass({
 
   handleLoginSubmit: function (username, email) {
     let self = this;
+    username = username.trim();
     return Client.postLogin(username, email)
       .then(function (res) {
         self.setState({username, points: res.points});
