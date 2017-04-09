@@ -120,7 +120,7 @@ export const AudioPlayer = React.createClass({
               onPause={this.handlePauseEvent}/>
 
         <div className="ui buttons no-margins ">
-          <button className="ui basic button green " onClick={this.handleClickPlay}>
+          <button className="ui basic button blue " onClick={this.handleClickPlay}>
             {this.state.timePlayed === -1 ?
               <i className="big refresh loading icon icon-margin" ></i> :
               <i className="big play icon icon-margin"></i>

@@ -1,46 +1,17 @@
+
 const path = require('path');
-const fs = require('fs');
 
 const config  = require('../../config.js');
 
-
-console.log('Calling external python-shrinker...');
-const execSync = require('child_process').execSync;
-const command = `python shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
-let child = execSync(command, {cwd: __dirname});
-console.log(child.toString('utf-8'));
-
-
-// function sleep(milliseconds) {
-//     var start = new Date().getTime();
-//     for (var i = 0; i < 1e7; i++) {
-//       if ((new Date().getTime() - start) > milliseconds){
-//         break;
-//       }
-//     }
-//   }
+var USR = require('./stores').USR;
+var SA = require('./stores').SA;
+var LOG_SA = require('./stores').LOG_SA;
+var LOG_MATCH = require('./stores').LOG_MATCH;
+var SONGS = require('./stores').SONGS;
 
 
 
-function shuffle(a) {
-  for (let i = a.length; i; i--) {
-    let j = Math.floor(Math.random() * i);
-    [a[i - 1], a[j]] = [a[j], a[i - 1]];
-  }
-  return a;
-}
-
-
-
-const SONGS = shuffle(
-                fs.readdirSync(config.SONG_FOLDER)
-                .filter((fn) => fn.endsWith('.mp3'))
-                .map((fn) => fn.slice(0, fn.length - 4))
-              );
-
-
-
-module.exports = function(app, USR, SA, LOG_SA, LOG_MATCH, matchSockets, monitorSocket) {
+module.exports = function(app, matchSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
 
