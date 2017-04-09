@@ -109,7 +109,7 @@ const App = React.createClass({
     return Client.postMatchCode(this.state.username, matchCode)
       .then(function ({accepted, points, matchUsername}) {
         if (accepted) {
-          self.setState({points, matchedCurrentCode: true, 
+          self.setState({points, matchedCurrentCode: true,
             messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
           return true;
         } else {
@@ -151,13 +151,13 @@ const App = React.createClass({
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
         <AudioPlayer code={this.state.code} matchedCurrentCode={this.state.matchedCurrentCode} 
-          onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} 
-          onActivity={this.recordActivity} />
+              onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} 
+              onActivity={this.recordActivity} />
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} 
-          matchedCurrentCode={this.state.matchedCurrentCode}
-          pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
+              matchedCurrentCode={this.state.matchedCurrentCode}
+              pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
         <TweetMessage username={this.state.username} pushMessage={this.pushMessage} 
-          updatePoints={this.updatePoints} onActivity={this.recordActivity}/>
+              updatePoints={this.updatePoints} onActivity={this.recordActivity}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
         <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />

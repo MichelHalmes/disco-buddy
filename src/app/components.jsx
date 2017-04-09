@@ -2,6 +2,7 @@ import React from 'react';
 import {Modal, Popup} from 'semantic-ui-react';
 import isEmail from 'validator/lib/isEmail';
 
+import './App.css';
 import Client from './client.js';
 
 
@@ -118,22 +119,22 @@ export const AudioPlayer = React.createClass({
               onPlay={this.handlePlayEvent}
               onPause={this.handlePauseEvent}/>
 
-        <div className="column no-margins">
-          <div className="ui horizontal segments button no-margins">
-            <div className="ui tertiary green inverted center aligned segment no-margins" onClick={this.handleClickPlay}>
-              {this.state.timePlayed === -1 ?
-                <i className="big refresh loading icon" ></i> :
-                <i className="big play icon"></i>
-              }
-              <p>{renderTimeToPlay(this.state.timePlayed)}</p>
-            </div>
-            <div className={"ui secondary inverted center aligned segment no-margins " + (this.canClickNext() ? "blue" : "grey")}
+        <div className="ui buttons no-margins ">
+          <button className="ui basic button green " onClick={this.handleClickPlay}>
+            {this.state.timePlayed === -1 ?
+              <i className="big refresh loading icon icon-margin" ></i> :
+              <i className="big play icon icon-margin"></i>
+            }
+            <p>{renderTimeToPlay(this.state.timePlayed)}</p>
+          </button>
+          <button className={"ui button " + (this.canClickNext() ? "blue" : "grey")}
               onClick={this.handleClickNext}>
-              <i className="big forward icon"></i>
+              <i className="big forward icon icon-margin"></i>
               <p>Next</p>
-            </div>
-          </div>
+          </button>
+
         </div>
+
 
         <Modal open={this.state.noAutoplay && !!this.props.code} >
           <div className="ui center aligned basic segment">
@@ -200,7 +201,9 @@ export const CodeArea = React.createClass({
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
-          <button className={"ui green submit button " + (this.props.matchedCurrentCode? "disabled" : "")} onClick={this.onFormSubmit}>Enter</button>
+          <button className={"ui green submit button " + (this.props.matchedCurrentCode? "disabled" : "")} onClick={this.onFormSubmit}>
+            Enter
+          </button>
         </div>
       </div>
     </div>

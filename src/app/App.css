@@ -1,8 +1,15 @@
 
 .no-margins {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  padding-top: 4pt !important;
-  padding-bottom: 4pt !important;
+    margin-top: 0pt !important;
+    margin-bottom: 0pt !important;
+    padding-top: 4pt !important;
+    padding-bottom: 4pt !important;
+}
+
+.icon-margin {
+    margin-left: 3pt !important;
+    margin-right: 3pt !important;
+    padding-left: 4pt !important;
+    padding-right: 4pt !important;
 }
 
