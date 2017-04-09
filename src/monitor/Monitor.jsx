@@ -56,7 +56,7 @@ function Guide(props) {
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL}Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
           <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH}Points)`} />
-          <GuideItem icon="forward" text={`Click 'Next' afer ${CONFIG.TIME_TO_NEXT_S} seconds or a match;
+          <GuideItem icon="forward" text={`Click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds or a match;
                                            But better dance until the end (+${CONFIG.POINTS_SONG_END}Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET}Point)`} />
         </div>

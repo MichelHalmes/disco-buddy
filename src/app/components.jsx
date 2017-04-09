@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal, Popup} from 'semantic-ui-react';
+import {Modal, Popup, Dimmer} from 'semantic-ui-react';
 import isEmail from 'validator/lib/isEmail';
 
 import './App.css';
@@ -127,7 +127,7 @@ export const AudioPlayer = React.createClass({
             }
             <p>{renderTimeToPlay(this.state.timePlayed)}</p>
           </button>
-          <button className={"ui button " + (this.canClickNext() ? "blue" : "grey")}
+          <button className={"ui button blue " + (this.canClickNext() ? "" : "disabled")}
               onClick={this.handleClickNext}>
               <i className="big forward icon icon-margin"></i>
               <p>Next</p>
@@ -169,7 +169,7 @@ export const CodeArea = React.createClass({
     } else {
       this.props.pushMessage(`Bad input!`);
       this.setState({isValid: false});
-      setTimeout(this.setState.bind(this, {isValid: true}), 4000);
+      setTimeout(this.setState.bind(this, {isValid: true}), 2000);
     }
   },
 
@@ -187,7 +187,8 @@ export const CodeArea = React.createClass({
       <div className="ui twelve wide column center aligned raised segment no-margins">
         <div>Give your code to a match </div>
         <div className="ui black button">
-          <i className="exchange icon"></i> {this.props.code || '????'}
+          <i className="exchange icon"></i>
+          {this.props.code || '????'}
         </div>
         <div className="ui horizontal divider no-margins">
           Or
@@ -201,10 +202,18 @@ export const CodeArea = React.createClass({
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
-          <button className={"ui green submit button " + (this.props.matchedCurrentCode? "disabled" : "")} onClick={this.onFormSubmit}>
+          <button className="ui green submit button" onClick={this.onFormSubmit}>
             Enter
           </button>
         </div>
+
+        <Dimmer active={this.props.matchedCurrentCode}>
+          <p className="no-margins">{`Match! +${CONFIG.POINTS_MATCH} Points!`}</p>
+          <i className="huge smile icon"></i>
+          <p className="no-margins">Click next for a new song... </p>
+          <p>{`Or listen till the end to get +${CONFIG.POINTS_SONG_END} Points!`}</p>
+        </Dimmer>
+
       </div>
     </div>
     );
@@ -368,7 +377,7 @@ export const TweetMessage  = React.createClass({
     } else {
       self.props.pushMessage(`Bad input!`);
       self.setState({isValid: false});
-      setTimeout(self.setState.bind(self, {isValid: true}), 4000);
+      setTimeout(self.setState.bind(self, {isValid: true}), 2000);
 
     }
   },
