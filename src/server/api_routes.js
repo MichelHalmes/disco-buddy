@@ -40,7 +40,7 @@ const SONGS = shuffle(
 
 
 
-module.exports = function(app, USR, SA, LOG, matchSockets, monitorSocket) {
+module.exports = function(app, USR, SA, LOG_SA, LOG_MATCH, matchSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
 
@@ -69,18 +69,14 @@ let nextSongIdx = 0;
 // USR.insert({username: 'Peter', email: '', points: -5});
 // USR.insert({username: 'John', email: '', points: 20});
 //
-// // LOG.insert({username: 'michel', songIdx: '0'});
-// // LOG.insert({username: 'michel', songIdx: '0'});
+// // LOG_SA.insert({username: 'michel', songIdx: '0'});
+// // LOG_SA.insert({username: 'michel', songIdx: '0'});
 // SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
 // SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
 // SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
 // SA.insert({code: '0003', songIdx: 0, username: 'John'});
 // nextCode = 4;
 // nextSongIdx = 2;
-
-
-
-
 
 
 
@@ -107,7 +103,7 @@ app.get('/api/code', (req, res) => {
     songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
   });
 
-  let logSongIdxUser = LOG.find({username}).map((log) => log.songIdx);
+  let logSongIdxUser = LOG_SA.find({username}).map((log) => log.songIdx);
 
   let songIdxBest;
   Object.keys(songCounts).forEach(function (songIdx) {
@@ -120,13 +116,11 @@ app.get('/api/code', (req, res) => {
 
 
   let nbUsers = saSongIdxAll.length;
-  if (songIdxBest == undefined) { // The player has heard everything
+  if (songIdxBest == undefined ||  // The player has heard everything
+    (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
-  } else if (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH) { // There are too many players per song. We need to add songs
-    songIdxBest = nextSongIdx;
-    nextSongIdx = (nextSongIdx + 1) % SONGS.length;
-  }
+  } 
 
   let previousAllocation = SA.findOne({username});
   if (previousAllocation) {
@@ -140,7 +134,7 @@ app.get('/api/code', (req, res) => {
     nbUsers += 1;
   }
   SA.insert({code, songIdx: songIdxBest, username});
-  LOG.insert({songIdx: songIdxBest, username});
+  LOG_SA.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({code, points: usr.points});
 
@@ -172,7 +166,7 @@ app.get('/api/synctime', (req, res) => {
   res.json({time: new Date().getTime()});
 });
 
-// POST MACTHCODE ++++++++++++++++++++++++++++++++++++
+// POST MATCHCODE ++++++++++++++++++++++++++++++++++++
 
 
 app.post('/api/matchcode', (req, res) => {
@@ -215,6 +209,8 @@ app.post('/api/matchcode', (req, res) => {
 
     monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data:
       {username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
+
+    LOG_MATCH.insert({username, matchUsername: usrMatch.username, songIdx: saUser.songIdx, song: SONGS[saUser.songIdx]});
 
   } else {
     res.json({accepted: false, points: usrUser.points});

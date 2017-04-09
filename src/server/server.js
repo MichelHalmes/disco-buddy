@@ -25,7 +25,8 @@ let DB = new loki(config.DATA_FOLDER+'/loki.json', {verbose: false, autosave: tr
 let USR = DB.addCollection('Users', {unique: ['username'], indices: ['username']});
 let SA = DB.addCollection('SongAllocations',
   {unique: ['code', 'username'], indices: ['username']});
-let LOG = DB.addCollection('Logs', {indices: ['username']});
+let LOG_SA = DB.addCollection('Log_SA', {indices: ['username']});
+let LOG_MATCH = DB.addCollection('Log_Match');
 
 
 
@@ -66,7 +67,7 @@ setInterval(function () {
 }, 4000);
 
 
-require('./api_routes')(app, USR, SA, LOG, io.sockets, monitorSocket);
+require('./api_routes')(app, USR, SA, LOG_SA, LOG_MATCH, io.sockets, monitorSocket);
 
 // SERVE BUILD ++++++++++++++++++++++++++++++++++++
 
@@ -109,8 +110,8 @@ process.on('SIGINT', function () {
   var csvDir = config.DATA_FOLDER+"/loki_"+(new Date().toISOString().replace(/[-:]/g, ""));
   fs.mkdirSync(csvDir);
   collectionToCsv(USR, csvDir);
-  collectionToCsv(SA, csvDir);
-  collectionToCsv(LOG, csvDir);
+  collectionToCsv(LOG_SA, csvDir);
+  collectionToCsv(LOG_MATCH, csvDir);
   console.log("...done!");
   process.exit();
 });
