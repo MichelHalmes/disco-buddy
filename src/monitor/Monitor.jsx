@@ -52,7 +52,7 @@ function Guide(props) {
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
-          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me  (192.168.1.107:4000)</a> with your browser</span>} />
+          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL}Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
           <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH}Points)`} />

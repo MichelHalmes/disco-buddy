@@ -33,7 +33,7 @@ export const AudioPlayer = React.createClass({
         }
         if (nb_tries<10) {
           setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 2000);
-        }  
+        }
       });
   },
 
@@ -210,7 +210,7 @@ export const CodeArea = React.createClass({
         <Dimmer active={this.props.matchedCurrentCode}>
           <p className="no-margins">{`Match! +${CONFIG.POINTS_MATCH} Points!`}</p>
           <i className="huge smile icon"></i>
-          <p className="no-margins">Click next for a new song... </p>
+          <p className="no-margins">Click "Next" for a new song... </p>
           <p>{`Or listen till the end to get +${CONFIG.POINTS_SONG_END} Points!`}</p>
         </Dimmer>
 

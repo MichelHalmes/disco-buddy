@@ -1,13 +1,12 @@
 
 const path = require('path');
-
 const config  = require('../../config.js');
 
-var USR = require('./stores').USR;
-var SA = require('./stores').SA;
-var LOG_SA = require('./stores').LOG_SA;
-var LOG_MATCH = require('./stores').LOG_MATCH;
-var SONGS = require('./stores').SONGS;
+const USR = require('./stores').USR;
+const SA = require('./stores').SA;
+const LOG_SA = require('./stores').LOG_SA;
+const LOG_MATCH = require('./stores').LOG_MATCH;
+const SONGS = require('./stores').SONGS;
 
 
 
@@ -16,14 +15,14 @@ module.exports = function(app, matchSockets, monitorSocket) {
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
 
 app.post('/api/login', (req, res) => {
-  let username = req.body.username;
-  let email = req.body.email;
+  const username = req.body.username;
+  const email = req.body.email;
 
-  let existingUser = USR.findOne({username});
+  const existingUser = USR.findOne({username});
   if (existingUser) {
     res.status(403).send('A user with this username exists already!');
   } else {
-    let points = email ? config.POINTS_EMAIL : 0
+    const points = email ? config.POINTS_EMAIL : 0
     USR.insert({username, email, points});
     res.json({points});
     monitorSocket.emit('send:newsEvent', {type: 'login', points, data: {username}});
@@ -33,7 +32,7 @@ app.post('/api/login', (req, res) => {
     // GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
-
+//
 // USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
 // USR.insert({username: 'Mary', email: '', points: 10});
 // USR.insert({username: 'Kate', email: '', points: 30});
@@ -43,24 +42,41 @@ let nextSongIdx = 0;
 // // LOG_SA.insert({username: 'michel', songIdx: '0'});
 // // LOG_SA.insert({username: 'michel', songIdx: '0'});
 // SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
-// SA.insert({code: '0001', songIdx: 0, username: 'Kate'});
+// SA.insert({code: '0001', songIdx: 1, username: 'Kate'});
 // SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
 // SA.insert({code: '0003', songIdx: 0, username: 'John'});
 // nextCode = 4;
-// nextSongIdx = 2;
+// nextSongIdx = 0;
 
 
 
 
 app.get('/api/code', (req, res) => {
   console.time('NewCode');
-  let username = Buffer.from(req.headers.authorization, 'base64').toString();
+  const username = Buffer.from(req.headers.authorization, 'base64').toString();
 
-  let usr = USR.findOne({username});
+  const usr = USR.findOne({username});
   if (!usr) {
     console.log('Could not find user :' + username);
     res.status(401).send(`A user with the name ${username} does not exist!`);
     return;
+  }
+
+  const saSongIdxAll = SA.find({}).map((sa) => sa.songIdx);
+  let nbUsers = saSongIdxAll.length;
+  const previousAllocation = SA.findOne({username});
+  if (previousAllocation) {
+    const songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
+    if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
+      usr.points += config.POINTS_SONG_END;
+      USR.update(usr);
+    } else if (songDuration < config.TIME_TO_NEXT_S) {
+      res.json({code: previousAllocation.code, points: usr.points});
+      return;
+    }
+    SA.remove(previousAllocation);
+  } else { // This is a new user, that was not yet in SA
+    nbUsers += 1;
   }
 
   let code = nextCode;
@@ -68,14 +84,13 @@ app.get('/api/code', (req, res) => {
   code = '000' + code.toString();
   code = code.slice(-4);
 
-  let saSongIdxAll = SA.find({}).map((sa) => sa.songIdx);
-  let songCounts = {};
+
+  const songCounts = {};
   saSongIdxAll.forEach(function (songIdx) {
     songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
   });
 
-  let logSongIdxUser = LOG_SA.find({username}).map((log) => log.songIdx);
-
+  const logSongIdxUser = LOG_SA.find({username}).map((log) => log.songIdx);
   let songIdxBest;
   Object.keys(songCounts).forEach(function (songIdx) {
     songIdx = parseInt(songIdx)
@@ -85,25 +100,12 @@ app.get('/api/code', (req, res) => {
     }
   });
 
-
-  let nbUsers = saSongIdxAll.length;
   if (songIdxBest == undefined ||  // The player has heard everything
     (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
-  } 
-
-  let previousAllocation = SA.findOne({username});
-  if (previousAllocation) {
-    let songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
-    if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
-      usr.points += config.POINTS_SONG_END;
-      USR.update(usr);
-    }
-    SA.remove(previousAllocation);
-  } else { // This is a new user, that was not yet in SA
-    nbUsers += 1;
   }
+
   SA.insert({code, songIdx: songIdxBest, username});
   LOG_SA.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -119,11 +121,11 @@ app.get('/api/code', (req, res) => {
 // GET SONG ++++++++++++++++++++++++++++++++++++
 
 app.get('/api/song/:code', (req, res) => {
-  let code = req.params.code;
-  let allocation = SA.findOne({code});
+  const code = req.params.code;
+  const allocation = SA.findOne({code});
 
   if (allocation) {
-    let songFile = SONGS[allocation.songIdx] + '.mp3';
+    const songFile = SONGS[allocation.songIdx] + '.mp3';
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.sendFile(path.join(config.SONG_FOLDER, songFile));
   } else {
@@ -141,11 +143,11 @@ app.get('/api/synctime', (req, res) => {
 
 
 app.post('/api/matchcode', (req, res) => {
-  let username = req.body.username;
+  const username = req.body.username;
   let matchCode = req.body.matchCode;
   console.log('/api/matchcode', username, matchCode);
 
-  let usrUser = USR.findOne({username});
+  const usrUser = USR.findOne({username});
   if (!usrUser) {
     res.status(401).send(`A user with the name ${username} does not exist!`);
     return;
@@ -153,8 +155,8 @@ app.post('/api/matchcode', (req, res) => {
 
   matchCode = '000' + matchCode.toString();
   matchCode = matchCode.slice(-4);
-  let saMatch = SA.findOne({code: matchCode});
-  let saUser = SA.findOne({username});
+  const saMatch = SA.findOne({code: matchCode});
+  const saUser = SA.findOne({username});
 
   if (saUser && saMatch && saUser.songIdx == saMatch.songIdx) {
     SA.remove(saUser);
@@ -163,13 +165,13 @@ app.post('/api/matchcode', (req, res) => {
     usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
-    let usrMatch = USR.findOne({username: saMatch.username});
+    const usrMatch = USR.findOne({username: saMatch.username});
     usrMatch.points += config.POINTS_MATCH;
     USR.update(usrMatch);
 
     res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
 
-    let matchSocket = matchSockets.connected[usrMatch.socketId]
+    const matchSocket = matchSockets.connected[usrMatch.socketId]
     if (matchSocket) {
       matchSocket.emit('code:match',
         {username: usrMatch.username, matchUsername: usrUser.username, points: usrMatch.points}
@@ -191,11 +193,11 @@ app.post('/api/matchcode', (req, res) => {
 // POST LOGIN ++++++++++++++++++++++++++++++++++++"
 
 app.post('/api/tweet', (req, res) => {
-  let username = req.body.username;
-  let message = req.body.message;
+  const username = req.body.username;
+  const message = req.body.message;
 
 
-  let usr = USR.findOne({username});
+  const usr = USR.findOne({username});
   if (usr) {
     usr.points += config.POINTS_TWEET;
     USR.update(usr);

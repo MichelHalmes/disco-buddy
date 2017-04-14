@@ -7,7 +7,7 @@ import {Modal} from 'semantic-ui-react';
 import Client from './client.js';
 import {AudioPlayer, CodeArea, MessagePopup, ModalSetUser, TweetMessage} from './components.jsx';
 import './App.css';
-import CONFIG  from '../../config.js';
+import CONFIG from '../../config.js';
 
 
 
