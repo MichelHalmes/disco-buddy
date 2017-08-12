@@ -32,22 +32,31 @@ app.post('/api/login', (req, res) => {
     // GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
-//
+// 
 // USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
 // USR.insert({username: 'Mary', email: '', points: 10});
 // USR.insert({username: 'Kate', email: '', points: 30});
 // USR.insert({username: 'Peter', email: '', points: -5});
 // USR.insert({username: 'John', email: '', points: 20});
+// USR.insert({username: 'As', email: '', points: 20});
+// USR.insert({username: 'Elin', email: '', points: 20});
+// USR.insert({username: '123456789012345', email: '', points: 20});
 //
-// // LOG_SA.insert({username: 'michel', songIdx: '0'});
-// // LOG_SA.insert({username: 'michel', songIdx: '0'});
+// LOG_SA.insert({username: 'michel', songIdx: '0'});
+// LOG_SA.insert({username: 'michel', songIdx: '0'});
 // SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
 // SA.insert({code: '0001', songIdx: 1, username: 'Kate'});
 // SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
 // SA.insert({code: '0003', songIdx: 0, username: 'John'});
-// nextCode = 4;
+// SA.insert({code: '0004', songIdx: 2, username: 'As'});
+// SA.insert({code: '0005', songIdx: 3, username: 'Elin'});
+// SA.insert({code: '0006', songIdx: 4, username: '123456789012345'});
+// nextCode = 7;
 // nextSongIdx = 0;
-
+//
+// let f= [...Array(500).keys()];
+// console.log(f)
+// f.map((i) => SA.insert({code: nextCode+i, songIdx: 4, username: ""+123456789012345+i}))
 
 
 

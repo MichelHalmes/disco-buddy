@@ -3,13 +3,10 @@ import React from 'react';
 import io from 'socket.io-client';
 import {Modal} from 'semantic-ui-react';
 
-
-import Client from './client.js';
-import {AudioPlayer, CodeArea, MessagePopup, ModalSetUser, TweetMessage} from './components.jsx';
+import Client from './Client.js';
+import {AudioPlayer, CodeArea, MessagePopup, ModalSetUser, TweetMessage} from './Components.jsx';
 import './App.css';
 import CONFIG from '../../config.js';
-
-
 
 
 const App = React.createClass({
@@ -18,8 +15,8 @@ const App = React.createClass({
     this.lastActivity = new Date().getTime();
     this.resolveInactivity;
 
-    return {code: undefined, 
-      username: username, 
+    return {code: undefined,
+      username: username,
       points: 0,
       messages: [],
       matchedCurrentCode: false,
@@ -28,15 +25,15 @@ const App = React.createClass({
   },
 
   componentDidMount: function () {
-    let self = this; 
+    let self = this;
     self.handelCodeRequest();
 
     self.socket = io();
     self.socket.on('connect', () => self.socket.emit('send:username', self.state.username));
-    
+
     self.socket.on('code:match', function ({username, matchUsername, points}) {
       if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
-      self.setState({points, matchedCurrentCode: true, 
+      self.setState({points, matchedCurrentCode: true,
         messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
     });
   },
@@ -78,7 +75,7 @@ const App = React.createClass({
     self.setState({code: undefined});
     if (!self.state.username) return Promise.resolve(); // After Login error
 
-    return new Promise(function(resolve) { 
+    return new Promise(function(resolve) {
       if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
         resolve();
       } else {
@@ -123,7 +120,7 @@ const App = React.createClass({
     this.resolveInactivity();
     this.recordActivity();
     this.setState({isInactive: false});
-  },  
+  },
 
   recordActivity: function () {
     this.lastActivity = new Date().getTime();
@@ -147,16 +144,16 @@ const App = React.createClass({
   render() {
     return (
       <div className="ui center aligned basic segment no-margins" >
-        
+
         <Header />
         <Points username={this.state.username} points={this.state.points}/>
-        <AudioPlayer code={this.state.code} matchedCurrentCode={this.state.matchedCurrentCode} 
-              onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage} 
+        <AudioPlayer code={this.state.code} matchedCurrentCode={this.state.matchedCurrentCode}
+              onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage}
               onActivity={this.recordActivity} />
-        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit} 
+        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}
               matchedCurrentCode={this.state.matchedCurrentCode}
               pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
-        <TweetMessage username={this.state.username} pushMessage={this.pushMessage} 
+        <TweetMessage username={this.state.username} pushMessage={this.pushMessage}
               updatePoints={this.updatePoints} onActivity={this.recordActivity}/>
         <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
         <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
@@ -179,7 +176,7 @@ function Points(props) {
           {props.points} points
         </a>
       </div>
-    </div>  
+    </div>
   );
 }
 
@@ -188,13 +185,13 @@ function Header(props) {
   return (
     <div >
       <h2 className="no-margins">
-        <i className="music icon"></i> 
-        Disco Match 
-        <i className="music icon"></i> 
+        <i className="music icon"></i>
+        Disco Match
+        <i className="music icon"></i>
       </h2>
       <div className="">Find a dancer with your song!</div>
       <div className="ui divider no-margins"></div>
-    </div>  
+    </div>
   );
 }
 
@@ -202,12 +199,12 @@ function ModalInactivity(props) {
   return (
     <Modal open={props.isInactive} >
       <div className="ui center aligned basic segment">
-        <h1>You have been inactive for quite some time...?</h1>
+        <h1>You have been inactive for quite some time...!?</h1>
         <button className="ui submit button green" onClick={props.onReactivate}>
           Continue playing!
         </button>
       </div>
-    </Modal>  
+    </Modal>
   );
 }
 

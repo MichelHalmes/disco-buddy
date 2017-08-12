@@ -14,14 +14,16 @@ const Monitor = React.createClass({
         <div className="ui two column internally celled grid full-window-height">
           <div className="column">
             <Header/>
-            <div className="ui divider"></div>
+            <div className="ui divider small-margins-paddings "></div>
             <Guide />
             <div className="ui divider"></div>
             <Statistics />
             <Ranking />
+
           </div>
           <div className="column">
             <NewsFeed />
+            <Footer />
           </div>
         </div>
     );
@@ -31,7 +33,7 @@ const Monitor = React.createClass({
 function Header(props) {
   return (
     <div className="ui center aligned basic segment no-margins" >
-      <h2 >
+      <h2 className="small-margins-paddings">
         <i className="music icon"></i>
         Disco Match
         <i className="music icon"></i>
@@ -39,7 +41,6 @@ function Header(props) {
       <p className="no-margins-paddings">A gamification of Silent Disco...</p>
       <p className="no-margins-paddings">Find a dancer with your song!</p>
     </div>
-
   );
 }
 
@@ -48,17 +49,18 @@ function Guide(props) {
     <div className="ui centered grid" >
       <div className="two wide column">
       </div>
-      <div className="fourteen wide column">
+      <div className="fourteen wide column small-margins-paddings">
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
           <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
-          <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL}Points)`} />
+          <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH}Points)`} />
+          <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH} Points)`} />
           <GuideItem icon="forward" text={`Click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds or a match;
-                                           But better dance until the end (+${CONFIG.POINTS_SONG_END}Points)`} />
-          <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET}Point)`} />
+                                           But better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
+          <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Point)`} />
+          <GuideItem icon="warning sign" text="Please return your headphones when you're done!!" />
         </div>
       </div>
 
@@ -77,9 +79,6 @@ function GuideItem(props) {
     </div>
   );
 }
-
-
-
 
 const Statistics = React.createClass({
   getInitialState: function () {
@@ -103,17 +102,17 @@ const Statistics = React.createClass({
 
   render() {
     return (
-      <div className="ui two column centered grid" >
-        <div className="column">
-          <div className="ui statistics">
-            <div className="ui statistic">
+      <div className="ui two column centered grid no-margins-paddings" >
+        <div className="column no-margins-paddings">
+          <div className="ui statistics no-margins-paddings">
+            <div className="ui statistic no-margins-paddings">
               <div className="value">
                 <i className="child icon"> </i>
                 <a> {this.state.nbUsers}</a>
               </div>
               <div className="label"> Players </div>
             </div>
-            <div className="ui statistic">
+            <div className="ui statistic no-margins-paddings">
               <div className="value">
                 <i className="music icon"> </i>
                 <a> {this.state.nbSongs}</a>
@@ -126,7 +125,6 @@ const Statistics = React.createClass({
     )
   }
 });
-
 
 const Ranking = React.createClass({
   getInitialState: function () {
@@ -147,17 +145,16 @@ const Ranking = React.createClass({
 
   render() {
     return (
-      <div className="ui five column grid">
+      <div className="ui five column grid no-margins-paddings">
       {this.state.ranking.map((usr, i) => <RankingItem {...usr} rank={i+1} key={i} />)}
       </div>
     );
   }
 });
 
-
 function RankingItem(props) {
   return (
-    <div className="column">
+    <div className="column small-margins-paddings">
       <div className="large item">
         <span className="">
           <strong style={{fontSize: '150%'}}># {props.rank} </strong>
@@ -171,7 +168,14 @@ function RankingItem(props) {
   );
 }
 
-
+function Footer() {
+  return (
+    <div className="footer">
+        With <i className="heart icon"></i>by Mich-Mich!
+        <a>  disco-match@mail.com</a>
+    </div>
+  );
+}
 
 const NewsFeed = React.createClass({
   getInitialState: function () {
@@ -261,7 +265,7 @@ function NewsEvent({event}) {
   }
 
   return (
-    <div className="event no-margins" >
+    <div className="event no-margins-paddings" >
       <div className="label" >
         <i className={`big ${EVENT_TYPE_ICON[event.type]} icon`}></i>
       </div>

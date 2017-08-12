@@ -3,7 +3,7 @@ import {Modal, Popup, Dimmer} from 'semantic-ui-react';
 import isEmail from 'validator/lib/isEmail';
 
 import './App.css';
-import Client from './client.js';
+import Client from './Client.js';
 
 
 const CONFIG  = require('../../config.js');
@@ -120,14 +120,14 @@ export const AudioPlayer = React.createClass({
               onPause={this.handlePauseEvent}/>
 
         <div className="ui buttons no-margins ">
-          <button className="ui basic button blue " onClick={this.handleClickPlay}>
+          <button className="ui basic button blue no-margins " onClick={this.handleClickPlay}>
             {this.state.timePlayed === -1 ?
               <i className="big refresh loading icon icon-margin" ></i> :
               <i className="big play icon icon-margin"></i>
             }
             <p>{renderTimeToPlay(this.state.timePlayed)}</p>
           </button>
-          <button className={"ui button blue " + (this.canClickNext() ? "" : "disabled")}
+          <button className={"ui button blue no-margins " + (this.canClickNext() ? "" : "disabled")}
               onClick={this.handleClickNext}>
               <i className="big forward icon icon-margin"></i>
               <p>Next</p>

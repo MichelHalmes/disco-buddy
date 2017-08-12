@@ -2,8 +2,8 @@
 .no-margins {
     margin-top: 0pt !important;
     margin-bottom: 0pt !important;
-    padding-top: 4pt !important;
-    padding-bottom: 4pt !important;
+    padding-top: 3pt !important;
+    padding-bottom: 3pt !important;
 }
 
 .icon-margin {
@@ -12,4 +12,3 @@
     padding-left: 4pt !important;
     padding-right: 4pt !important;
 }
-
