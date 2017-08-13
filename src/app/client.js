@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 /* eslint-disable no-undef */
+import fetch from 'isomorphic-fetch';
 
 function postLogin(username, email) {
   console.log('/api/login', username);

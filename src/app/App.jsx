@@ -1,26 +1,25 @@
 import React from 'react';
-import { createStore } from 'redux';
 import { connect } from 'react-redux';
 
 import io from 'socket.io-client';
 import { Modal } from 'semantic-ui-react';
 
-import Client from './Client.js';
-import { AudioPlayer, CodeArea, MessagePopup, ModalSetUser, TweetMessage } from './Components.jsx';
 import './App.css';
 import CONFIG from '../../config.js';
 
-import { updatePointsAC } from './redux';
+import Client from './Client.js';
+import { AudioPlayer, CodeArea, MessagePopup, TweetMessage } from './Components.jsx';
+import ModalSetUser from './containers/ModalSetUser';
 
 
 const App = React.createClass({
   getInitialState: function () {
-    let username = JSON.parse(localStorage.getItem('username'));
+    // let username = JSON.parse(localStorage.getItem('username'));
     this.lastActivity = new Date().getTime();
     this.resolveInactivity;
 
     return {code: undefined,
-      username: username,
+      // username: username,
       messages: [],
       matchedCurrentCode: false,
       isInactive: false
@@ -32,10 +31,10 @@ const App = React.createClass({
     self.handelCodeRequest();
 
     self.socket = io();
-    self.socket.on('connect', () => self.socket.emit('send:username', self.state.username));
+    self.socket.on('connect', () => self.socket.emit('send:username', self.props.username));
 
     self.socket.on('code:match', function ({username, matchUsername, points}) {
-      if (username!== self.state.username) throw new Error('Codematch for another user: ' + username);
+      if (username!== self.props.username) throw new Error('Codematch for another user: ' + username);
       self.props.updatePoints(points);
       self.setState({matchedCurrentCode: true,
         messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
@@ -43,9 +42,10 @@ const App = React.createClass({
   },
 
   componentDidUpdate: function (prevProps, prevState) {
-    if (this.state.username && prevState.username !== this.state.username) {
-      this.pushMessage(`Welcome ${this.state.username}!`);
-      this.socket.emit('send:username', this.state.username);
+    if (this.props.username && prevProps.username !== this.props.username) {
+      console.log('componentDidUpdate', prevProps.username, this.props.username)
+      this.pushMessage(`Welcome ${this.props.username}!`);
+      this.socket.emit('send:username', this.props.username);
     }
     if (prevProps.points < this.props.points) {
       this.pushMessage(`Congrats; You have gained ${this.props.points-prevProps.points} points! :-)`);
@@ -54,31 +54,31 @@ const App = React.createClass({
     }
   },
 
-  handleLoginSubmit: function (username, email) {
-    let self = this;
-    username = username.trim();
-    return Client.postLogin(username, email)
-      .then(function (res) {
-        self.setState({username});
-        self.props.updatePoints(res.points);
-        localStorage.setItem('username', JSON.stringify(username));
-        self.handelCodeRequest();
-        return true;
-      })
-      .catch(function (error) {
-        // eslint-disable-next-line
-        if (error.response.status == 403) { // username already exists!
-          return false;
-        } else {
-           throw error;
-        }
-      });
-  },
+  // handleLoginSubmit: function (username, email) {
+  //   let self = this;
+  //   username = username.trim();
+  //   return Client.postLogin(username, email)
+  //     .then(function (res) {
+  //       self.setState({username});
+  //       self.props.updatePoints(res.points);
+  //       localStorage.setItem('username', JSON.stringify(username));
+  //       self.handelCodeRequest();
+  //       return true;
+  //     })
+  //     .catch(function (error) {
+  //       // eslint-disable-next-line
+  //       if (error.response.status == 403) { // username already exists!
+  //         return false;
+  //       } else {
+  //          throw error;
+  //       }
+  //     });
+  // },
 
   handelCodeRequest: function () {
     let self = this;
     self.setState({code: undefined});
-    if (!self.state.username) return Promise.resolve(); // After Login error
+    if (!self.props.username) return Promise.resolve(); // After Login error
 
     return new Promise(function(resolve) {
       if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
@@ -87,7 +87,7 @@ const App = React.createClass({
         self.setState({isInactive: true});
         self.resolveInactivity = resolve;
       }})
-      .then(() => Client.getCode(self.state.username))
+      .then(() => Client.getCode(self.props.username))
       .then(function(res) {
         self.pushMessage(`New song, new luck...!`);
         self.props.updatePoints(res.points);
@@ -110,7 +110,7 @@ const App = React.createClass({
 
   handleCodeSubmit: function (matchCode) {
     let self = this;
-    return Client.postMatchCode(this.state.username, matchCode)
+    return Client.postMatchCode(this.props.username, matchCode)
       .then(function ({accepted, points, matchUsername}) {
         if (accepted) {
           self.props.updatePoints(points);
@@ -143,28 +143,21 @@ const App = React.createClass({
     this.setState({messages: this.state.messages.concat([newMessage])});
   },
 
-  // updatePoints: function (points) {
-  //   this.setState({points});
-  // },
-
-
-
 
   render() {
     return (
       <div className="ui center aligned basic segment no-margins" >
-
         <Header />
-        <Points username={this.state.username} points={this.props.points}/>
+        <Points username={this.props.username} points={this.props.points}/>
         <AudioPlayer code={this.state.code} matchedCurrentCode={this.state.matchedCurrentCode}
               onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage}
               onActivity={this.recordActivity} />
         <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}
               matchedCurrentCode={this.state.matchedCurrentCode}
               pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
-        <TweetMessage username={this.state.username} pushMessage={this.pushMessage}
+        <TweetMessage username={this.props.username} pushMessage={this.pushMessage}
               updatePoints={this.props.updatePoints} onActivity={this.recordActivity}/>
-        <ModalSetUser username={this.state.username} onLoginSubmit={this.handleLoginSubmit} />
+        <ModalSetUser  />
         <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
         <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />
       </div>
@@ -220,9 +213,12 @@ function ModalInactivity(props) {
 const mapStateToProps = state => {
   console.log('mapStateToProps', state)
   return {
-    points: state.pointsReducer
+    points: state.appReducer.points,
+    username: state.appReducer.username
   }
 }
+
+import { updatePointsAC } from './redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
