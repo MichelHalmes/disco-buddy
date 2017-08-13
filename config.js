@@ -3,8 +3,8 @@ const path = require('path');
 const timeToPLay = 90
 
 module.exports = {
-	TIME_TO_PLAY_S: 120,
-	TIME_TO_NEXT_S: 15,
+	TIME_TO_PLAY_S: 60,
+	TIME_TO_NEXT_S: 5,
 	TIME_TO_INACTIVE_S: 240,
 	SYNC_PERIOD_S: 60,
 	TARGET_PROBA_MATCH: 0.25,

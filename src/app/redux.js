@@ -145,6 +145,7 @@ export function getCodeAC() {
       .then(res => {
         dispatch(getCodeSuccessAC(res.code))
         dispatch(updatePointsAC(res.points))
+        dispatch(pushMessageAC(`New song; New luck!`))
         return true;
       })
       .catch(error => {
@@ -159,6 +160,25 @@ export function getCodeAC() {
       });
   }
 }
+
+export function postMatchCodeAC(matchCode) {
+  return (dispatch, getState) => {
+    let username = getState().usernameReducer;
+    return Client.postMatchCode(username, matchCode)
+      .then(function ({accepted, points, matchUsername}) {
+        if (accepted) {
+          dispatch(matchCodeSuccessAC())
+          dispatch(updatePointsAC(points))
+          return true;
+        } else {
+          dispatch(pushMessageAC(`Nope, wrong code!`))
+          dispatch(updatePointsAC(points))
+          return false;
+        }
+      })
+  }
+}
+
 
 // REDUCERS
 

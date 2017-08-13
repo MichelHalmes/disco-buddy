@@ -1,14 +1,13 @@
 import React from 'react';
-import {Modal, Popup, Dimmer} from 'semantic-ui-react';
+import { connect } from 'react-redux';
+import { Modal } from 'semantic-ui-react';
 
-import './App.css';
-import Client from './Client.js';
+import Client from '../Client.js';
+
+const CONFIG  = require('../../../config.js');
 
 
-const CONFIG  = require('../../config.js');
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-export const AudioPlayer = React.createClass({
+const AudioPlayer = React.createClass({
   getInitialState: function () {
     this.syncTimeOffsetMs = 0;
     this.startTime = 0;
@@ -70,7 +69,7 @@ export const AudioPlayer = React.createClass({
   handleClickNext: function () {
     this.props.onActivity();
     if (this.canClickNext()) {
-      this.props.onCodeRequest();
+      this.props.getCode();
     } else {
       this.props.pushMessage(`Play longer to click next!`);
     }
@@ -87,8 +86,9 @@ export const AudioPlayer = React.createClass({
     if (timePlayed < CONFIG.TIME_TO_PLAY_S) {
       this.setState({timePlayed: timePlayed});
     } else {
-      this.props.onCodeRequest();
       this.props.pushMessage(`Time's up!`);
+      this.props.getCode();
+
     }
   },
 
@@ -148,61 +148,22 @@ export const AudioPlayer = React.createClass({
   },
 });
 
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+const mapStateToProps = state => {
+  return {
+    code: state.codeReducer.code,
+    matchedCurrentCode: state.codeReducer.matchedCurrentCode
+  }
+}
+
+import { getCodeAC, pushMessageAC } from '../redux';
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+  return {
+    getCode: () => dispatch(getCodeAC()),
+    pushMessage: () => dispatch(pushMessageAC())
+  }
+}
 
 
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-
-
-// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-export const TweetMessage  = React.createClass({
-  getInitialState() {
-    return { message: '', isValid: true};
-  },
-
-  onFormSubmit(evt) {
-    let self = this;
-    self.props.onActivity();
-    if (self.state.message.length > 3) {
-      Client.postTweet(self.props.username, self.state.message)
-        .then(function(res) {
-          self.props.updatePoints(res.points);
-        });
-      self.setState({message: '' });
-      // evt.preventDefault();
-    } else {
-      self.props.pushMessage(`Bad input!`);
-      self.setState({isValid: false});
-      setTimeout(self.setState.bind(self, {isValid: true}), 2000);
-
-    }
-  },
-
-  onInputChange(evt) {
-    this.setState({message: evt.target.value, isValid: true});
-  },
-
-  render() {
-    return (
-      <div className="ui center aligned basic segment">
-        <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
-          <i className="talk icon"></i>
-          <input type="text"
-            placeholder="Message"
-            value={this.state.message}
-            onChange={this.onInputChange}
-            />
-          <button className="ui green submit button" onClick={this.onFormSubmit}>Tweet</button>
-        </div>
-      </div>
-    );
-  },
-})
+export default connect(mapStateToProps, mapDispatchToProps)(AudioPlayer);

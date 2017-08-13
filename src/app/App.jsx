@@ -8,9 +8,11 @@ import './App.css';
 import CONFIG from '../../config.js';
 
 import Client from './Client.js';
-import { AudioPlayer, CodeArea, TweetMessage } from './Components.jsx';
+import { TweetMessage } from './Components.jsx';
 import ModalSetUser from './containers/ModalSetUser';
 import MessagePopup from './containers/MessagePopup';
+import AudioPlayer from './containers/AudioPlayer';
+import CodeArea from './containers/CodeArea';
 
 
 const App = React.createClass({
@@ -43,11 +45,6 @@ const App = React.createClass({
   componentDidUpdate: function (prevProps, prevState) {
     if (this.props.username && prevProps.username !== this.props.username) {
       this.socket.emit('send:username', this.props.username);
-    }
-    if (prevProps.points < this.props.points) {
-      this.pushMessage(`Congrats; You have gained ${this.props.points-prevProps.points} points! :-)`);
-    } else if (prevProps.points > this.props.points) {
-      this.pushMessage(`Oooh; You have lost ${prevProps.points-this.props.points} points! :-(`);
     }
   },
 
@@ -105,22 +102,22 @@ const App = React.createClass({
   //   }
   // },
 
-  handleCodeSubmit: function (matchCode) {
-    let self = this;
-    return Client.postMatchCode(this.props.username, matchCode)
-      .then(function ({accepted, points, matchUsername}) {
-        if (accepted) {
-          self.props.updatePoints(points);
-          self.setState({matchedCurrentCode: true,
-            messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
-          return true;
-        } else {
-          self.props.updatePoints(points);
-          self.setState({messages: self.state.messages.concat([`Nope, wrong code!`]) });
-          return false;
-        }
-      })
-  },
+  // handleCodeSubmit: function (matchCode) {
+  //   let self = this;
+  //   return Client.postMatchCode(this.props.username, matchCode)
+  //     .then(function ({accepted, points, matchUsername}) {
+  //       if (accepted) {
+  //         self.props.updatePoints(points);
+  //         self.setState({matchedCurrentCode: true,
+  //           messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
+  //         return true;
+  //       } else {
+  //         self.props.updatePoints(points);
+  //         self.setState({messages: self.state.messages.concat([`Nope, wrong code!`]) });
+  //         return false;
+  //       }
+  //     })
+  // },
 
   handleReactivate: function () {
     this.resolveInactivity();
@@ -146,12 +143,8 @@ const App = React.createClass({
       <div className="ui center aligned basic segment no-margins" >
         <Header />
         <Points username={this.props.username} points={this.props.points}/>
-        <AudioPlayer code={this.props.code} matchedCurrentCode={this.state.matchedCurrentCode}
-              onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage}
-              onActivity={this.recordActivity} />
-            <CodeArea code={this.props.code} onCodeSubmit={this.handleCodeSubmit}
-              matchedCurrentCode={this.state.matchedCurrentCode}
-              pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
+        <AudioPlayer onActivity={this.recordActivity} />
+        <CodeArea onActivity={this.recordActivity}/>
         <TweetMessage username={this.props.username} pushMessage={this.pushMessage}
               updatePoints={this.props.updatePoints} onActivity={this.recordActivity}/>
         <ModalSetUser  />
@@ -185,7 +178,7 @@ function Header(props) {
     <div >
       <h2 className="no-margins">
         <i className="music icon"></i>
-        Disco Match
+          Disco-Connect
         <i className="music icon"></i>
       </h2>
       <div className="">Find a dancer with your song!</div>
