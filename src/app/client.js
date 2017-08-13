@@ -3,7 +3,6 @@
 import fetch from 'isomorphic-fetch';
 
 function postLogin(username, email) {
-  console.log('/api/login', username);
   return fetch('/api/login', {
     method: 'post',
     body: JSON.stringify({username, email}),
@@ -37,7 +36,6 @@ function getSyncTime() {
 }
 
 function postMatchCode(username, matchCode) {
-  console.log('/api/matchcode', username, matchCode);
   return fetch('/api/matchcode', {
     method: 'post',
     body: JSON.stringify({username, matchCode}),

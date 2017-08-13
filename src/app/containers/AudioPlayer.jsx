@@ -161,7 +161,7 @@ import { getCodeAC, pushMessageAC } from '../redux';
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     getCode: () => dispatch(getCodeAC()),
-    pushMessage: () => dispatch(pushMessageAC())
+    pushMessage: (message) => dispatch(pushMessageAC(message))
   }
 }
 

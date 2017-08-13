@@ -92,7 +92,6 @@ function usernameReducer(state = initalUsername, action) {
     case POST_LOGIN_REQUEST:
       return state
     case POST_LOGIN_SUCCESS:
-      localStorage.setItem('username', JSON.stringify(action.username)) // TODO: Should not go here!
       return  action.username
     case POST_LOGIN_FAILURE:
       return state
@@ -140,6 +139,14 @@ export function getCodeAC() {
     if (!username) {
       return false; // Needs login first!
     }
+    // return new Promise(function(resolve) {
+    //   if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
+    //     resolve();
+    //   } else {
+    //     self.setState({isInactive: true});
+    //     self.resolveInactivity = resolve;
+    //   }})
+    // } TODO: inactivity
     dispatch(getCodeRequestAC())
     return Client.getCode(username)
       .then(res => {
@@ -167,8 +174,7 @@ export function postMatchCodeAC(matchCode) {
     return Client.postMatchCode(username, matchCode)
       .then(function ({accepted, points, matchUsername}) {
         if (accepted) {
-          dispatch(matchCodeSuccessAC())
-          dispatch(updatePointsAC(points))
+          dispatch(matchCodeSuccessAC(matchUsername, points))
           return true;
         } else {
           dispatch(pushMessageAC(`Nope, wrong code!`))
