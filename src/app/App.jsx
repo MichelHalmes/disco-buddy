@@ -8,8 +8,9 @@ import './App.css';
 import CONFIG from '../../config.js';
 
 import Client from './Client.js';
-import { AudioPlayer, CodeArea, MessagePopup, TweetMessage } from './Components.jsx';
+import { AudioPlayer, CodeArea, TweetMessage } from './Components.jsx';
 import ModalSetUser from './containers/ModalSetUser';
+import MessagePopup from './containers/MessagePopup';
 
 
 const App = React.createClass({
@@ -20,31 +21,27 @@ const App = React.createClass({
 
     return {code: undefined,
       // username: username,
-      messages: [],
-      matchedCurrentCode: false,
+      // messages: [],
+      // matchedCurrentCode: false,
       isInactive: false
     };
   },
 
   componentDidMount: function () {
     let self = this;
-    self.handelCodeRequest();
+    this.props.getCode()
 
     self.socket = io();
     self.socket.on('connect', () => self.socket.emit('send:username', self.props.username));
 
     self.socket.on('code:match', function ({username, matchUsername, points}) {
       if (username!== self.props.username) throw new Error('Codematch for another user: ' + username);
-      self.props.updatePoints(points);
-      self.setState({matchedCurrentCode: true,
-        messages: self.state.messages.concat([`You have matched with ${matchUsername}!`, `Click 'Next' for a new song!`]) });
+      self.props.matchCodeSuccess(matchUsername, points)
     });
   },
 
   componentDidUpdate: function (prevProps, prevState) {
     if (this.props.username && prevProps.username !== this.props.username) {
-      console.log('componentDidUpdate', prevProps.username, this.props.username)
-      this.pushMessage(`Welcome ${this.props.username}!`);
       this.socket.emit('send:username', this.props.username);
     }
     if (prevProps.points < this.props.points) {
@@ -75,38 +72,38 @@ const App = React.createClass({
   //     });
   // },
 
-  handelCodeRequest: function () {
-    let self = this;
-    self.setState({code: undefined});
-    if (!self.props.username) return Promise.resolve(); // After Login error
+  // handelCodeRequest: function () {
+  //   let self = this;
+  //   self.setState({code: undefined});
+  //   if (!self.props.username) return Promise.resolve(); // After Login error
+  //
+  //   return new Promise(function(resolve) {
+  //     if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
+  //       resolve();
+  //     } else {
+  //       self.setState({isInactive: true});
+  //       self.resolveInactivity = resolve;
+  //     }})
+  //     .then(() => Client.getCode(self.props.username))
+  //     .then(function(res) {
+  //       self.pushMessage(`New song, new luck...!`);
+  //       self.props.updatePoints(res.points);
+  //       self.setState({code: res.code, matchedCurrentCode: false});
+  //
+  //     })
+  //     .catch(self.catchLoginError);
+  // },
 
-    return new Promise(function(resolve) {
-      if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
-        resolve();
-      } else {
-        self.setState({isInactive: true});
-        self.resolveInactivity = resolve;
-      }})
-      .then(() => Client.getCode(self.props.username))
-      .then(function(res) {
-        self.pushMessage(`New song, new luck...!`);
-        self.props.updatePoints(res.points);
-        self.setState({code: res.code, matchedCurrentCode: false});
-
-      })
-      .catch(self.catchLoginError);
-  },
-
-  catchLoginError: function (error) {
-    // eslint-disable-next-line
-    if (error.response && error.response.status == 401) { // username not found
-      this.setState({username: undefined});
-      localStorage.removeItem('username')
-      return false;
-    } else {
-       throw error;
-    }
-  },
+  // catchLoginError: function (error) {
+  //   // eslint-disable-next-line
+  //   if (error.response && error.response.status == 401) { // username not found
+  //     this.setState({username: undefined});
+  //     localStorage.removeItem('username')
+  //     return false;
+  //   } else {
+  //      throw error;
+  //   }
+  // },
 
   handleCodeSubmit: function (matchCode) {
     let self = this;
@@ -135,13 +132,13 @@ const App = React.createClass({
     this.lastActivity = new Date().getTime();
   },
 
-  voidMessages: function () {
-    this.setState({messages: []})
-  },
-
-  pushMessage: function (newMessage) {
-    this.setState({messages: this.state.messages.concat([newMessage])});
-  },
+  // voidMessages: function () {
+  //   this.setState({messages: []})
+  // },
+  //
+  // pushMessage: function (newMessage) {
+  //   this.setState({messages: this.state.messages.concat([newMessage])});
+  // },
 
 
   render() {
@@ -149,17 +146,17 @@ const App = React.createClass({
       <div className="ui center aligned basic segment no-margins" >
         <Header />
         <Points username={this.props.username} points={this.props.points}/>
-        <AudioPlayer code={this.state.code} matchedCurrentCode={this.state.matchedCurrentCode}
+        <AudioPlayer code={this.props.code} matchedCurrentCode={this.state.matchedCurrentCode}
               onCodeRequest={this.handelCodeRequest} pushMessage={this.pushMessage}
               onActivity={this.recordActivity} />
-        <CodeArea code={this.state.code} onCodeSubmit={this.handleCodeSubmit}
+            <CodeArea code={this.props.code} onCodeSubmit={this.handleCodeSubmit}
               matchedCurrentCode={this.state.matchedCurrentCode}
               pushMessage={this.pushMessage} onActivity={this.recordActivity}/>
         <TweetMessage username={this.props.username} pushMessage={this.pushMessage}
               updatePoints={this.props.updatePoints} onActivity={this.recordActivity}/>
         <ModalSetUser  />
         <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
-        <MessagePopup messages={this.state.messages} onMessagesRead={this.voidMessages} />
+        <MessagePopup  />
       </div>
     );
   }
@@ -211,18 +208,21 @@ function ModalInactivity(props) {
 }
 
 const mapStateToProps = state => {
-  console.log('mapStateToProps', state)
   return {
-    points: state.appReducer.points,
-    username: state.appReducer.username
+    points: state.pointsReducer,
+    username: state.usernameReducer,
+    code: state.codeReducer.code,
+    matchedCurrentCode: state.codeReducer.matchedCurrentCode,
   }
 }
 
-import { updatePointsAC } from './redux';
+import { updatePointsAC, matchCodeSuccessAC, getCodeAC } from './redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    updatePoints: (points) => dispatch(updatePointsAC(points))
+    updatePoints: (points) => dispatch(updatePointsAC(points)),
+    matchCodeSuccess: (matchUsername, points) => dispatch(matchCodeSuccessAC(matchUsername, points)),
+    getCode:() => dispatch(getCodeAC()),
   }
 }
 

@@ -47,13 +47,8 @@ const ModalSetUser = React.createClass({
 
     if (!isValid) return;
 
-    console.log(this.props)
-
-    let promise = this.props.postLogin(person.username, person.email)
-    console.log('postLogin.sent', promise)
-
-    promise.then(function (isOk){
-        console.log('postLogin.then', isOk)
+    this.props.postLogin(person.username, person.email)
+      .then(isOk => {
         if (!isOk) {
           self.setState({
             fields: {},
@@ -64,9 +59,6 @@ const ModalSetUser = React.createClass({
           });
         }
       })
-      .catch(function(err){
-        console.log('postLogin.catch', err)
-      });
   },
 
   render: function() {
@@ -104,9 +96,8 @@ const ModalSetUser = React.createClass({
 });
 
 const mapStateToProps = state => {
-  console.log('ModalSetUser mapStateToProps', state)
   return {
-    username: state.appReducer.username
+    username: state.usernameReducer
   }
 }
 

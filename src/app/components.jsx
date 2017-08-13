@@ -222,48 +222,7 @@ export const CodeArea = React.createClass({
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-const timeoutLength = 4000;
 
-export const MessagePopup = React.createClass({
-  getInitialState() {
-    return { isOpen: false };
-  },
-
-  componentDidUpdate: function (prevProps, prevState) {
-    // console.log('message')
-    if (this.props.messages.length === 0 || prevProps.messages === this.props.messages) return;
-    this.setState({isOpen: true})
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => {
-      this.handleClose();
-
-    }, timeoutLength)
-  },
-
-  handleClose()  {
-    // console.log('close popup')
-    this.setState({isOpen: false});
-    this.props.onMessagesRead();
-    clearTimeout(this.timeout);
-  },
-
-  render() {
-    return (
-      <div className="ui center aligned basic segment">
-        <Popup
-            content={"undefined"}
-            open={this.state.isOpen}
-            basic
-            on="click"
-            onClose={this.handleClose}
-            inverted
-            flowing>
-            {this.props.messages.map((msg, i) => <p key={i}>{msg}</p>)}
-        </Popup>
-      </div>
-    );
-  }
-});
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
