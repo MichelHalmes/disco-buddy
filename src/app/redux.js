@@ -59,23 +59,24 @@ export function postLoginAC(username, email) {
   return (dispatch, getState) => {
     dispatch(postLoginRequestAC(username, email))
     return Client.postLogin(username, email)
-      .then(res => {
-        dispatch(postLoginSuccessAC(username))
-        dispatch(updatePointsAC(res.points))
-        dispatch(pushMessageAC(`Welcome ${username}!`))
-        localStorage.setItem('username', JSON.stringify(username));
-        dispatch(getCodeAC())
-        return true;
-      })
-      .catch(error => {
-        if (error.response.status == 403) { // username already exists!
-          dispatch(postLoginFailureAC('Username already used!'))
-          return false;
-        } else {
-          dispatch(postLoginFailureAC(error))
-          throw error;
-        }
-      });
+      .then(
+        res => {
+          dispatch(postLoginSuccessAC(username))
+          dispatch(updatePointsAC(res.points))
+          dispatch(pushMessageAC(`Welcome ${username}!`))
+          localStorage.setItem('username', JSON.stringify(username));
+          dispatch(getCodeAC())
+          return true;
+        },
+        error => {
+          if (error.response.status == 403) { // username already exists!
+            dispatch(postLoginFailureAC('Username already used!'))
+            return false;
+          } else {
+            dispatch(postLoginFailureAC(error))
+            throw error;
+          }
+        });
   }
 }
 
@@ -139,33 +140,26 @@ export function getCodeAC() {
       dispatch(getCodeFailureAC('User is Inactive'))
       return false
     }
-    // return new Promise(function(resolve) {
-    //   if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
-    //     resolve();
-    //   } else {
-    //     self.setState({isInactive: true});
-    //     self.resolveInactivity = resolve;
-    //   }})
-    // } TODO: inactivity
     dispatch(getCodeRequestAC())
     return Client.getCode(username)
-      .then(res => {
-        dispatch(getCodeSuccessAC(res.code))
-        dispatch(updatePointsAC(res.points))
-        dispatch(pushMessageAC(`New song; New luck!`))
-        return true;
-      })
-      .catch(error => {
-        if (error.response && error.status == 401) { // username not found
-          dispatch(getCodeFailureAC(`The username ${username} does not exist`))
-          localStorage.removeItem('username')
-          dispatch(triggerLoginAC()) // Trigger new login
-          return false;
-        } else {
-          dispatch(getCodeFailureAC(error))
-          throw error;
-        }
-      });
+      .then(
+        res => {
+          dispatch(getCodeSuccessAC(res.code))
+          dispatch(updatePointsAC(res.points))
+          dispatch(pushMessageAC(`New song; New luck!`))
+          return true;
+        },
+        error => {
+          if (error.response && error.status == 401) { // username not found
+            dispatch(getCodeFailureAC(`The username ${username} does not exist`))
+            localStorage.removeItem('username')
+            dispatch(triggerLoginAC()) // Trigger new login
+            return false;
+          } else {
+            dispatch(getCodeFailureAC(error))
+            throw error;
+          }
+        });
   }
 }
 
@@ -192,22 +186,22 @@ export function postMatchCodeAC(matchCode) {
 function codeReducer(state = {code: 0, matchedCurrentCode: false}, action) {
   switch (action.type) {
     case GET_CODE_REQUEST:
-      return Object.assign({}, state, {
+      return {...state,
         code: undefined
-      })
+      }
     case GET_CODE_SUCCESS:
-      return Object.assign({}, state, {
+      return {...state,
         code: action.code,
         matchedCurrentCode: false,
-      })
+      }
     case GET_CODE_FAILURE:
-      return Object.assign({}, state, {
+      return {...state,
         code: undefined
-      })
+      }
     case MATCH_CODE_SUCCESS:
-      return Object.assign({}, state, {
+      return {...state,
         matchedCurrentCode: true
-      })
+      }
     default:
       return state
   }
@@ -272,18 +266,18 @@ function checkActivityAC() {
 function activityReducer(state = {isActive: true, lastActivity: new Date().getTime()}, action) {
   switch (action.type) {
     case RECORD_ACTIVITY:
-      return Object.assign({}, state, {
+      return {...state,
         lastActivity: new Date().getTime()
-      })
+      }
     case REACTIVATE:
-      return Object.assign({}, state, {
+      return {...state,
         isActive: true,
         lastActivity: new Date().getTime()
-      })
+      }
     case SET_INACTIVE:
-      return Object.assign({}, state, {
+      return {...state,
         isActive: false
-      })
+      }
     default:
       return state
   }

@@ -37,7 +37,6 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "test_server": "mocha -- src/server/test_api.js",
-    "eject": "react-scripts eject",
     "server": "nodemon src/server/server.js --watch src/server/"
   }
 }
