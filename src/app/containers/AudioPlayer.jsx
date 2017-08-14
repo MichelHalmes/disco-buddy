@@ -67,7 +67,7 @@ const AudioPlayer = React.createClass({
 
 
   handleClickNext: function () {
-    this.props.onActivity();
+    this.props.recordActivity();
     if (this.canClickNext()) {
       this.props.getCode();
     } else {
@@ -156,12 +156,13 @@ const mapStateToProps = state => {
   }
 }
 
-import { getCodeAC, pushMessageAC } from '../redux';
+import { getCodeAC, pushMessageAC, recordActivityAC } from '../redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     getCode: () => dispatch(getCodeAC()),
-    pushMessage: (message) => dispatch(pushMessageAC(message))
+    pushMessage: (message) => dispatch(pushMessageAC(message)),
+    recordActivity: () => dispatch(recordActivityAC())
   }
 }
 

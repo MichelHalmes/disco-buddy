@@ -31,7 +31,7 @@ const MessagePopup = React.createClass({
     return (
       <div className="ui center aligned basic segment">
         <Popup
-            content={"undefined"}
+            // content={"undefined"}
             open={this.state.isOpen}
             basic
             on="click"

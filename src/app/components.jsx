@@ -36,7 +36,7 @@ export function Header(props) {
 
 export function ModalInactivity(props) {
   return (
-    <Modal open={props.isInactive} >
+    <Modal open={!props.isActive} >
       <div className="ui center aligned basic segment">
         <h1>You have been inactive for quite some time...!?</h1>
         <button className="ui submit button green" onClick={props.onReactivate}>

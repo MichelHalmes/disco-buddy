@@ -15,7 +15,7 @@ const CodeArea = React.createClass({
   },
 
   onFormSubmit(evt) {
-    this.props.onActivity();
+    this.props.recordActivity();
     const matchCode = this.state.matchCode;
     const isValid = this.validate(matchCode);
     // evt.preventDefault();
@@ -83,12 +83,13 @@ const mapStateToProps = state => {
   }
 }
 
-import { postMatchCodeAC, pushMessageAC } from '../redux';
+import { postMatchCodeAC, pushMessageAC, recordActivityAC } from '../redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     postMatchCode: (matchCode) => dispatch(postMatchCodeAC(matchCode)),
-    pushMessage: () => dispatch(pushMessageAC())
+    pushMessage: (message) => dispatch(pushMessageAC(message)),
+    recordActivity: () => dispatch(recordActivityAC())
   }
 }
 

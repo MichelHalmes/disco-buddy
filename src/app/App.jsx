@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { Modal } from 'semantic-ui-react';
 
 import './App.css';
-import CONFIG from '../../config.js';
+
 
 
 import { Points, Header, ModalInactivity } from './Components.jsx';
@@ -17,19 +17,9 @@ import TweetMessage from './containers/TweetMessage';
 
 
 const App = React.createClass({
-  getInitialState: function () {
-    // let username = JSON.parse(localStorage.getItem('username'));
-    this.lastActivity = new Date().getTime();
-    this.resolveInactivity;
-
-    return {code: undefined,
-      isInactive: false
-    };
-  },
-
   componentDidMount: function () {
     let self = this;
-    this.props.getCode()
+    self.props.getCode()
 
     self.socket = io();
     self.socket.on('connect', () => self.socket.emit('send:username', self.props.username));
@@ -47,27 +37,22 @@ const App = React.createClass({
   },
 
 
-  handleReactivate: function () {
-    this.resolveInactivity();
-    this.recordActivity();
-    this.setState({isInactive: false});
-  },
-
-  recordActivity: function () {
-    this.lastActivity = new Date().getTime();
-  },
+  //
+  // recordActivity: function () {
+  //   this.lastActivity = new Date().getTime();
+  // },
 
   render() {
     return (
       <div className="ui center aligned basic segment no-margins" >
         <Header />
-        <Points username={this.props.username} points={this.props.points}/>
+        <Points username={this.props.username} points={this.props.points} />
         <AudioPlayer onActivity={this.recordActivity} />
-        <CodeArea onActivity={this.recordActivity}/>
-        <TweetMessage onActivity={this.recordActivity}/>
-        <ModalSetUser  />
-        <ModalInactivity isInactive={this.state.isInactive} onReactivate={this.handleReactivate} />
-        <MessagePopup  />
+        <CodeArea />
+        <TweetMessage />
+        <ModalSetUser />
+        <ModalInactivity isActive={this.props.isActive} onReactivate={this.props.reactivate} />
+        <MessagePopup />
       </div>
     );
   }
@@ -78,18 +63,17 @@ const mapStateToProps = state => {
   return {
     points: state.pointsReducer,
     username: state.usernameReducer,
-    code: state.codeReducer.code,
-    matchedCurrentCode: state.codeReducer.matchedCurrentCode,
+    isActive: state.activityReducer.isActive
   }
 }
 
-import { updatePointsAC, matchCodeSuccessAC, getCodeAC } from './redux';
+import { matchCodeSuccessAC, getCodeAC, reactivateAC} from './redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    updatePoints: (points) => dispatch(updatePointsAC(points)),
     matchCodeSuccess: (matchUsername, points) => dispatch(matchCodeSuccessAC(matchUsername, points)),
-    getCode:() => dispatch(getCodeAC()),
+    getCode: () => dispatch(getCodeAC()),
+    reactivate: () => dispatch(reactivateAC())
   }
 }
 

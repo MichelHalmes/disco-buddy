@@ -24,7 +24,7 @@ describe("API", function() {
         server = require("./server.js");
         sleep(50);
 
-        request.post({url: base_url+'/api/login', body: JSON.stringify({username: 'x'}), headers: {'Content-Type': 'application/json'} }, 
+        request.post({url: base_url+'/api/login', body: JSON.stringify({username: 'x'}), headers: {'Content-Type': 'application/json'} },
         function(error, response, body){
           assert.equal(200, response.statusCode);
           assert.equal('{}', body);
@@ -48,8 +48,6 @@ describe("API", function() {
           done();
         }
       );
-
     });
-   
   });
 });

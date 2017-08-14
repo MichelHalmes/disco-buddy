@@ -1,13 +1,7 @@
 
-// code
-// matchedCurrentCode
-// username
-// isInactive
-// points
-//
-
 import { combineReducers } from 'redux';
 import Client from './Client.js';
+const CONFIG  = require('../../config.js');
 
 " ======= POINTS ======== "
 
@@ -74,11 +68,12 @@ export function postLoginAC(username, email) {
         return true;
       })
       .catch(error => {
-        dispatch(postLoginFailureAC(error))
         if (error.response.status == 403) { // username already exists!
+          dispatch(postLoginFailureAC('Username already used!'))
           return false;
         } else {
-           throw error;
+          dispatch(postLoginFailureAC(error))
+          throw error;
         }
       });
   }
@@ -137,7 +132,12 @@ export function getCodeAC() {
   return (dispatch, getState) => {
     let username = getState().usernameReducer;
     if (!username) {
-      return false; // Needs login first!
+      dispatch(getCodeFailureAC('No username defined!'))
+      return false // Needs login first!
+    }
+    if (!dispatch(checkActivityAC())) {
+      dispatch(getCodeFailureAC('User is Inactive'))
+      return false
     }
     // return new Promise(function(resolve) {
     //   if (new Date().getTime() - self.lastActivity < CONFIG.TIME_TO_INACTIVE_S * 1000) {
@@ -156,13 +156,14 @@ export function getCodeAC() {
         return true;
       })
       .catch(error => {
-        dispatch(getCodeFailureAC(error))
         if (error.response && error.status == 401) { // username not found
-          dispatch(triggerLoginAC()) // Trigger new login
+          dispatch(getCodeFailureAC(`The username ${username} does not exist`))
           localStorage.removeItem('username')
+          dispatch(triggerLoginAC()) // Trigger new login
           return false;
         } else {
-           throw error;
+          dispatch(getCodeFailureAC(error))
+          throw error;
         }
       });
   }
@@ -237,11 +238,65 @@ function messagesReducer(state = [], action) {
   }
 }
 
+" ======= INACTIVITY ======== "
+
+// ACTIONS & ACTION_CREATORS
+const RECORD_ACTIVITY = 'RECORD_ACTIVITY'
+export function recordActivityAC() {
+  return {type: RECORD_ACTIVITY}
+}
+
+const REACTIVATE = 'REACTIVATE'
+export function reactivateAC() {
+  return (dispatch, getState) => {
+    dispatch({type: REACTIVATE})
+    if (!getState().codeReducer.code) {
+      dispatch(getCodeAC())
+    }
+  }
+}
+
+const SET_INACTIVE = 'SET_INACTIVE'
+function checkActivityAC() {
+  return (dispatch, getState) => {
+    if (new Date().getTime() - self.lastActivity > CONFIG.TIME_TO_INACTIVE_S * 1000) {
+      dispatch({type: SET_INACTIVE})
+      return false
+    } else {
+      return true
+    }
+  }
+}
+
+// REDUCER
+function activityReducer(state = {isActive: true, lastActivity: new Date().getTime()}, action) {
+  switch (action.type) {
+    case RECORD_ACTIVITY:
+      return Object.assign({}, state, {
+        lastActivity: new Date().getTime()
+      })
+    case REACTIVATE:
+      return Object.assign({}, state, {
+        isActive: true,
+        lastActivity: new Date().getTime()
+      })
+    case SET_INACTIVE:
+      return Object.assign({}, state, {
+        isActive: false
+      })
+    default:
+      return state
+  }
+}
+
+" -------- ROOT_REDUCER -------- "
+
 const rootReducer = combineReducers({
   pointsReducer,
   usernameReducer,
   codeReducer,
-  messagesReducer
+  messagesReducer,
+  activityReducer
 })
 
 export default rootReducer

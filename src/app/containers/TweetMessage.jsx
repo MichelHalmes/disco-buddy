@@ -11,7 +11,7 @@ export const TweetMessage  = React.createClass({
 
   onFormSubmit(evt) {
     let self = this;
-    self.props.onActivity();
+    self.props.recordActivity();
     if (self.state.message.length > 3) {
       Client.postTweet(self.props.username, self.state.message)
         .then(function(res) {
@@ -53,12 +53,13 @@ const mapStateToProps = state => {
   }
 }
 
-import { pushMessageAC, updatePointsAC } from '../redux';
+import { pushMessageAC, updatePointsAC, recordActivityAC } from '../redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
     pushMessage: (message) => dispatch(pushMessageAC(message)),
     updatePoints: (points) => dispatch(updatePointsAC(points)),
+    recordActivity: () => dispatch(recordActivityAC())
   }
 }
 
