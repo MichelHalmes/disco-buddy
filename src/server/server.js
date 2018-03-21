@@ -63,7 +63,7 @@ require('./api_routes')(app, io.sockets, monitorSocket);
 
 console.log(path.resolve(__dirname, '../../build'))
 
-// app.use('/*', express.static(path.resolve(__dirname, '../../build')));
+app.use(express.static(path.resolve(__dirname, '../../build')));
 // app.use('/', express.static(`${__dirname}/public`));
 app.get('/*', function (req, res) {
   res.sendFile(path.resolve(__dirname, '../../build', 'index.html'));

@@ -6,22 +6,21 @@ import { Router, Route, browserHistory } from 'react-router';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 
-import thunkMiddleware from 'redux-thunk';
-import { createLogger } from 'redux-logger';
-
-
 import App from './app/App.jsx';
 import rootReducer from './app/redux';
 import Monitor from './monitor/Monitor.jsx';
 
-const loggerMiddleware = createLogger()
+import thunkMiddleware from 'redux-thunk'; // lets us dispatch() functions
+
+let middleware = [thunkMiddleware]
+if (process.env.NODE_ENV !== 'production') {
+  let loggerMiddleware = require('redux-logger').createLogger() // neat middleware that logs actions
+  middleware = [...middleware, loggerMiddleware]
+}
 
 let store = createStore(
   rootReducer,
-  applyMiddleware(
-    thunkMiddleware, // lets us dispatch() functions
-    loggerMiddleware // neat middleware that logs actions
-  )
+  applyMiddleware(...middleware)
 )
 
 ReactDOM.render(

@@ -25,9 +25,9 @@ const AudioPlayer = React.createClass({
     return Client.getSyncTime()
       .then(function(res) {
         if (nb_tries==0) {
-          self.syncTimeOffsetMs = (res.time - new Date().getTime());
-        } else { // We get the one with the shortest delay ie maximum offset
-          self.syncTimeOffsetMs = Math.max(self.syncTimeOffsetMs, (res.time - new Date().getTime()));
+          self.syncTimeOffsetMs = new Date().getTime() - res.time;
+        } else { // We get the one with the shortest delay ever observed
+          self.syncTimeOffsetMs = Math.min(self.syncTimeOffsetMs, new Date().getTime() - res.time);
         }
         if (nb_tries<10) {
           setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 2000);
@@ -51,7 +51,7 @@ const AudioPlayer = React.createClass({
   handleCanPlayEvent: function() {
     if (this.props.code != this.lastCodeSynced) {
       this.lastCodeSynced = this.props.code;
-      this.startTime = (new Date().getTime() + this.syncTimeOffsetMs) /1000 % CONFIG.SYNC_PERIOD_S
+      this.startTime = (new Date().getTime() - this.syncTimeOffsetMs) /1000 % CONFIG.SYNC_PERIOD_S
       this.refs.myAudio.currentTime = this.startTime;
     }
   },
