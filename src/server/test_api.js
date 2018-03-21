@@ -19,12 +19,12 @@ describe("API", function() {
     var fsStub, randomStub, server;
 
     before(function(done) {
-        fsStub = sinon.stub(fs, 'readdirSync').returns(['a.mp3', 'b.mp3', 'c.mp3']);
-        randomStub = sinon.stub(Math, 'random').returns(0.99);
-        server = require("./server.js");
-        sleep(50);
+      fsStub = sinon.stub(fs, 'readdirSync').returns(['a.mp3', 'b.mp3', 'c.mp3']);
+      randomStub = sinon.stub(Math, 'random').returns(0.99);
+      server = require("./server.js");
+      sleep(50);
 
-        request.post({url: base_url+'/api/login', body: JSON.stringify({username: 'x'}), headers: {'Content-Type': 'application/json'} },
+      request.post({url: base_url+'/api/login', body: JSON.stringify({username: 'x'}), headers: {'Content-Type': 'application/json'} },
         function(error, response, body){
           assert.equal(200, response.statusCode);
           assert.equal('{}', body);
