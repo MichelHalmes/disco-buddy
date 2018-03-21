@@ -8,7 +8,7 @@ import './App.css';
 
 
 
-import { Points, Header, ModalInactivity } from './Components.jsx';
+import { Points, Header, ModalInactivity } from './components.jsx';
 import ModalSetUser from './containers/ModalSetUser';
 import MessagePopup from './containers/MessagePopup';
 import AudioPlayer from './containers/AudioPlayer';
