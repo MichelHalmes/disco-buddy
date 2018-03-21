@@ -35,7 +35,7 @@ function Header(props) {
     <div className="ui center aligned basic segment no-margins" >
       <h2 className="small-margins-paddings">
         <i className="music icon"></i>
-        Disco Match
+        Disco Buddy
         <i className="music icon"></i>
       </h2>
       <p className="no-margins-paddings">A gamification of Silent Disco...</p>
@@ -51,13 +51,13 @@ function Guide(props) {
       </div>
       <div className="fourteen wide column small-margins-paddings">
         <div className="ui large ordered list">
-          <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-MATCH</a></span>}/>
+          <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-BUDDY</a> (No internet!)</span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
-          <GuideItem icon="chrome" text={<span>Visit <a>disco-match.me</a> with your browser</span>} />
+          <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.me</a> in your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text={`Find players with the same song and exchange a code (+${CONFIG.POINTS_MATCH} Points)`} />
-          <GuideItem icon="forward" text={`Click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds or a match;
+          <GuideItem icon="exchange" text={`Find a buddy with a your song and exchange a code (+${CONFIG.POINTS_MATCH} Points)`} />
+          <GuideItem icon="forward" text={`Click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds;
                                            But better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Point)`} />
           <GuideItem icon="warning sign" text="Please return your headphones when you're done!!" />
@@ -172,14 +172,14 @@ function Footer() {
   return (
     <div className="footer">
         With <i className="heart icon"></i>by Mich-Mich!
-        <a>  disco-match@mail.com</a>
+        <a>  disco-buddy@mail.com</a>
     </div>
   );
 }
 
 const NewsFeed = React.createClass({
   getInitialState: function () {
-    const initalMessage = `Welcome to disco-match!
+    const initalMessage = `Welcome to disco-buddy!
     Here is how it works:
        + Login by providing a username and optionally your email
        + Plug your headphones
@@ -189,7 +189,7 @@ const NewsFeed = React.createClass({
        + Exchange codes to gain points (One exchange is enough for both of you)
        + Keep playing!`;
     return {
-      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Match', message: initalMessage}}]
+      newsEvents: [{type: 'message', points: +0, data: {username: 'Disco-Buddy', message: initalMessage}}]
     };
   },
 
@@ -222,7 +222,7 @@ const NewsFeed = React.createClass({
   }
 });
 
-// <NewsEvent event={{type: 'match', points: +50, data: {username: 'Michel', matchUsername: 'Petra', song: 'Recondite'}}} />
+// <NewsEvent event={{type: 'match', points: +50, data: {username: 'Michel', buddyUsername: 'Petra', song: 'Recondite'}}} />
 // <NewsEvent event={{type: 'next', points: -5, data: {username: 'Michel', song: 'Recondite'}}} />
 // <NewsEvent event={{type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
 // <NewsEvent event={{type: 'login', points: +10, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
@@ -242,7 +242,7 @@ function NewsEvent({event}) {
       case 'match':
         return (
           <div>
-            <a>{data.username}</a> found <a>{data.matchUsername}</a> on <a>{data.song}</a>
+            <a>{data.username}</a> found <a>{data.buddyUsername}</a> with <a>{data.song}</a>
           </div>);
       case 'next':
         return (

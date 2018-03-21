@@ -118,11 +118,11 @@ function getCodeFailureAC(error) {
   return {type: GET_CODE_FAILURE, error}
 }
 
-const MATCH_CODE_SUCCESS = 'MATCH_CODE_SUCCESS'
-export function matchCodeSuccessAC(matchUsername, points) {
+const BUDDY_CODE_MATCH = 'BUDDY_CODE_MATCH'
+export function buddyCodeMatchAC(buddyUsername, points) {
   return (dispatch, getState) => {
-    dispatch({type: MATCH_CODE_SUCCESS})
-    dispatch(pushMessageAC(`You have matched with ${matchUsername}!`))
+    dispatch({type: BUDDY_CODE_MATCH})
+    dispatch(pushMessageAC(`You found your buddy '${buddyUsername}'!`))
     dispatch(updatePointsAC(points))
     dispatch(pushMessageAC(`Click 'Next' for a new song!`))
   }
@@ -163,13 +163,13 @@ export function getCodeAC() {
   }
 }
 
-export function postMatchCodeAC(matchCode) {
+export function postBuddyCodeAC(buddyCode) {
   return (dispatch, getState) => {
     let username = getState().usernameReducer;
-    return Client.postMatchCode(username, matchCode)
-      .then(function ({accepted, points, matchUsername}) {
+    return Client.postBuddyCode(username, buddyCode)
+      .then(function ({accepted, points, buddyUsername}) {
         if (accepted) {
-          dispatch(matchCodeSuccessAC(matchUsername, points))
+          dispatch(buddyCodeMatchAC(buddyUsername, points))
           return true;
         } else {
           dispatch(pushMessageAC(`Nope, wrong code!`))
@@ -198,7 +198,7 @@ function codeReducer(state = {code: 0, matchedCurrentCode: false}, action) {
       return {...state,
         code: undefined
       }
-    case MATCH_CODE_SUCCESS:
+    case BUDDY_CODE_MATCH:
       return {...state,
         matchedCurrentCode: true
       }

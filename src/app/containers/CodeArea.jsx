@@ -11,18 +11,18 @@ const CONFIG  = require('../../../config.js');
 const CodeArea = React.createClass({
 
   getInitialState() {
-    return {matchCode: '', isValid: true};
+    return {buddyCode: '', isValid: true};
   },
 
   onFormSubmit(evt) {
     this.props.recordActivity();
-    const matchCode = this.state.matchCode;
-    const isValid = this.validate(matchCode);
+    const buddyCode = this.state.buddyCode;
+    const isValid = this.validate(buddyCode);
     // evt.preventDefault();
 
     if (isValid) {
-      this.props.postMatchCode(matchCode);
-      this.setState({matchCode: ''});
+      this.props.postBuddyCode(buddyCode);
+      this.setState({buddyCode: ''});
     } else {
       this.props.pushMessage(`Bad input!`);
       this.setState({isValid: false});
@@ -31,18 +31,18 @@ const CodeArea = React.createClass({
   },
 
   onInputChange(evt) {
-    this.setState({ matchCode: evt.target.value, isValid: true});
+    this.setState({ buddyCode: evt.target.value, isValid: true});
   },
 
-  validate(matchCode) {
-    return matchCode && matchCode>=0 && matchCode<=9999;
+  validate(buddyCode) {
+    return buddyCode && buddyCode>=0 && buddyCode<=9999;
   },
 
   render() {
     return (
     <div className="ui centered grid no-margins">
       <div className="ui twelve wide column center aligned raised segment no-margins">
-        <div>Give your code to a match </div>
+        <div>Give your code to a buddy</div>
         <div className="ui black button">
           <i className="exchange icon"></i>
           {this.props.code || '????'}
@@ -50,12 +50,12 @@ const CodeArea = React.createClass({
         <div className="ui horizontal divider no-margins">
           Or
         </div>
-        <div>Enter code of a match</div>
+        <div>Enter code of a buddy</div>
         <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
           <i className="exchange icon"></i>
           <input type="number"
             placeholder="Code"
-            value={this.state.matchCode}
+            value={this.state.buddyCode}
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
@@ -65,7 +65,7 @@ const CodeArea = React.createClass({
         </div>
 
         <Dimmer active={this.props.matchedCurrentCode}>
-          <p className="no-margins">{`Match! +${CONFIG.POINTS_MATCH} Points!`}</p>
+          <p className="no-margins">{`Well done! +${CONFIG.POINTS_MATCH} Points!`}</p>
           <i className="huge smile icon"></i>
           <p className="no-margins">Click "Next" for a new song... </p>
           <p>{`Or listen till the end to get +${CONFIG.POINTS_SONG_END} Points!`}</p>
@@ -83,11 +83,11 @@ const mapStateToProps = state => {
   }
 }
 
-import { postMatchCodeAC, pushMessageAC, recordActivityAC } from '../redux';
+import { postBuddyCodeAC, pushMessageAC, recordActivityAC } from '../redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    postMatchCode: (matchCode) => dispatch(postMatchCodeAC(matchCode)),
+    postBuddyCode: (buddyCode) => dispatch(postBuddyCodeAC(buddyCode)),
     pushMessage: (message) => dispatch(pushMessageAC(message)),
     recordActivity: () => dispatch(recordActivityAC())
   }

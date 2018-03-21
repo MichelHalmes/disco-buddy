@@ -1,5 +1,5 @@
 {
-  "name": "disco-match",
+  "name": "disco-buddy",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:4000",

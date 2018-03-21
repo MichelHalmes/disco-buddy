@@ -10,7 +10,7 @@ const SONGS = require('./stores').SONGS;
 
 
 
-module.exports = function(app, matchSockets, monitorSocket) {
+module.exports = function(app, playerSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
 
@@ -148,13 +148,13 @@ app.get('/api/synctime', (req, res) => {
   res.json({time: new Date().getTime()});
 });
 
-// POST MATCHCODE ++++++++++++++++++++++++++++++++++++
+// POST BUDDYCODE ++++++++++++++++++++++++++++++++++++
 
 
-app.post('/api/matchcode', (req, res) => {
+app.post('/api/buddycode', (req, res) => {
   const username = req.body.username;
-  let matchCode = req.body.matchCode;
-  console.log('/api/matchcode', username, matchCode);
+  let buddyCode = req.body.buddyCode;
+  console.log('/api/buddycode', username, buddyCode);
 
   const usrUser = USR.findOne({username});
   if (!usrUser) {
@@ -162,37 +162,37 @@ app.post('/api/matchcode', (req, res) => {
     return;
   }
 
-  matchCode = '000' + matchCode.toString();
-  matchCode = matchCode.slice(-4);
-  const saMatch = SA.findOne({code: matchCode});
+  buddyCode = '000' + buddyCode.toString();
+  buddyCode = buddyCode.slice(-4);
+  const saBuddy = SA.findOne({code: buddyCode});
   const saUser = SA.findOne({username});
 
-  if (saUser && saMatch && saUser.songIdx == saMatch.songIdx) {
+  if (saUser && saBuddy && saUser.songIdx == saBuddy.songIdx) {
     SA.remove(saUser);
-    SA.remove(saMatch);
+    SA.remove(saBuddy);
 
     usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
-    const usrMatch = USR.findOne({username: saMatch.username});
-    usrMatch.points += config.POINTS_MATCH;
-    USR.update(usrMatch);
+    const usrBuddy = USR.findOne({username: saBuddy.username});
+    usrBuddy.points += config.POINTS_MATCH;
+    USR.update(usrBuddy);
 
-    res.json({accepted: true, points: usrUser.points, matchUsername: usrMatch.username});
+    res.json({accepted: true, points: usrUser.points, buddyUsername: usrBuddy.username});
 
-    const matchSocket = matchSockets.connected[usrMatch.socketId]
-    if (matchSocket) {
-      matchSocket.emit('code:match',
-        {username: usrMatch.username, matchUsername: usrUser.username, points: usrMatch.points}
+    const buddySocket = playerSockets.connected[usrBuddy.socketId]
+    if (buddySocket) {
+      buddySocket.emit('code:match',
+        {username: usrBuddy.username, buddyUsername: usrUser.username, points: usrBuddy.points}
       );
     } else {
-      console.log('No socket found for :' + usrMatch.username);
+      console.log('No socket found for :' + usrBuddy.username);
     }
 
     monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data:
-      {username, matchUsername: usrMatch.username, song: SONGS[saUser.songIdx]}});
+      {username, buddyUsername: usrBuddy.username, song: SONGS[saUser.songIdx]}});
 
-    LOG_MATCH.insert({username, matchUsername: usrMatch.username, songIdx: saUser.songIdx, song: SONGS[saUser.songIdx]});
+    LOG_MATCH.insert({username, buddyUsername: usrBuddy.username, songIdx: saUser.songIdx, song: SONGS[saUser.songIdx]});
 
   } else {
     res.json({accepted: false, points: usrUser.points});

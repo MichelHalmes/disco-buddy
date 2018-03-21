@@ -8,7 +8,7 @@ import './App.css';
 
 
 
-import { Points, Header, ModalInactivity } from './components.jsx';
+import { Points, Header, ModalInactivity } from './Components.jsx';
 import ModalSetUser from './containers/ModalSetUser';
 import MessagePopup from './containers/MessagePopup';
 import AudioPlayer from './containers/AudioPlayer';
@@ -24,9 +24,9 @@ const App = React.createClass({
     self.socket = io();
     self.socket.on('connect', () => self.socket.emit('send:username', self.props.username));
 
-    self.socket.on('code:match', function ({username, matchUsername, points}) {
-      if (username!== self.props.username) throw new Error('Codematch for another user: ' + username);
-      self.props.matchCodeSuccess(matchUsername, points)
+    self.socket.on('code:match', function ({username, buddyUsername, points}) {
+      if (username!== self.props.username) throw new Error('Code match for another user: ' + username);
+      self.props.buddyCodeMatch(buddyUsername, points)
     });
   },
 
@@ -67,11 +67,11 @@ const mapStateToProps = state => {
   }
 }
 
-import { matchCodeSuccessAC, getCodeAC, reactivateAC} from './redux';
+import { buddyCodeMatchAC, getCodeAC, reactivateAC} from './redux';
 
 const mapDispatchToProps = (dispatch, ownProps) => {
   return {
-    matchCodeSuccess: (matchUsername, points) => dispatch(matchCodeSuccessAC(matchUsername, points)),
+    buddyCodeMatch: (buddyUsername, points) => dispatch(buddyCodeMatchAC(buddyUsername, points)),
     getCode: () => dispatch(getCodeAC()),
     reactivate: () => dispatch(reactivateAC())
   }

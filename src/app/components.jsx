@@ -25,7 +25,7 @@ export function Header(props) {
     <div >
       <h2 className="no-margins">
         <i className="music icon"></i>
-          Disco-Connect
+          Disco-Buddy
         <i className="music icon"></i>
       </h2>
       <div className="">Find a dancer with your song!</div>

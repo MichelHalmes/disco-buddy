@@ -35,10 +35,10 @@ function getSyncTime() {
     .then(parseJSON);
 }
 
-function postMatchCode(username, matchCode) {
-  return fetch('/api/matchcode', {
+function postBuddyCode(username, buddyCode) {
+  return fetch('/api/buddycode', {
     method: 'post',
-    body: JSON.stringify({username, matchCode}),
+    body: JSON.stringify({username, buddyCode}),
     headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
@@ -80,6 +80,6 @@ module.exports = {
   postLogin,
   getCode,
   getSyncTime,
-  postMatchCode,
+  postBuddyCode,
   postTweet
 };
