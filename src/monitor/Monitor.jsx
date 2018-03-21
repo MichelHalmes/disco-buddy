@@ -201,12 +201,10 @@ const NewsFeed = React.createClass({
     self.socket.on('connection', () => {console.log('connection')});
 
     self.socket.on('send:newsEvent', function (event) {
-      console.log(event);
       let events = self.state.newsEvents;
       events.push(event);
       if (events.length > CONFIG.MAX_NEWS_EVENTS) {
         events.shift();
-        console.log(events);
       }
       self.setState({newsEvents: events});
     });
@@ -231,7 +229,7 @@ const NewsFeed = React.createClass({
 function NewsEvent({event}) {
   const EVENT_TYPE_ICON = {
     match: 'exchange',
-    next: 'forward',
+    // next: 'forward',
     message: 'talk',
     login: 'add user'
   };
@@ -244,11 +242,11 @@ function NewsEvent({event}) {
           <div>
             <a>{data.username}</a> found <a>{data.buddyUsername}</a> with <a>{data.song}</a>
           </div>);
-      case 'next':
-        return (
-          <div>
-            <a>{data.username}</a> didn't like <a>{data.song}</a>
-          </div>);
+      // case 'next': // DEPRECATED
+      //   return (
+      //     <div>
+      //       <a>{data.username}</a> didn't like <a>{data.song}</a>
+      //     </div>);
       case 'message':
         return (
           <div>

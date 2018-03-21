@@ -39,7 +39,8 @@ const ModalSetUser = React.createClass({
   },
 
   handleFormSubmit(evt) {
-    document.getElementById('yourAudioTag').play(); //Force play as autoplay is not allowed on mobile
+    // TODO!
+    // document.getElementById('yourAudioTag').play(); //Force play as autoplay is not allowed on mobile
     let self = this;
     const person = this.state.fields;
     const isValid = this.validate(person);

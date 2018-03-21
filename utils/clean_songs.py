@@ -27,7 +27,7 @@ def get_cosine(vec1, vec2):
 
 
 # text1 = 'This is a foo bar sentence .'
-# text2 = 'This sentence is similar to a foo bar sentence .'
+# text2 = 'This sentence is similar to a foo bar .'
 
 # cosine = get_cosine(text1, text2)
 
@@ -35,12 +35,10 @@ def get_cosine(vec1, vec2):
 
 SONG_FOLDER = path.abspath(path.join(__file__, '../../../songs'))
 
-
-
 song_list = listdir(SONG_FOLDER)
 
 for s1 in range(len(song_list)):
-    for s2 in range(s1+1, len(song_list)):
+    for s2 in range(s1 + 1, len(song_list)):
         vec1 = text_to_vector(song_list[s1])
         vec2 = text_to_vector(song_list[s2])
 

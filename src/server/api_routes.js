@@ -151,7 +151,6 @@ app.get('/api/synctime', (req, res) => {
 
 // POST BUDDYCODE ++++++++++++++++++++++++++++++++++++
 
-
 app.post('/api/buddycode', (req, res) => {
   const username = req.body.username;
   let buddyCode = req.body.buddyCode;

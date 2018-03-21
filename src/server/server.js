@@ -12,7 +12,7 @@ app.set('port', (process.env.PORT || 4000));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static('./build'));
+
 
 
 const USR = require('./stores').USR;
@@ -61,8 +61,12 @@ require('./api_routes')(app, io.sockets, monitorSocket);
 
 // SERVE BUILD ++++++++++++++++++++++++++++++++++++
 
+console.log(path.resolve(__dirname, '../../build'))
+
+// app.use('/*', express.static(path.resolve(__dirname, '../../build')));
+// app.use('/', express.static(`${__dirname}/public`));
 app.get('/*', function (req, res) {
-  res.sendFile(path.join(__dirname, '../../build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, '../../build', 'index.html'));
 });
 
 http.listen(app.get('port'), () => {
