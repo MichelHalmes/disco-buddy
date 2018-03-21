@@ -172,7 +172,7 @@ function Footer() {
   return (
     <div className="footer">
         With <i className="heart icon"></i>by Mich-Mich!
-        <a>  disco-buddy@mail.com</a>
+        <a>  disco-buddy@mail.com  </a>
     </div>
   );
 }

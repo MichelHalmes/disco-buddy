@@ -27,9 +27,12 @@ for filename in listdir(SONG_FOLDER):
 
     # If this fails, it's because ffmpeg is not installed...
     segment = AudioSegment.from_mp3(path.join(SONG_FOLDER, filename))
-    
+
     idx_start = CUT_START * 1000
     idx_end = (CUT_START + CUT_DURATION) * 1000
+    if len(segment) < idx_end:
+        print "Song '{}' is only {}s (<{}s)".format(filename, len(segment) / 1000, idx_end / 1000)
+        continue
     segment = segment[idx_start:idx_end].fade_in(2000).fade_out(3000)
 
     segment.export(path.join(SHRINK_FOLDER, filename), format="mp3", bitrate="%sK" % args.bitrate)

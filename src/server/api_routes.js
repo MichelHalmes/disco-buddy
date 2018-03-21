@@ -6,6 +6,7 @@ const USR = require('./stores').USR;
 const SA = require('./stores').SA;
 const LOG_SA = require('./stores').LOG_SA;
 const LOG_MATCH = require('./stores').LOG_MATCH;
+const LOG_TWEET = require('./stores').LOG_TWEET;
 const SONGS = require('./stores').SONGS;
 
 
@@ -199,19 +200,19 @@ app.post('/api/buddycode', (req, res) => {
   }
 });
 
-// POST LOGIN ++++++++++++++++++++++++++++++++++++"
+// POST TWEET ++++++++++++++++++++++++++++++++++++"
 
 app.post('/api/tweet', (req, res) => {
   const username = req.body.username;
   const message = req.body.message;
 
-
   const usr = USR.findOne({username});
   if (usr) {
-    usr.points += config.POINTS_TWEET;
-    USR.update(usr);
     monitorSocket.emit('send:newsEvent', {type: 'message', points: config.POINTS_TWEET, data: {username, message}});
     res.json({points: usr.points});
+    usr.points += config.POINTS_TWEET;
+    USR.update(usr);
+    LOG_TWEET.insert({ username, message });
   } else {
     res.status(401).send(`A user with the name ${username} does not exist!`);
   }

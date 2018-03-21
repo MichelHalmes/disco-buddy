@@ -48,6 +48,7 @@ const SA = DB.addCollection('SongAllocations',
   {unique: ['code', 'username'], indices: ['username']});
 const LOG_SA = DB.addCollection('Log_SA', {indices: ['username']});
 const LOG_MATCH = DB.addCollection('Log_Match');
+const LOG_TWEET = DB.addCollection('Log_Tweet');
 
 
 // SAVE TO CSV ++++++++++++++++++++++++++++++++++++
@@ -76,6 +77,7 @@ function saveStoresToCsv() {
     collectionToCsv(USR, csvDir);
     collectionToCsv(LOG_SA, csvDir);
     collectionToCsv(LOG_MATCH, csvDir);
+    collectionToCsv(LOG_TWEET, csvDir);
 
     SONG_COLLECT = {name: 'Songs'}
     SONG_COLLECT.data = SONGS.map((song, idx) => ({song, idx}));
@@ -88,5 +90,5 @@ function saveStoresToCsv() {
 // EXPORT   ++++++++++++++++++++++++++++++++++++
 
 module.exports = {
-    USR, SA, LOG_SA, LOG_MATCH, SONGS, saveStoresToCsv
+  USR, SA, LOG_SA, LOG_MATCH, LOG_TWEET, SONGS, saveStoresToCsv
 };
