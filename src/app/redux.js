@@ -82,7 +82,7 @@ export function postLoginAC(username, email) {
 
 
 // REDUCERS
-const initalUsername = localStorage.getItem('username')===null ? JSON.parse(localStorage.getItem('username')) : null
+const initalUsername = localStorage.getItem('username')!==null ? JSON.parse(localStorage.getItem('username')) : null
 function usernameReducer(state = initalUsername, action) {
   switch (action.type) {
     case POST_LOGIN_REQUEST:
