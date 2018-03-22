@@ -1,0 +1,161 @@
+Windows PowerShell
+Copyright (C) 2012 Microsoft Corporation. All rights reserved.
+
+~\GitHub\disco-match [master = +0 ~0 -1 !]> npm run server
+
+> disco-buddy@0.1.0 server C:\Users\Michel\GitHub\disco-match
+> nodemon src/server/server.js --watch src/server/
+
+[nodemon] 1.11.0
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching: C:\Users\Michel\GitHub\disco-match\src\server/**/*
+[nodemon] starting `node src/server/server.js`
+Calling external python-shrinker...
+Shrinking songs to 161 seconds!
+
+C:\Users\Michel\GitHub\disco-match\build
+Find the server at: http://localhost:4000/
+Closing...
+Terminate batch job (Y/N)? ...done!
+^
+C~\GitHub\disco-match [master = +0 ~0 -1 !]> PORT=80 npm run server
+PORT=80 : The term 'PORT=80' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ PORT=80 npm run server
++ ~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (PORT=80:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+~\GitHub\disco-match [master = +0 ~0 -1 !]> export PORT=80
+export : The term 'export' is not recognized as the name of a cmdlet, function, script file, or operable program.
+Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:1
++ export PORT=80
++ ~~~~~~
+    + CategoryInfo          : ObjectNotFound: (export:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+
+~\GitHub\disco-match [master = +0 ~0 -1 !]> npm run server
+
+> disco-buddy@0.1.0 server C:\Users\Michel\GitHub\disco-match
+> nodemon src/server/server.js --watch src/server/
+
+[nodemon] 1.11.0
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching: C:\Users\Michel\GitHub\disco-match\src\server/**/*
+[nodemon] starting `node src/server/server.js`
+Calling external python-shrinker...
+Shrinking songs to 161 seconds!
+
+C:\Users\Michel\GitHub\disco-match\build
+Find the server at: http://localhost:4000/
+Closing...
+...done!
+Terminate batch job (Y/N)? ^C
+~\GitHub\disco-match [master = +0 ~0 -1 !]> env PORT=80 npm run server
+
+> disco-buddy@0.1.0 server C:\Users\Michel\GitHub\disco-match
+> nodemon src/server/server.js --watch src/server/
+
+[nodemon] 1.11.0
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching: C:\Users\Michel\GitHub\disco-match\src\server/**/*
+[nodemon] starting `node src/server/server.js`
+Calling external python-shrinker...
+Shrinking songs to 161 seconds!
+
+C:\Users\Michel\GitHub\disco-match\build
+Find the server at: http://localhost:80/
+Could not find user :admin
+Could not find user :admin
+Could not find user :admin
+Code 0001 for Jessicacpe; playing: Eminem - Lose Yourself
+NewCode: 3.233ms
+Code 0002 for Ka; playing: Eminem - Lose Yourself
+NewCode: 1.205ms
+Code 0003 for Jessicacpe; playing: Crystal Fighters - Plage
+NewCode: 1.507ms
+/api/buddycode Ka 0003
+/api/buddycode Jessicacpe 0002
+Code 0004 for Ka; playing: Crystal Fighters - Plage
+NewCode: 1.125ms
+Code 0005 for Michel; playing: Savage Garden - To the Moon & Back
+NewCode: 0.880ms
+Code 0006 for Jessicacpe; playing: Savage Garden - To the Moon & Back
+NewCode: 1.317ms
+/api/buddycode Jessicacpe 0005
+Code 0007 for Jessicacpe; playing: Bloodhound Gang - The Bad Touch
+NewCode: 1.064ms
+Code 0008 for Michel; playing: Crystal Fighters - Plage
+NewCode: 0.987ms
+/api/buddycode Ka 0008
+Code 0009 for Michel; playing: Bloodhound Gang - The Bad Touch
+NewCode: 2.056ms
+Code 0010 for Ka; playing: Keane - Somewhere Only We Know
+NewCode: 1.631ms
+Code 0011 for Jessicacpe; playing: Keane - Somewhere Only We Know
+NewCode: 1.324ms
+/api/buddycode Ka 0011
+Code 0012 for Michel; playing: Gregor Tresher - About A Good Place
+NewCode: 1.942ms
+Code 0013 for Ka; playing: Gregor Tresher - About A Good Place
+NewCode: 1.975ms
+/api/buddycode Michel 13
+Code 0014 for Jessicacpe; playing: Katy Perry - Last Friday Night (T.G.I.F.)
+NewCode: 1.235ms
+Code 0015 for Ka; playing: Katy Perry - Last Friday Night (T.G.I.F.)
+NewCode: 1.503ms
+Code 0016 for Michel; playing: Johnny Cash - Ring of Fire
+NewCode: 1.226ms
+Code 0017 for Michel; playing: Empire of the Sun - Walking on a Dream
+NewCode: 1.223ms
+/api/buddycode Ka 0014
+Code 0018 for Ka; playing: Toto - Africa
+NewCode: 1.625ms
+Code 0019 for Jessicacpe; playing: Toto - Africa
+NewCode: 1.352ms
+Code 0020 for Ka; playing: Florence + the Machine - Girl With One Eye
+NewCode: 1.653ms
+Code 0021 for Michel; playing: Florence + the Machine - Girl With One Eye
+NewCode: 1.520ms
+Could not find user :admin
+/api/buddycode Michel 20
+/api/buddycode Michel 20
+Code 0022 for Michel; playing: The Smiths- How Soon Is Now HQ
+NewCode: 1.748ms
+/api/buddycode Michel 21
+/api/buddycode Michel 20
+Code 0023 for Ka; playing: The Smiths- How Soon Is Now HQ
+NewCode: 0.921ms
+/api/buddycode Michel 23
+Code 0024 for Jessicacpe; playing: The Roots - Now Or Never (Feat. Phonte  Dice Raw).m4v
+NewCode: 2.446ms
+Code 0025 for Michel; playing: The Roots - Now Or Never (Feat. Phonte  Dice Raw).m4v
+NewCode: 2.521ms
+/api/buddycode Michel 24
+Code 0026 for Jessicacpe; playing: Coldplay - The Scientist
+NewCode: 1.921ms
+Code 0027 for Michel; playing: Coldplay - The Scientist
+NewCode: 1.762ms
+/api/buddycode Michel 27
+Error: Object is not a document stored in the collection
+    at LokiEventEmitter.Collection.remove (C:\Users\Michel\GitHub\disco-match\node_modules\lokijs\src\lokijs.js:4911:15)
+
+    at app.post (C:\Users\Michel\GitHub\disco-match\src\server\api_routes.js:172:8)
+    at Layer.handle [as handle_request] (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\layer.js:95:
+5)
+    at next (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\route.js:131:13)
+    at Route.dispatch (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\route.js:112:3)
+    at Layer.handle [as handle_request] (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\layer.js:95:
+5)
+    at C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\index.js:277:22
+    at Function.process_params (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\index.js:330:12)
+    at next (C:\Users\Michel\GitHub\disco-match\node_modules\express\lib\router\index.js:271:10)
+    at urlencodedParser (C:\Users\Michel\GitHub\disco-match\node_modules\body-parser\lib\types\urlencoded.js:81:44)
+/api/buddycode Michel 26
+/api/buddycode Michel 26
+/api/buddycode Michel 26
+Code 0028 for Ka; playing: Coldplay - The Scientist
+NewCode: 1.988ms
+/api/buddycode Jessicacpe 27
