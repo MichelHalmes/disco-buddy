@@ -168,9 +168,15 @@ app.post('/api/buddycode', (req, res) => {
   const saUser = SA.findOne({username});
 
   if (saUser && saBuddy && saUser.songIdx == saBuddy.songIdx) {
-    SA.remove(saUser);
-    SA.remove(saBuddy);
-
+    try {
+      SA.remove(saUser);
+      SA.remove(saBuddy);
+    }
+    catch (error) { // Probaly a conflict on simultaneous remove
+      console.error(`Error removing song-allocations for ${saUser.username} & ${saBuddy.username} `);
+      console.error(error);
+    }
+    
     usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
@@ -186,7 +192,7 @@ app.post('/api/buddycode', (req, res) => {
         {username: usrBuddy.username, buddyUsername: usrUser.username, points: usrBuddy.points}
       );
     } else {
-      console.log('No socket found for :' + usrBuddy.username);
+      console.error('No socket found for :' + usrBuddy.username);
     }
 
     monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data:

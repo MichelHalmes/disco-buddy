@@ -1,6 +1,6 @@
 const path = require('path');
 
-const syncPeriod = 15
+const syncPeriod = 40
 const timeToPLay = 3 * syncPeriod
 
 module.exports = {
