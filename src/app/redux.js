@@ -150,7 +150,7 @@ export function getCodeAC() {
           return true;
         },
         error => {
-          if (error.response && error.status == 401) { // username not found
+          if (error.status == 401) { // username not found
             dispatch(getCodeFailureAC(`The username ${username} does not exist`))
             localStorage.removeItem('username')
             dispatch(triggerLoginAC()) // Trigger new login

@@ -65,7 +65,7 @@ function checkStatus(response) {
     return response;
   } else {
     const error = new Error(`HTTP Error ${response.statusText}`);
-    error.status = response.statusText;
+    error.status = response.status;
     error.response = response;
     console.log(response);
     throw error;
