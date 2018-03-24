@@ -76,10 +76,36 @@ function parseJSON(response) {
   return response.json();
 }
 
+function retryOnServerError(clientFunc) {
+  let retryCount = 0;
+  return function wrappedFunction(...args) {
+    return new Promise(function (resolve, reject) {
+      clientFunc.apply(null, args)
+        .then(
+          res => { resolve(res) },
+          error => {
+            if (error.status < 500 || retryCount > 5) {
+              reject(error)
+            } else {
+              retryCount++;
+              setTimeout(() => {
+                wrappedFunction.apply(null, args)
+                  .then(
+                    res => { resolve(res) },
+                    err => { reject(err) }
+                )
+              }, 500 * retryCount**2);
+            }
+          }
+        )
+    })
+  }
+}
+
 module.exports = {
-  postLogin,
-  getCode,
-  getSyncTime,
-  postBuddyCode,
-  postTweet
+  postLogin: retryOnServerError(postLogin),
+  getCode: retryOnServerError(getCode),
+  getSyncTime: retryOnServerError(getSyncTime),
+  postBuddyCode: retryOnServerError(postBuddyCode),
+  postTweet: retryOnServerError(postTweet)
 };
