@@ -58,8 +58,8 @@ const CodeArea = React.createClass({
             value={this.state.buddyCode}
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
-            />
-            <button className={"ui green button " + (this.state.buddyCode ? "submit" : "disabled")} onClick={this.onFormSubmit}>
+          />
+          <button className={"ui green button " + (this.state.buddyCode ? "submit" : "disabled")} onClick={this.onFormSubmit}>
             Enter
           </button>
         </div>

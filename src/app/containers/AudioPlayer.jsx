@@ -126,7 +126,7 @@ const AudioPlayer = React.createClass({
             }
             <p>{renderTimeToPlay(this.state.timePlayed)}</p>
           </button>
-          <button className={"ui button blue no-margins " + (this.canClickNext() ? "" : "disabled")}
+          <button className={"ui blue button no-margins " + (this.canClickNext() ? "" : "basic disabled")}
               onClick={this.handleClickNext}>
               <i className="big forward icon icon-margin"></i>
               <p>Next</p>
