@@ -37,6 +37,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "test_server": "mocha -- src/server/test_api.js",
-    "server": "nodemon src/server/server.js --watch src/server/"
+    "server": "nodemon src/server/server.js --watch src/server/",
+    "server_windows": "env PORT=80 node src/server/server.js"
   }
 }
