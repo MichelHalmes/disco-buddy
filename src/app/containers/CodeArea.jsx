@@ -11,7 +11,7 @@ const CONFIG  = require('../../../config.js');
 const CodeArea = React.createClass({
 
   getInitialState() {
-    return {buddyCode: '', isValid: true};
+    return {buddyCode: '', isValid: true, disableDimmer: false};
   },
 
   onInputChange(evt) {
@@ -21,6 +21,7 @@ const CodeArea = React.createClass({
     this.setState({ buddyCode, isValid });
 
     if (isValid && buddyCode.length == 4) {
+      setTimeout(this.setState.bind(this, { buddyCode: '' }), 1000);
       this.props.postBuddyCode(buddyCode)
         .then((ok) => {
           if (!ok) { // not a match
@@ -28,12 +29,23 @@ const CodeArea = React.createClass({
             setTimeout(this.setState.bind(this, { isValid: true }), 1000);
           }
         })
-      setTimeout(this.setState.bind(this, { buddyCode: '' }), 1000);
     }    
   },
 
   validate(buddyCode) {
     return buddyCode && buddyCode>=0 && buddyCode<=9999;
+  },
+
+  componentDidUpdate: function (prevProps, prevState) {
+    if (this.props.matchedCurrentCode && !prevProps.matchedCurrentCode) { // Just matched the code
+      this.setState({ disableDimmer: false });
+    }
+  },
+
+  onDimmerClick(evt) {
+    if (this.props.matchedCurrentCode) {
+      this.setState({ disableDimmer: true })
+    }
   },
 
   render() {
@@ -43,7 +55,7 @@ const CodeArea = React.createClass({
         <div>Give your code to a buddy</div>
         <div className="ui black basic big label">
           <i className="exchange icon"></i>
-          {this.props.code || '????'}
+          {this.props.matchedCurrentCode ? '- - - -': (this.props.code || '????')}
         </div>
         <div className="ui horizontal divider no-margins">
           Or
@@ -62,7 +74,7 @@ const CodeArea = React.createClass({
           </button> */}
         </div>
 
-        <Dimmer active={this.props.matchedCurrentCode}>
+        <Dimmer active={this.props.matchedCurrentCode && !this.state.disableDimmer} onClick={this.onDimmerClick}>
           <p className="no-margins">{`Well done! +${CONFIG.POINTS_MATCH} Points!`}</p>
           <i className="huge smile icon"></i>
           <p className="no-margins">Click "Next" for a new song... </p>
