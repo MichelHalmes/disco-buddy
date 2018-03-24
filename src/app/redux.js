@@ -157,6 +157,7 @@ export function getCodeAC() {
             return false;
           } else {
             dispatch(getCodeFailureAC(error))
+            // TODO: retry !!!!!!!!!!!!!!!!!!!!!!!!!!
             throw error;
           }
         });

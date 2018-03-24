@@ -2,7 +2,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import io from 'socket.io-client';
-import { Modal } from 'semantic-ui-react';
 
 import './App.css';
 
@@ -35,12 +34,6 @@ const App = React.createClass({
       this.socket.emit('send:username', this.props.username);
     }
   },
-
-
-  //
-  // recordActivity: function () {
-  //   this.lastActivity = new Date().getTime();
-  // },
 
   render() {
     return (
@@ -76,6 +69,5 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     reactivate: () => dispatch(reactivateAC())
   }
 }
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

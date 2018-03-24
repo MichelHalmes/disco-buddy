@@ -44,10 +44,13 @@ let monitorSocket = io.of('/monitor');
 
 setInterval(function () {
   let now = Date.now();
-  console.log(now)
-  console.log(SA.findOne({}))
-  console.log(config.TIME_TO_PLAY_S * 1000 * 1.25)
-  SA.removeWhere((obj) => now - obj.meta.created > config.TIME_TO_PLAY_S * 1000 * 1.25);
+  SA.removeWhere((obj) => {
+    let must_remove = now - obj.meta.created > config.TIME_TO_PLAY_S * 1000 * 1.25
+    if (must_remove) {
+      console.log("Removing", obj.username, now/1000, obj.meta.created/1000, config.TIME_TO_PLAY_S * 1.25)
+    }
+    return must_remove
+  });
   
 
   let nbUsers = SA.data.length;
