@@ -43,7 +43,7 @@ const CodeArea = React.createClass({
     <div className="ui centered grid no-margins">
       <div className="ui twelve wide column center aligned raised segment no-margins">
         <div>Give your code to a buddy</div>
-        <div className="ui black button">
+        <div className="ui black basic big label">
           <i className="exchange icon"></i>
           {this.props.code || '????'}
         </div>
@@ -59,7 +59,7 @@ const CodeArea = React.createClass({
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
             />
-          <button className="ui green submit button" onClick={this.onFormSubmit}>
+            <button className={"ui green button " + (this.state.buddyCode ? "submit" : "disabled")} onClick={this.onFormSubmit}>
             Enter
           </button>
         </div>

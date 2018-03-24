@@ -172,7 +172,7 @@ export function postBuddyCodeAC(buddyCode) {
           dispatch(buddyCodeMatchAC(buddyUsername, points))
           return true;
         } else {
-          dispatch(pushMessageAC(`Nope, wrong code!`))
+          dispatch(pushMessageAC(`Nope, not the same song!`))
           dispatch(updatePointsAC(points))
           return false;
         }
