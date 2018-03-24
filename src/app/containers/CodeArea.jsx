@@ -14,24 +14,22 @@ const CodeArea = React.createClass({
     return {buddyCode: '', isValid: true};
   },
 
-  onFormSubmit(evt) {
-    this.props.recordActivity();
-    const buddyCode = this.state.buddyCode;
-    const isValid = this.validate(buddyCode);
-    // evt.preventDefault();
-
-    if (isValid) {
-      this.props.postBuddyCode(buddyCode);
-      this.setState({buddyCode: ''});
-    } else {
-      this.props.pushMessage(`Bad input!`);
-      this.setState({isValid: false});
-      setTimeout(this.setState.bind(this, {isValid: true}), 2000);
-    }
-  },
-
   onInputChange(evt) {
-    this.setState({ buddyCode: evt.target.value, isValid: true});
+    this.props.recordActivity();
+    const buddyCode = evt.target.value;
+    const isValid = this.validate(buddyCode);
+    this.setState({ buddyCode, isValid });
+
+    if (isValid && buddyCode.length == 4) {
+      this.props.postBuddyCode(buddyCode)
+        .then((ok) => {
+          if (!ok) { // not a match
+            this.setState({ isValid: false })
+            setTimeout(this.setState.bind(this, { isValid: true }), 1000);
+          }
+        })
+      setTimeout(this.setState.bind(this, { buddyCode: '' }), 1000);
+    }    
   },
 
   validate(buddyCode) {
@@ -51,17 +49,17 @@ const CodeArea = React.createClass({
           Or
         </div>
         <div>Enter a buddy's code</div>
-        <div className={"ui left icon action input " + (this.state.isValid ? "" : "error")}>
-          <i className="exchange icon"></i>
+        <div className={"ui left icon focus large input " + (this.state.isValid ? "" : "error")}>
+          <i className="exchange black icon "></i>
           <input type="number"
             placeholder="Code"
             value={this.state.buddyCode}
             onChange={this.onInputChange}
             style={{maxWidth: '110px'}}
           />
-          <button className={"ui green button " + (this.state.buddyCode ? "submit" : "disabled")} onClick={this.onFormSubmit}>
+          {/* <button className={"ui green button " + (this.state.buddyCode ? "submit" : "disabled")} onClick={this.onFormSubmit}>
             Enter
-          </button>
+          </button> */}
         </div>
 
         <Dimmer active={this.props.matchedCurrentCode}>

@@ -55,7 +55,7 @@ function Guide(props) {
           <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.org</a> in your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange code (+${CONFIG.POINTS_MATCH} Points)`} />
+          <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange codes (+${CONFIG.POINTS_MATCH} Points)`} />
           <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds;
                                            But better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Point)`} />
