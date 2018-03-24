@@ -254,7 +254,8 @@ export function reactivateAC() {
 const SET_INACTIVE = 'SET_INACTIVE'
 function checkActivityAC() {
   return (dispatch, getState) => {
-    if (new Date().getTime() - self.lastActivity > CONFIG.TIME_TO_INACTIVE_S * 1000) {
+    let lastActivity = getState().activityReducer.lastActivity
+    if (new Date().getTime() - lastActivity > CONFIG.TIME_TO_INACTIVE_S * 1000) {
       dispatch({type: SET_INACTIVE})
       return false
     } else {
