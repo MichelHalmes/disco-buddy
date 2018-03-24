@@ -19,7 +19,6 @@ const Monitor = React.createClass({
             <div className="ui divider"></div>
             <Statistics />
             <Ranking />
-
           </div>
           <div className="column">
             <NewsFeed />
@@ -38,8 +37,8 @@ function Header(props) {
         Disco Buddy
         <i className="music icon"></i>
       </h2>
-      <p className="no-margins-paddings">A gamification of Silent Disco...</p>
-      <p className="no-margins-paddings">Find a dancer with your song!</p>
+      <p className="no-margins-paddings">A gamification of Silent-Disco...</p>
+      <p className="no-margins-paddings">Find a dancer with the same song as you!</p>
     </div>
   );
 }
@@ -53,11 +52,11 @@ function Guide(props) {
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-BUDDY</a> (No internet!)</span>}/>
           <GuideItem icon="signal" text="Switch off your mobile-data" />
-          <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.me</a> in your browser</span>} />
+          <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.org</a> in your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text={`Find a buddy with a your song and exchange a code (+${CONFIG.POINTS_MATCH} Points)`} />
-          <GuideItem icon="forward" text={`Click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds;
+          <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange code (+${CONFIG.POINTS_MATCH} Points)`} />
+          <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds;
                                            But better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Point)`} />
           <GuideItem icon="warning sign" text="Please return your headphones when you're done!!" />
