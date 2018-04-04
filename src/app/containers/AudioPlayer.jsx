@@ -30,17 +30,16 @@ const AudioPlayer = React.createClass({
           self.syncTimeOffsetMs = Math.min(self.syncTimeOffsetMs, new Date().getTime() - res.time);
         }
         if (nb_tries<10) {
-          setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 2000);
+          setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 5000);
         }
       });
   },
 
-  componentDidUpdate: function (prevProps, prevState) {
-    if (!this.props.code && prevProps.code) { // The song has ended, avoid continuing on buffer
-      this.canPause = true;
-      this.refs.myAudio.pause()
-      this.setState({timePlayed: -1});
-    }
+  nextSong: function () {
+    this.canPause = true;
+    this.refs.myAudio.pause()
+    this.props.getCode();
+    this.setState({ timePlayed: -1 });
   },
 
   handleClickPlay: function() {
@@ -61,15 +60,22 @@ const AudioPlayer = React.createClass({
   },
 
   handlePauseEvent: function() {
-    if (!this.canPause) this.refs.myAudio.play();
+    if (!this.canPause) {
+      this.refs.myAudio.play()
+        .catch(() => {}) // If pause might conflict wit this...
+    };
     this.canPause = false;
   },
 
+  handleEndedEvent: function () {
+    // Should not happen if songs are long enough...
+    this.nextSong();
+  },
 
   handleClickNext: function () {
     this.props.recordActivity();
     if (this.canClickNext()) {
-      this.props.getCode();
+      this.nextSong();
     } else {
       this.props.pushMessage(`Play longer to click next!`);
     }
@@ -87,7 +93,7 @@ const AudioPlayer = React.createClass({
       this.setState({timePlayed: timePlayed});
     } else {
       this.props.pushMessage(`Time's up!`);
-      this.props.getCode();
+      this.nextSong();
 
     }
   },
@@ -116,7 +122,8 @@ const AudioPlayer = React.createClass({
               onTimeUpdate={this.handleTimeUpdate}
               onCanPlay={this.handleCanPlayEvent}
               onPlay={this.handlePlayEvent}
-              onPause={this.handlePauseEvent}/>
+              onPause={this.handlePauseEvent}
+              onEnded={this.handleEndedEvent}/>
 
         <div className="ui buttons no-margins ">
           <button className="ui basic button blue no-margins " onClick={this.handleClickPlay}>

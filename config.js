@@ -1,12 +1,12 @@
 const path = require('path');
 
-const syncPeriod = 5
+const syncPeriod = 10
 const timeToPLay = 3 * syncPeriod
 
 module.exports = {
 	TIME_TO_PLAY_S: timeToPLay,
 	TIME_TO_NEXT_S: 5,
-	TIME_TO_INACTIVE_S: timeToPLay * 4 + 20,
+	TIME_TO_INACTIVE_S: timeToPLay * 4000 + 20,
 	SYNC_PERIOD_S: syncPeriod,
 	TARGET_PROBA_MATCH: 0.15,
 	POINTS_MATCH: 50,
