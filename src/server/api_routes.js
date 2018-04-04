@@ -78,9 +78,11 @@ app.get('/api/code', (req, res) => {
   if (previousAllocation) {
     const songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
     if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
+      console.log(`Points for ${username} (${songDuration}s)`, Date.now(), previousAllocation.meta.created)
       usr.points += config.POINTS_SONG_END;
       USR.update(usr);
     } else if (songDuration < config.TIME_TO_NEXT_S) {
+      console.log(`Same song for ${username} (${songDuration}s)`, Date.now(), previousAllocation.meta.created)
       res.json({code: previousAllocation.code, points: usr.points});
       return;
     }

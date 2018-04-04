@@ -47,7 +47,7 @@ setInterval(function () {
   SA.removeWhere((obj) => {
     let must_remove = now - obj.meta.created > config.TIME_TO_PLAY_S * 1000 * 1.25
     if (must_remove) {
-      console.log("Removing", obj.username, now/1000, obj.meta.created/1000, config.TIME_TO_PLAY_S * 1.25)
+      console.log(`Removing ${obj.username}! Inactivity: ${(now-obj.meta.created)/1000} s`)
     }
     return must_remove
   });
