@@ -49,13 +49,11 @@ app.get('/api/code', (req, res) => {
 
   const usr = USR.findOne({username});
   if (!usr) {
-    console.error('/api/code: Could not find user :' + username);
+    console.error(`/api/code: Could not find user: ${username}`);
     res.status(401).send(`A user with the name ${username} does not exist!`);
     return;
   }
 
-  const saSongIdxAll = SA.find({}).map((sa) => sa.songIdx);
-  let nbUsers = saSongIdxAll.length;
   const previousAllocation = SA.findOne({username});
   if (previousAllocation) {
     const songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
@@ -68,8 +66,6 @@ app.get('/api/code', (req, res) => {
       return;
     }
     SA.remove(previousAllocation);
-  } else { // This is a new user, that was not yet in SA
-    nbUsers += 1;
   }
 
   let codeIdx = nextCodeIdx;
@@ -78,8 +74,13 @@ app.get('/api/code', (req, res) => {
   code = '000' + code.toString();
   code = code.slice(-4);
 
+  const saSongIdxActive = SA.find({didMatch: false})
+                    .map((sa) => sa.songIdx);
+  let nbActive = saSongIdxActive.length; // Excluding the current user
+
   const allocationCounts = {};
-  saSongIdxAll.forEach(function (songIdx) {
+  saSongIdxActive.forEach(function (songIdx) {
+    songIdx = parseInt(songIdx)
     allocationCounts[songIdx] = allocationCounts[songIdx] ? allocationCounts[songIdx]+1 : 1;
   });
 
@@ -90,14 +91,13 @@ app.get('/api/code', (req, res) => {
       if (songIdxBest == undefined || allocationCounts[songIdx] < allocationCounts[songIdxBest]) {
         songIdxBest = songIdx;
       } else if (allocationCounts[songIdx] == allocationCounts[songIdxBest]) { // Draw
-        console.log("draw working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         songIdxBest = Math.random() < .2 ? songIdx : songIdxBest;
       }
     }
   });
 
   if (songIdxBest == undefined // The player has heard everything
-      || (nbUsers != 1 && (allocationCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
+      || (nbActive > 0 && allocationCounts[songIdxBest] / nbActive > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
@@ -109,7 +109,7 @@ app.get('/api/code', (req, res) => {
 
   console.log(`/api/code [${Date.now() - startTime}ms]: Code ${code} for '${username}': ${SONGS[songIdxBest]}`);
 
-  monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(allocationCounts).length});
+  monitorSocket.emit('send:statistics', {nbSongs: Object.keys(allocationCounts).length});
 });
 
 
