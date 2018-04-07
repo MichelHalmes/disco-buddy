@@ -44,7 +44,7 @@ function shuffle(arr) {
 const SONG_CODES = shuffle([...Array(10000).keys()])
 
 app.get('/api/code', (req, res) => {
-  const stertTime = Date.now()
+  const startTime = Date.now()
   const username = Buffer.from(req.headers.authorization, 'base64').toString();
 
   const usr = USR.findOne({username});
@@ -99,12 +99,12 @@ app.get('/api/code', (req, res) => {
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
 
-  SA.insert({code, songIdx: songIdxBest, username});
+  SA.insert({code, songIdx: songIdxBest, username, didMatch: false});
   LOG_SA.insert({songIdx: songIdxBest, username});
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({code, points: usr.points});
 
-  console.log(`/api/code: Code ${code} for '${username}': ${SONGS[songIdxBest]}`);
+  console.log(`/api/code [${Date.now() - startTime}ms]: Code ${code} for '${username}': ${SONGS[songIdxBest]}`);
 
   monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(songCounts).length});
 });
@@ -131,6 +131,7 @@ app.get('/api/synctime', (req, res) => {
 
 // POST BUDDYCODE ++++++++++++++++++++++++++++++++++++
 app.post('/api/buddycode', (req, res) => {
+  const startTime = Date.now()
   const username = req.body.username;
   let buddyCode = req.body.buddyCode;
 
@@ -145,16 +146,16 @@ app.post('/api/buddycode', (req, res) => {
   const saBuddy = SA.findOne({code: buddyCode});
   const saUser = SA.findOne({username});
 
-  if (saUser && saBuddy && saUser.songIdx == saBuddy.songIdx && saUser != saBuddy) {
-    try {
-      SA.remove(saUser);
-      SA.remove(saBuddy);
-    }
-    catch (error) { // Probaly a conflict on simultaneous remove
-      console.error(`/api/buddycode: Error removing song-allocations for ${saUser.username} & ${saBuddy.username}`);
-      console.error(error);
-    }
-    
+  if (saUser && saBuddy // Has allocation
+        && saUser.songIdx == saBuddy.songIdx // Same song
+        && !saUser.didMatch && !saBuddy.didMatch // Cannot rematch
+        && saUser != saBuddy // Cannot match with oneself
+      ) { 
+    saUser.didMatch = true
+    SA.update(saUser)
+    saBuddy.didMatch = true
+    SA.update(saBuddy)
+   
     usrUser.points += config.POINTS_MATCH;
     USR.update(usrUser);
 
@@ -177,14 +178,14 @@ app.post('/api/buddycode', (req, res) => {
       {username, buddyUsername: usrBuddy.username, song: SONGS[saUser.songIdx]}});
 
     LOG_MATCH.insert({username, buddyUsername: usrBuddy.username, songIdx: saUser.songIdx, song: SONGS[saUser.songIdx]});
+    console.log(`/api/buddycode [${Date.now() - startTime}ms]: '${username}' matched with '${usrBuddy.username}: ${SONGS[saUser.songIdx]}`);
 
   } else {
     res.json({accepted: false, points: usrUser.points});
   }
 });
 
-// POST TWEET ++++++++++++++++++++++++++++++++++++"
-
+// POST TWEET ++++++++++++++++++++++++++++++++++++
 app.post('/api/tweet', (req, res) => {
   const username = req.body.username;
   const message = req.body.message;
