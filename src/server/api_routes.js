@@ -30,8 +30,18 @@ app.post('/api/login', (req, res) => {
 });
 
 // GET CODE ++++++++++++++++++++++++++++++++++++
-let nextCode = 1;
+let nextCodeIdx = 1;
 let nextSongIdx = 0;
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+const SONG_CODES = shuffle([...Array(10000).keys()])
 
 app.get('/api/code', (req, res) => {
   const stertTime = Date.now()
@@ -62,8 +72,9 @@ app.get('/api/code', (req, res) => {
     nbUsers += 1;
   }
 
-  let code = nextCode;
-  nextCode = (nextCode+1) % 10000;
+  let codeIdx = nextCodeIdx;
+  nextCodeIdx = (nextCodeIdx+1) % 10000;
+  let code = SONG_CODES[codeIdx]
   code = '000' + code.toString();
   code = code.slice(-4);
 
