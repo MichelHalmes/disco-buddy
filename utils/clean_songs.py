@@ -32,16 +32,20 @@ def get_cosine(vec1, vec2):
 # cosine = get_cosine(text1, text2)
 
 # print 'Cosine:', cosine
+def main():
+    SONG_FOLDER = path.abspath(path.join(__file__, '../../songs'))
 
-SONG_FOLDER = path.abspath(path.join(__file__, '../../../songs'))
+    song_list = listdir(SONG_FOLDER)
 
-song_list = listdir(SONG_FOLDER)
+    for s1 in range(len(song_list)):
+        for s2 in range(s1 + 1, len(song_list)):
+            vec1 = text_to_vector(song_list[s1])
+            vec2 = text_to_vector(song_list[s2])
 
-for s1 in range(len(song_list)):
-    for s2 in range(s1 + 1, len(song_list)):
-        vec1 = text_to_vector(song_list[s1])
-        vec2 = text_to_vector(song_list[s2])
+            cosine = get_cosine(vec1, vec2)
+            if cosine > 0.65:
+                print song_list[s1], '\n', song_list[s2], '\n'
 
-        cosine = get_cosine(vec1, vec2)
-        if cosine > 0.65:
-            print song_list[s1], '\n', song_list[s2], '\n'
+
+if __name__=='__main__':
+    main()

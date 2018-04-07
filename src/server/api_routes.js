@@ -14,7 +14,6 @@ const SONGS = require('./stores').SONGS;
 module.exports = function(app, playerSockets, monitorSocket) {
 
 // POST LOGIN ++++++++++++++++++++++++++++++++++++
-
 app.post('/api/login', (req, res) => {
   const username = req.body.username;
   const email = req.body.email;
@@ -30,44 +29,17 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-    // GET CODE ++++++++++++++++++++++++++++++++++++
+// GET CODE ++++++++++++++++++++++++++++++++++++
 let nextCode = 1;
 let nextSongIdx = 0;
-// 
-// USR.insert({username: 'The Player', email: '', points: 9, socketId: undefined});
-// USR.insert({username: 'Mary', email: '', points: 10});
-// USR.insert({username: 'Kate', email: '', points: 30});
-// USR.insert({username: 'Peter', email: '', points: -5});
-// USR.insert({username: 'John', email: '', points: 20});
-// USR.insert({username: 'As', email: '', points: 20});
-// USR.insert({username: 'Elin', email: '', points: 20});
-// USR.insert({username: '123456789012345', email: '', points: 20});
-//
-// LOG_SA.insert({username: 'michel', songIdx: '0'});
-// LOG_SA.insert({username: 'michel', songIdx: '0'});
-// SA.insert({code: '0000', songIdx: 1, username: 'Mary'});
-// SA.insert({code: '0001', songIdx: 1, username: 'Kate'});
-// SA.insert({code: '0002', songIdx: 0, username: 'Peter'});
-// SA.insert({code: '0003', songIdx: 0, username: 'John'});
-// SA.insert({code: '0004', songIdx: 2, username: 'As'});
-// SA.insert({code: '0005', songIdx: 3, username: 'Elin'});
-// SA.insert({code: '0006', songIdx: 4, username: '123456789012345'});
-// nextCode = 7;
-// nextSongIdx = 0;
-//
-// let f= [...Array(500).keys()];
-// console.log(f)
-// f.map((i) => SA.insert({code: nextCode+i, songIdx: 4, username: ""+123456789012345+i}))
-
-
 
 app.get('/api/code', (req, res) => {
-  console.time('NewCode');
+  const stertTime = Date.now()
   const username = Buffer.from(req.headers.authorization, 'base64').toString();
 
   const usr = USR.findOne({username});
   if (!usr) {
-    console.log('Could not find user :' + username);
+    console.error('/api/code: Could not find user :' + username);
     res.status(401).send(`A user with the name ${username} does not exist!`);
     return;
   }
@@ -78,11 +50,10 @@ app.get('/api/code', (req, res) => {
   if (previousAllocation) {
     const songDuration = (Date.now() - previousAllocation.meta.created) / 1000;
     if (songDuration > 0.95 * config.TIME_TO_PLAY_S && songDuration < 1.25 * config.TIME_TO_PLAY_S) { // End of song without inactivity
-      console.log(`Points for ${username} (${songDuration}s)`, Date.now(), previousAllocation.meta.created)
       usr.points += config.POINTS_SONG_END;
       USR.update(usr);
     } else if (songDuration < config.TIME_TO_NEXT_S) {
-      console.log(`Same song for ${username} (${songDuration}s)`, Date.now(), previousAllocation.meta.created)
+      console.error(`/api/code: Premature 'Next' for ${username} after only ${songDuration}s`)
       res.json({code: previousAllocation.code, points: usr.points});
       return;
     }
@@ -95,7 +66,6 @@ app.get('/api/code', (req, res) => {
   nextCode = (nextCode+1) % 10000;
   code = '000' + code.toString();
   code = code.slice(-4);
-
 
   const songCounts = {};
   saSongIdxAll.forEach(function (songIdx) {
@@ -123,15 +93,13 @@ app.get('/api/code', (req, res) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.json({code, points: usr.points});
 
-  console.log(`Code ${code} for ${username}; playing: ${SONGS[songIdxBest]}`);
+  console.log(`/api/code: Code ${code} for '${username}': ${SONGS[songIdxBest]}`);
 
   monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(songCounts).length});
-  console.timeEnd('NewCode');
 });
 
 
 // GET SONG ++++++++++++++++++++++++++++++++++++
-
 app.get('/api/song/:code', (req, res) => {
   const code = req.params.code;
   const allocation = SA.findOne({code});
@@ -146,17 +114,14 @@ app.get('/api/song/:code', (req, res) => {
 });
 
 // GET SYNCTIME ++++++++++++++++++++++++++++++++++++
-
 app.get('/api/synctime', (req, res) => {
   res.json({time: new Date().getTime()});
 });
 
 // POST BUDDYCODE ++++++++++++++++++++++++++++++++++++
-
 app.post('/api/buddycode', (req, res) => {
   const username = req.body.username;
   let buddyCode = req.body.buddyCode;
-  console.log('/api/buddycode', username, buddyCode);
 
   const usrUser = USR.findOne({username});
   if (!usrUser) {
@@ -169,13 +134,13 @@ app.post('/api/buddycode', (req, res) => {
   const saBuddy = SA.findOne({code: buddyCode});
   const saUser = SA.findOne({username});
 
-  if (saUser && saBuddy && saUser.songIdx == saBuddy.songIdx) {
+  if (saUser && saBuddy && saUser.songIdx == saBuddy.songIdx && saUser != saBuddy) {
     try {
       SA.remove(saUser);
       SA.remove(saBuddy);
     }
     catch (error) { // Probaly a conflict on simultaneous remove
-      console.error(`Error removing song-allocations for ${saUser.username} & ${saBuddy.username} `);
+      console.error(`/api/buddycode: Error removing song-allocations for ${saUser.username} & ${saBuddy.username}`);
       console.error(error);
     }
     
@@ -194,7 +159,7 @@ app.post('/api/buddycode', (req, res) => {
         {username: usrBuddy.username, buddyUsername: usrUser.username, points: usrBuddy.points}
       );
     } else {
-      console.error('No socket found for :' + usrBuddy.username);
+      console.error(`/api/buddycode: No socket found for: ${usrBuddy.username}`);
     }
 
     monitorSocket.emit('send:newsEvent', {type: 'match', points: config.POINTS_MATCH, data:

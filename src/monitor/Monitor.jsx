@@ -219,11 +219,6 @@ const NewsFeed = React.createClass({
   }
 });
 
-// <NewsEvent event={{type: 'match', points: +50, data: {username: 'Michel', buddyUsername: 'Petra', song: 'Recondite'}}} />
-// <NewsEvent event={{type: 'next', points: -5, data: {username: 'Michel', song: 'Recondite'}}} />
-// <NewsEvent event={{type: 'message', points: +1, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
-// <NewsEvent event={{type: 'login', points: +10, data: {username: 'Michel', message: 'Whow, this is amazing!'}}} />
-
 
 function NewsEvent({event}) {
   const EVENT_TYPE_ICON = {

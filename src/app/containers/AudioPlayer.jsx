@@ -94,10 +94,8 @@ const AudioPlayer = React.createClass({
     } else {
       this.props.pushMessage(`Time's up!`);
       this.nextSong();
-
     }
   },
-
 
   render() {
     function renderTimeToPlay(timePlayed) {
