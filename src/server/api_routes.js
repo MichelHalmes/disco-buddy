@@ -78,23 +78,26 @@ app.get('/api/code', (req, res) => {
   code = '000' + code.toString();
   code = code.slice(-4);
 
-  const songCounts = {};
+  const allocationCounts = {};
   saSongIdxAll.forEach(function (songIdx) {
-    songCounts[songIdx] = songCounts[songIdx] ? songCounts[songIdx]+1 : 1;
+    allocationCounts[songIdx] = allocationCounts[songIdx] ? allocationCounts[songIdx]+1 : 1;
   });
 
   const logSongIdxUser = LOG_SA.find({username}).map((log) => log.songIdx);
   let songIdxBest;
-  Object.keys(songCounts).forEach(function (songIdx) {
-    songIdx = parseInt(songIdx)
-    if ((songIdxBest == undefined || songCounts[songIdx] < songCounts[songIdxBest])
-      && logSongIdxUser.indexOf(songIdx) == -1) {
+  Object.keys(allocationCounts).forEach(function (songIdx) {
+    if (logSongIdxUser.indexOf(songIdx) == -1) { // Hasn't heard the song yet
+      if (songIdxBest == undefined || allocationCounts[songIdx] < allocationCounts[songIdxBest]) {
         songIdxBest = songIdx;
+      } else if (allocationCounts[songIdx] == allocationCounts[songIdxBest]) { // Draw
+        console.log("draw working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        songIdxBest = Math.random() < .2 ? songIdx : songIdxBest;
+      }
     }
   });
 
-  if (songIdxBest == undefined ||  // The player has heard everything
-    (nbUsers != 1 && (songCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
+  if (songIdxBest == undefined // The player has heard everything
+      || (nbUsers != 1 && (allocationCounts[songIdxBest]-1) / (nbUsers - 1) > config.TARGET_PROBA_MATCH)) { // There are too many players per song. We need to add songs
     songIdxBest = nextSongIdx;
     nextSongIdx = (nextSongIdx + 1) % SONGS.length;
   }
@@ -106,7 +109,7 @@ app.get('/api/code', (req, res) => {
 
   console.log(`/api/code [${Date.now() - startTime}ms]: Code ${code} for '${username}': ${SONGS[songIdxBest]}`);
 
-  monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(songCounts).length});
+  monitorSocket.emit('send:statistics', {nbUsers, nbSongs: Object.keys(allocationCounts).length});
 });
 
 
