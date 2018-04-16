@@ -11,7 +11,7 @@ const CONFIG  = require('../../config.js');
 const Monitor = React.createClass({
   render() {
     return (
-        <div className="ui two column internally celled grid full-window-height">
+        <div className="ui two column internally celled grid main-body">
           <div className="column">
             <Header/>
             <div className="ui divider small-margins-paddings "></div>
@@ -31,7 +31,7 @@ const Monitor = React.createClass({
 
 function Header(props) {
   return (
-    <div className="ui center aligned basic segment no-margins" >
+    <div className="ui center aligned basic segment no-margins-paddings" >
       <h2 className="small-margins-paddings">
         <i className="music icon"></i>
         Disco Buddy
@@ -51,15 +51,15 @@ function Guide(props) {
       <div className="fourteen wide column small-margins-paddings">
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-BUDDY</a> (No internet!)</span>}/>
-          <GuideItem icon="signal" text="Switch off your mobile-data" />
+          {/* <GuideItem icon="signal" text="Switch off your mobile-data" /> */}
           <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.org</a> in your browser</span>} />
           <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
           <GuideItem icon="volume up" text="Plug some headphones" />
           <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange codes (+${CONFIG.POINTS_MATCH} Points)`} />
-          <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S} seconds;
-                                           But better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
+          <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S}sec;
+                                           Better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Point)`} />
-          <GuideItem icon="warning sign" text="Please return your headphones when you're done!!" />
+          <GuideItem icon="warning sign" text="Please roll up & return your headphones when you're done!!" />
         </div>
       </div>
 
@@ -170,7 +170,7 @@ function RankingItem(props) {
 function Footer() {
   return (
     <div className="footer">
-        With <i className="heart icon"></i>by Mich-Mich!
+        For Wilfried! <i className="heart icon"></i>
         <a>  disco-buddy@mail.com  </a>
     </div>
   );
@@ -210,7 +210,6 @@ const NewsFeed = React.createClass({
   },
 
   render() {
-
     return (
       <div className="ui feed chat">
         {this.state.newsEvents.map((evt, i) => <NewsEvent event={evt} key={i}/>)}

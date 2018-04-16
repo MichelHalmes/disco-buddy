@@ -1,5 +1,7 @@
-.full-window-height {
-	height: 98vh;
+.main-body {
+    height: 98vh;
+    font-size: 120%;
+    font-weight: 999;
 }
 
 .no-margins-paddings {
@@ -18,7 +20,8 @@
   padding-right: 5pt !important;
 }
 
-.chat {
+.feed.chat {
+    font-size: 1.1rem;
     position: absolute;
     bottom: 5px;
 		overflow: hidden;

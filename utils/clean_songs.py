@@ -43,7 +43,7 @@ def main():
             vec2 = text_to_vector(song_list[s2])
 
             cosine = get_cosine(vec1, vec2)
-            if cosine > 0.65:
+            if cosine > 0.5:
                 print song_list[s1], '\n', song_list[s2], '\n'
 
 
