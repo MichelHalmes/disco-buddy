@@ -46,9 +46,9 @@ function Header(props) {
 function Guide(props) {
   return (
     <div className="ui centered grid" >
-      <div className="two wide column">
-      </div>
-      <div className="fourteen wide column small-margins-paddings">
+      {/* <div className="one wide column">
+      </div> */}
+      <div className="fifteen wide column small-margins-paddings">
         <div className="ui large ordered list">
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-BUDDY</a> (No internet!)</span>}/>
           {/* <GuideItem icon="signal" text="Switch off your mobile-data" /> */}
@@ -155,9 +155,9 @@ function RankingItem(props) {
   return (
     <div className="column small-margins-paddings">
       <div className="large item">
-        <span className="">
+        <div className="">
           <strong style={{fontSize: '150%'}}># {props.rank} </strong>
-        </span>
+        </div>
         <span className="content top aligned ">
           <a className="header" style={{verticalAlign:'top'}}>{props.username}</a>
           <div>({props.points} points)</div>
