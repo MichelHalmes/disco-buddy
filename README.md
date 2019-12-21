@@ -9,6 +9,7 @@ A song starts playing and, by dancing and singing along, participants have to fi
 Once they find each other, they exchange a code, which will give both players points.
 A screen shows the players' ranking and an activity feed to which they can message.
 
+## Images
 
 <img src="media/Mainscreen.png" alt="Mainscreen" width="220" height="400" />
 <p/>
