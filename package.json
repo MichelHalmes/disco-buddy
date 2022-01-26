@@ -29,7 +29,7 @@
     "redux-thunk": "^2.2.0",
     "semantic-ui-react": "^0.67.1",
     "socket.io": "^1.5.1",
-    "validator": "5.1.0"
+    "validator": "13.7.0"
   },
   "scripts": {
     "app_windows": "env \"PORT=80\" react-scripts start ",
