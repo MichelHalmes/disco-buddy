@@ -6,7 +6,7 @@ const fs = require('fs');
 
 console.log('Calling external python-shrinker...');
 const execSync = require('child_process').execSync;
-const command = `python shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
+const command = `python3 shrink.py --duration ${config.TIME_TO_PLAY_S+config.SYNC_PERIOD_S+1} --bitrate ${config.MP3_BITRATE}`
 const child = execSync(command, {cwd: __dirname});
 console.log(child.toString('utf-8'));
 

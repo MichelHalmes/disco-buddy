@@ -51,7 +51,7 @@ setInterval(function () {
     }
     return must_remove
   });
-  
+
 
   let nbUsers = SA.data.length;
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});

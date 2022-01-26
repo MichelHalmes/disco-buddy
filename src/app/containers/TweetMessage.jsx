@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Client from '../Client.js';
+import Client from '../client.js';
 
 
 export const TweetMessage  = React.createClass({

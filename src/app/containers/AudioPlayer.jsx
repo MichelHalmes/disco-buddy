@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Modal } from 'semantic-ui-react';
 
-import Client from '../Client.js';
+import Client from '../client.js';
 
 const CONFIG  = require('../../../config.js');
 

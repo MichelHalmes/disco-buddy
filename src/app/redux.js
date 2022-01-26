@@ -1,6 +1,6 @@
 
 import { combineReducers } from 'redux';
-import Client from './Client.js';
+import Client from './client.js';
 const CONFIG  = require('../../config.js');
 
 " ======= POINTS ======== "

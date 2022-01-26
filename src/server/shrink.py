@@ -10,7 +10,7 @@ CUT_START = 10
 def shrink_file(filename, CUT_DURATION, BITRATE):
     if not filename.endswith(".mp3") or path.exists(path.join(SHRINK_FOLDER, filename)):
         return
-    print "Shrinking: ", filename
+    print("Shrinking: ", filename)
 
     # If this fails, it's because ffmpeg is not installed...
     segment = AudioSegment.from_mp3(path.join(SONG_FOLDER, filename))
@@ -18,7 +18,7 @@ def shrink_file(filename, CUT_DURATION, BITRATE):
     idx_start = CUT_START * 1000
     idx_end = (CUT_START + CUT_DURATION) * 1000
     if len(segment) < idx_end:
-        print "Song '{}' is only {}s (<{}s)".format(filename, len(segment) / 1000, idx_end / 1000)
+        print(f"Song '{filename}' is only {len(segment) / 1000,}s (<{idx_end / 1000}s)")
         return
     segment = segment[idx_start:idx_end].fade_in(2000).fade_out(3000)
 
@@ -35,7 +35,7 @@ def main():
 
     CUT_DURATION = args.duration
     BITRATE = args.bitrate
-    print "Shrinking songs to %i seconds!" % CUT_DURATION
+    print(f"Shrinking songs to {CUT_DURATION} seconds!" )
 
     if not path.exists(SHRINK_FOLDER):
         mkdir(SHRINK_FOLDER)
