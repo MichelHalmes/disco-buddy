@@ -22,7 +22,7 @@ const Monitor = React.createClass({
           </div>
           <div className="column">
             <NewsFeed />
-            <Footer />
+            {/* <Footer /> */}
           </div>
         </div>
     );
@@ -53,7 +53,8 @@ function Guide(props) {
           <GuideItem icon="wifi" text={<span>Connect your phone to the Wifi <a>DISCO-BUDDY</a> (No internet!)</span>}/>
           {/* <GuideItem icon="signal" text="Switch off your mobile-data" /> */}
           <GuideItem icon="chrome" text={<span>Visit <a>disco-buddy.org</a> in your browser</span>} />
-          <GuideItem icon="add user" text={`Enter a username and optionally an email (+${CONFIG.POINTS_EMAIL} Points)`} />
+          <GuideItem icon="add user" text={`Enter a username`} />
+          {/* and optionally an email (+${CONFIG.POINTS_EMAIL} Points) */}
           <GuideItem icon="volume up" text="Plug some headphones" />
           <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange codes (+${CONFIG.POINTS_MATCH} Points)`} />
           <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S}sec;

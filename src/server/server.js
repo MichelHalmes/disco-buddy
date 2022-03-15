@@ -57,7 +57,7 @@ setInterval(function () {
   monitorSocket.emit('send:statistics', {nbUsers: nbUsers});
 
   let ranking = SA.eqJoin(USR.data, 'username', 'username',
-      (left,right) => ({username: right.username, points: right.points}))
+      (left, right) => ({username: right.username, points: right.points}))
     .simplesort('points', true).data();
 
   monitorSocket.emit('send:ranking', ranking);

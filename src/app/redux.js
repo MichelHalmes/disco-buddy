@@ -3,7 +3,7 @@ import { combineReducers } from 'redux';
 import Client from './client.js';
 const CONFIG  = require('../../config.js');
 
-" ======= POINTS ======== "
+// ======= POINTS ========
 
 // ACTIONS & ACTION_CREATORS
 const UPDATE_POINTS = 'UPDATE_POINTS'
@@ -30,7 +30,7 @@ function pointsReducer(state = 0, action) {
 }
 
 
-" ======= LOGIN  ======== "
+// ======= LOGIN  ========
 
 // ACTIONS & ACTION_CREATORS
 const POST_LOGIN_REQUEST = 'POST_LOGIN_REQUEST'
@@ -100,7 +100,7 @@ function usernameReducer(state = initalUsername, action) {
 
 
 
-" ======= CODE  ======== "
+// ======= CODE  ========
 
 // ACTIONS & ACTION_CREATORS
 const GET_CODE_REQUEST = 'GET_CODE_REQUEST'
@@ -207,7 +207,7 @@ function codeReducer(state = {code: 0, matchedCurrentCode: false}, action) {
   }
 }
 
-" ======= MESSAGES ======== "
+// ======= MESSAGES ========
 
 // ACTIONS & ACTION_CREATORS
 const PUSH_MESSAGE = 'PUSH_MESSAGE'
@@ -232,7 +232,7 @@ function messagesReducer(state = [], action) {
   }
 }
 
-" ======= INACTIVITY ======== "
+// ======= INACTIVITY ========
 
 // ACTIONS & ACTION_CREATORS
 const RECORD_ACTIVITY = 'RECORD_ACTIVITY'
@@ -284,7 +284,7 @@ function activityReducer(state = {isActive: true, lastActivity: new Date().getTi
   }
 }
 
-" -------- ROOT_REDUCER -------- "
+// -------- ROOT_REDUCER --------
 
 const rootReducer = combineReducers({
   pointsReducer,
