@@ -15,7 +15,7 @@ module.exports = {
 	POINTS_TWEET: 5,
 	MAX_NEWS_EVENTS: 20,
 	MAX_NAME_LEN: 15,
-	MP3_BITRATE: 55,
+	MP3_BITRATE: 80,
 	SONG_FOLDER: path.join(__dirname, './songs/_shrink'),
 	DATA_FOLDER: path.join(__dirname, './data')
 }

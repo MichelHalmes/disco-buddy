@@ -4,9 +4,7 @@ import io from 'socket.io-client';
 import './Monitor.css';
 
 
-
 const CONFIG  = require('../../config.js');
-
 
 const Monitor = React.createClass({
   render() {
@@ -56,11 +54,12 @@ function Guide(props) {
           <GuideItem icon="add user" text={`Enter a username`} />
           {/* and optionally an email (+${CONFIG.POINTS_EMAIL} Points) */}
           <GuideItem icon="volume up" text="Plug some headphones" />
-          <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange codes (+${CONFIG.POINTS_MATCH} Points)`} />
+          <GuideItem icon="exchange" text={`Find a buddy with the same song and exchange codes (+${CONFIG.POINTS_MATCH} Points)
+                                          You can match only once per song...`} />
           <GuideItem icon="forward" text={`You may click 'Next' after ${CONFIG.TIME_TO_NEXT_S}sec;
                                            Better dance until the end (+${CONFIG.POINTS_SONG_END} Points)`} />
           <GuideItem icon="talk" text={`Gain points, have fun, be lekker...  and tweet (+${CONFIG.POINTS_TWEET} Points)`} />
-          <GuideItem icon="warning sign" text="Please roll up & return your headphones when you're done!!" />
+          {/* <GuideItem icon="warning sign" text="Please roll up & return your headphones when you're done!!" /> */}
         </div>
       </div>
 
@@ -181,7 +180,7 @@ const NewsFeed = React.createClass({
   getInitialState: function () {
     const initalMessage = `Welcome to disco-buddy!
     Here is how it works:
-       + Login by providing a username and optionally your email
+       + Login by providing a username
        + Plug your headphones
        + A song will start playing (be patient...).
        + Dance and sing along as much as you can!

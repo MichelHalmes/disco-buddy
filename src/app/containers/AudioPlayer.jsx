@@ -29,8 +29,8 @@ const AudioPlayer = React.createClass({
         } else { // We get the one with the shortest delay ever observed
           self.syncTimeOffsetMs = Math.min(self.syncTimeOffsetMs, new Date().getTime() - res.time);
         }
-        if (nb_tries<10) {
-          setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 5000);
+        if (nb_tries<5) {
+          setTimeout(self.setSyncTimeOffsetMs.bind(self, nb_tries+1), 15000);
         }
       });
   },
